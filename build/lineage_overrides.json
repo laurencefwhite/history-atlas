@@ -1,0 +1,25 @@
+{
+  "_note": "Hand corrections to the succession graph, keyed by Cliopatria entity name. Edges are [predecessor, successor]. An 'add' is taken as authority: it skips the handover test and outranks any automatic edge, because the cases that need correcting are exactly the ones where the shapes do not line up (the Rashidun and the Umayyads held separate ground through the First Fitna; the Sui were already a rump when the Tang began). A 'drop' removes an edge; a 'root' cuts every edge into a name, so it begins a line of its own.",
+
+  "add": [
+    ["Roman Kingdom", "Roman Republic"],
+    ["Rashidun Caliphate", "Umayyad Caliphate"],
+    ["Umayyad Caliphate", "Abbasid Caliphate"],
+    ["Sui Dynasty", "Tang Dynasty"],
+    ["West Franks", "Kingdom of France"],
+    ["Russian Republic", "Union of Soviet Socialist Republics"],
+    ["Union of Soviet Socialist Republics", "Russian Federation"]
+  ],
+
+  "drop": [
+    ["Rashidun Caliphate", "Principality of Iberia"],
+    ["Eastern Roman Empire", "Umayyad Caliphate"],
+    ["West Franks", "Duchy of Aquitaine"],
+    ["Yuan Dynasty", "Ming Dynasty"],
+    ["Jalayirid Sultanate", "Hashemite Arab Federation"],
+    ["First French Empire", "Principality of Andorra"],
+    ["Ilkhanate", "Jalayirid Sultanate"]
+  ],
+
+  "root": []
+}

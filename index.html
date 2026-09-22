@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  History Atlas
+  Copyright 2026 Laurence F. White. All rights reserved.
+  Polities from Cliopatria (Seshat Global History Databank, CC BY 4.0); countries and cities from Natural Earth; succession from Wikidata. d3 (ISC) and topojson-client (BSD) in lib/.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>History Atlas</title>
+<meta name="author" content="Laurence F. White">
+<meta name="copyright" content="Copyright 2026 Laurence F. White">
+<meta name="description" content="An interactive globe of world history: drag the ribbon to choose a year and the globe shows who held what, each political lineage in its own hue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Spectral:ital,wght@0,300;0,400;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060c;
+  --panel:rgba(13,18,29,.84);
+  --panel-brd:rgba(255,255,255,.10);
+  --ink:#e9eef7;
+  --ink-dim:#9aa8c0;
+  --ink-faint:#6c7a93;
+  --accent:#8ed0ff;
+  --shadow:0 18px 50px -12px rgba(0,0,0,.75);
+  --serif:'Spectral',Georgia,'Times New Roman',serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:13px;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+#stage{position:fixed;inset:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#globe{cursor:grab}
+#globe.dragging{cursor:grabbing}
+
+.pmin{
+  position:absolute;top:7px;right:8px;z-index:3;
+  width:19px;height:19px;padding:0;border-radius:6px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
+  color:var(--ink-faint);font:inherit;font-size:12px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.pmin::before{content:'\2013'}
+.pmin:hover{background:rgba(255,255,255,.13);color:var(--ink)}
+.panel.min{padding:0 !important;width:auto !important;min-width:0 !important}
+.panel.min > *:not(.pmin){display:none !important}
+.panel.min .pmin{
+  position:static;width:auto;height:28px;padding:0 12px;border:0;border-radius:14px;
+  background:transparent;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+}
+.panel.min .pmin::before{content:attr(data-name)}
+.panel.min:hover .pmin{background:rgba(255,255,255,.07);color:var(--ink)}
+
+.panel{
+  position:absolute;
+  background:var(--panel);
+  border:1px solid var(--panel-brd);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+}
+
+/* ---------- masthead, with the year where the clocks were ---------- */
+#masthead{top:18px;left:18px;padding:15px 18px 14px;width:268px}
+#masthead h1{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:21px;
+  letter-spacing:.005em;
+  line-height:1.15;
+}
+#masthead .sub{
+  margin-top:3px;color:var(--ink-faint);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;
+}
+.yearbox{display:flex;align-items:flex-end;gap:14px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08)}
+#yearval{
+  font-family:var(--serif);font-size:34px;line-height:1;letter-spacing:.005em;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#yearval em{font-style:normal;font-size:17px;color:var(--ink-dim);margin-left:4px;letter-spacing:.06em}
+.yearside{flex:1;min-width:0;padding-bottom:3px}
+.yearside .lab{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint)}
+.yearside .val{font-size:12px;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- controls ---------- */
+#controls{top:18px;right:18px;width:246px;padding:14px 16px 15px}
+.grp+.grp{margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.08)}
+.grp-t{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px}
+.tog{display:flex;align-items:center;gap:9px;padding:4px 0;cursor:pointer;user-select:none}
+.tog input{position:absolute;opacity:0;pointer-events:none}
+.sw{
+  width:30px;height:17px;border-radius:9px;flex:none;position:relative;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.13);
+  transition:background .18s,border-color .18s;
+}
+.sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;
+  background:#b8c4d8;transition:transform .18s,background .18s;
+}
+.tog input:checked+.sw{background:rgba(142,208,255,.30);border-color:rgba(142,208,255,.55)}
+.tog input:checked+.sw::after{transform:translateX(13px);background:var(--accent)}
+.tog span.tl{font-size:12px;color:var(--ink)}
+.tog input:not(:checked)~span.tl{color:var(--ink-dim)}
+
+#search{position:relative}
+#search input{
+  width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:9px;padding:8px 10px 8px 30px;color:var(--ink);font:inherit;font-size:12px;outline:none;
+}
+#search input::placeholder{color:var(--ink-faint)}
+#search input:focus{border-color:rgba(142,208,255,.5);background:rgba(255,255,255,.09)}
+#search .ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none;font-size:12px}
+#results{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);max-height:236px;overflow-y:auto;z-index:5;
+  background:rgba(12,17,28,.96);border:1px solid var(--panel-brd);border-radius:10px;
+  box-shadow:var(--shadow);padding:4px;display:none;
+}
+#results.on{display:block}
+#results .r{padding:6px 9px;border-radius:7px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+#results .r:hover,#results .r.sel{background:rgba(142,208,255,.14)}
+#results .r .nm{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#results .r .ct{font-size:10px;color:var(--ink-faint);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.btn{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:var(--ink);
+  border-radius:8px;padding:5px 10px;font:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s;
+}
+.btn:hover{background:rgba(255,255,255,.13)}
+.btn.on{background:rgba(142,208,255,.20);border-color:rgba(142,208,255,.45);color:var(--accent)}
+
+/* ---------- legend ---------- */
+#legend{left:18px;bottom:104px;padding:11px 14px 12px;width:268px}
+#legend .lt{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;display:flex;justify-content:space-between}
+.ramp{display:flex;height:15px;border-radius:4px;overflow:hidden}
+.ramp div{flex:1}
+.ramp.hues div{transition:transform .12s}
+.ramp.hues div:hover{transform:scaleY(1.45)}
+.rrow{display:flex;align-items:center;gap:8px;margin-top:6px}
+.rrow .ramp{flex:1;height:13px}
+.rrow .rl{width:64px;font-size:9.5px;color:var(--ink-dim);flex:none}
+.rticks{display:flex;justify-content:space-between;margin-top:5px;font-size:9.5px;color:var(--ink-faint)}
+#legend .note{margin-top:9px;font-size:10px;line-height:1.45;color:var(--ink-faint)}
+#legend .lsec{margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08)}
+#biglist{margin-top:2px;max-height:124px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+#biglist .b{display:flex;align-items:center;gap:8px;padding:3px 4px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--ink-dim)}
+#biglist .b:hover{background:rgba(142,208,255,.12);color:var(--ink)}
+#biglist .b span:not(.ar){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#biglist .b i{width:9px;height:9px;border-radius:2px;flex:none}
+#biglist .b .ar{margin-left:auto;flex:none;font-size:9.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- the scrubber ---------- */
+#scrub{
+  position:absolute;left:18px;right:18px;bottom:14px;height:74px;z-index:6;
+  background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;
+  box-shadow:var(--shadow);backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  display:flex;align-items:stretch;padding:8px 10px 8px 8px;gap:10px;
+}
+#play{
+  flex:none;width:40px;border-radius:10px;border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.06);color:var(--ink);cursor:pointer;font:inherit;font-size:15px;
+  display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;
+}
+#play:hover{background:rgba(255,255,255,.13)}
+#play.on{background:rgba(142,208,255,.20);border-color:rgba(142,208,255,.45);color:var(--accent)}
+#ribwrap{flex:1;min-width:0;position:relative;cursor:ew-resize;touch-action:none}
+#ribbon{position:absolute;inset:0;width:100%;height:100%}
+#ribwrap.dragging{cursor:grabbing}
+
+/* ---------- tooltip ---------- */
+#tip{
+  position:absolute;pointer-events:none;z-index:20;opacity:0;transition:opacity .12s;
+  background:rgba(10,15,25,.90);border:1px solid rgba(255,255,255,.13);border-radius:12px;
+  padding:11px 13px;min-width:200px;max-width:300px;box-shadow:var(--shadow);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+#tip.on{opacity:1}
+#tip.pin{pointer-events:auto;border-color:rgba(142,208,255,.42)}
+#tip .tn{font-family:var(--serif);font-size:16px;line-height:1.2;display:flex;align-items:center;gap:8px}
+#tip .tn i{width:10px;height:10px;border-radius:3px;flex:none}
+#tip .tc{font-size:10.5px;color:var(--ink-faint);letter-spacing:.05em;margin-top:2px}
+#tip .path{font-size:11.5px;letter-spacing:0;color:var(--ink-dim);line-height:1.5;margin-top:4px}
+#tip .path b{font-weight:500;color:var(--ink)}
+#tip .sep{color:var(--accent);opacity:.75;margin:0 .32em}
+#tip .tt{font-size:15px;margin-top:9px;line-height:1.25}
+#tip .tt small{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px}
+#tip .td{font-size:11px;color:var(--ink-dim);margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.10);line-height:1.5}
+#tip .td b{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+#tip .tgo{margin-top:9px;display:flex;align-items:center;gap:8px;font-size:10px;color:var(--ink-faint)}
+#tip .tgo a,#tip a.wl{color:var(--accent);text-decoration:none;font-size:11px}
+#tip .tgo a:hover,#tip a.wl:hover{text-decoration:underline}
+#tip .hintpin{margin-top:8px;font-size:9.5px;color:var(--ink-faint);letter-spacing:.06em}
+
+.floatbtn{
+  position:absolute;display:none;z-index:4;height:30px;padding:0 13px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--panel-brd);box-shadow:var(--shadow);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+}
+.floatbtn:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+
+#hint{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:98px;font-size:11px;color:var(--ink-faint);
+  letter-spacing:.05em;pointer-events:none;transition:opacity .8s;text-align:center;
+}
+#credit{
+  margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:9px;letter-spacing:.03em;line-height:1.6;color:#63708a;
+}
+#credit a{color:#7f8da5;text-decoration:none}
+#credit a:hover{color:var(--accent)}
+
+@media (max-height:860px){
+  #legend .lsec.big{display:none}
+}
+@media (max-height:740px){
+  #legend{display:none}
+}
+@media (max-width:860px){
+  #masthead.min, #controls.min{right:auto}
+  #masthead{top:10px;left:10px;right:10px;width:auto;padding:11px 14px 12px}
+  #masthead h1{font-size:18px}
+  #masthead .sub{display:none}
+  #masthead .yearbox{margin-top:9px;padding-top:9px}
+  #yearval{font-size:27px}
+
+  #controls{top:auto;bottom:100px;right:10px;left:10px;width:auto;padding:26px 12px 10px}
+  #controls.min{padding:0 !important}
+  .grp+.grp{border-top:0;padding-top:9px;margin-top:0}
+  #controls .grp-t{display:none}
+  #controls .grp.togs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  #controls .grp.togs::-webkit-scrollbar{display:none}
+  .tog{flex:none;padding:5px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05)}
+  .tog .sw{display:none}
+  .tog span.tl{font-size:11.5px;white-space:nowrap;color:var(--ink-faint)}
+  .tog input:checked~span.tl{color:var(--accent)}
+  #results{max-height:180px;top:auto;bottom:calc(100% + 6px)}
+
+  #scrub{left:8px;right:8px;bottom:8px;height:60px}
+  #legend{display:none}
+  #hint{display:none}
+  #credit{display:none}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="sky"></canvas>
+  <canvas id="globe"></canvas>
+
+  <div id="tip"></div>
+
+  <div class="panel" id="masthead">
+    <button class="pmin" data-name="Title" title="Minimise"></button>
+    <h1>History Atlas</h1>
+    <div class="sub">Who held what, and when</div>
+    <div class="yearbox">
+      <div id="yearval">&ndash;</div>
+      <div class="yearside">
+        <div class="lab">Polities</div>
+        <div class="val" id="st-live">&ndash;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="controls">
+    <button class="pmin" data-name="Layers" title="Minimise"></button>
+    <div class="grp">
+      <div class="grp-t">Find a polity</div>
+      <div id="search">
+        <span class="ico">&#9906;</span>
+        <input id="q" type="text" placeholder="Rome, Tang, Aksum&hellip;" autocomplete="off" spellcheck="false">
+        <div id="results"></div>
+      </div>
+    </div>
+    <div class="grp togs">
+      <div class="grp-t">Layers</div>
+      <label class="tog"><input type="checkbox" id="L-polities" checked><span class="sw"></span><span class="tl">Polities</span></label>
+      <label class="tog"><input type="checkbox" id="L-edges" checked><span class="sw"></span><span class="tl">Borders</span></label>
+      <label class="tog"><input type="checkbox" id="L-minor" checked><span class="sw"></span><span class="tl">Mute minor polities</span></label>
+      <label class="tog"><input type="checkbox" id="L-names" checked><span class="sw"></span><span class="tl">Polity names</span></label>
+      <label class="tog"><input type="checkbox" id="L-co"><span class="sw"></span><span class="tl">Modern borders</span></label>
+      <label class="tog"><input type="checkbox" id="L-cities" checked><span class="sw"></span><span class="tl">Cities</span></label>
+      <label class="tog"><input type="checkbox" id="L-cnames"><span class="sw"></span><span class="tl">City names</span></label>
+      <label class="tog"><input type="checkbox" id="L-grat" checked><span class="sw"></span><span class="tl">Graticule</span></label>
+      <label class="tog"><input type="checkbox" id="L-spin"><span class="sw"></span><span class="tl">Slow spin</span></label>
+    </div>
+    <div class="grp">
+      <button class="btn" id="resetview" title="Recentre and fit the globe">Reset view</button>
+    </div>
+  </div>
+
+  <button class="btn floatbtn" id="resetfloat" title="Recentre and fit the globe">Reset view</button>
+
+  <div class="panel" id="legend">
+    <button class="pmin" data-name="Key" title="Minimise"></button>
+    <div class="lt"><span>One hue, one lineage</span></div>
+    <div class="ramp hues" id="hueramp"></div>
+    <div class="note">A hue belongs to a line of succession, not to a state, so a lineage holds its colour across the whole scrub. Lineages that were never neighbours may share a hue; blue is kept for water.</div>
+
+    <div class="lsec">
+      <div class="lt"><span>Shades within a lineage</span></div>
+      <div class="rrow"><span class="rl">Succession</span><div class="ramp" id="shaderamp"></div></div>
+      <div class="rticks"><span style="margin-left:72px">earliest</span><span>latest</span></div>
+      <div class="note">On a card, <b style="color:var(--accent);font-weight:500">&gt;</b> is the same polity under a new form and <b style="color:var(--accent);font-weight:500">/</b> a branch: Rome&thinsp;&gt;&thinsp;Roman Republic&thinsp;&gt;&thinsp;Roman Empire&thinsp;/&thinsp;Eastern Roman Empire. Polities too small to read at this zoom are drawn in a low tint of their hue.</div>
+    </div>
+
+    <div class="lsec big">
+      <div class="lt"><span>Largest this year</span></div>
+      <div id="biglist"></div>
+    </div>
+
+    <div id="credit">
+      Polities: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a> (Seshat Global History Databank), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a><br>
+      Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
+      Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
+      &copy; 2026 Laurence F. White &middot; v0.1
+    </div>
+  </div>
+
+  <div id="scrub">
+    <button id="play" title="Play (space)">&#9654;</button>
+    <div id="ribwrap"><canvas id="ribbon"></canvas></div>
+  </div>
+
+  <div id="hint">Drag the ribbon to move through history &middot; drag the globe to spin &middot; hover a polity to see where it came from</div>
+</div>
+
+<script src="lib/globe-libs.js"></script>
+<script>
+/* the chunks arrive as script tags, so the page works from file:// too */
+window.HA_CHUNKS = {};
+window.HA_CHUNK = function (ci, kind, topo) {
+  (window.HA_CHUNKS[kind] || (window.HA_CHUNKS[kind] = {}))[ci] = topo;
+  if (window.HA_ONCHUNK) window.HA_ONCHUNK(ci, kind, topo);
+};
+</script>
+<script src="data/base.js"></script>
+<script>
+(function () {
+'use strict';
+
+var D = window.HA_DATA;
+var DEG = Math.PI / 180;
+
+/* ------------------------------------------------------------------ data */
+/* one entry per entity; a lineage is a chain of them, and carries the hue */
+var ENT = D.ents.map(function (a, i) {
+  return { i: i, name: a[0], lin: a[1], hue: a[2], L: a[3], wp: a[4], wd: a[5],
+           first: a[6], last: a[7], aggs: a[8] || [], parent: a[9], pos: a[10] };
+});
+var LIN = D.lins.map(function (a) { return { id: a[0], hue: a[1], m: a[2] }; });
+var CHUNKS = D.chunks;
+var YMIN = CHUNKS[0][0], YMAX = CHUNKS[CHUNKS.length - 1][1];
+
+var world     = topojson.feature(D.countries, D.countries.objects.countries);
+var borders   = topojson.mesh(D.countries, D.countries.objects.countries, function (a, b) { return a !== b; });
+var graticule = d3.geoGraticule().step([15, 15])();
+function parallel(lat) { return d3.geoCircle().center([0, 90]).radius(90 - lat).precision(2)(); }
+var EQUATOR = parallel(0);
+var TROPIC_N = parallel(23.4368), TROPIC_S = parallel(-23.4368);
+var POLAR_N = parallel(66.5632), POLAR_S = parallel(-66.5632);
+
+var cities = D.cities.map(function (c) {
+  return { name: c[0], country: c[1], lat: c[2], lon: c[3], pop: c[4], rank: c[5] || 0, state: c[6] || null };
+});
+
+/* --------------------------------- spherical caps, to cull what is out of view */
+function unitv(ll) {
+  var l = ll[0] * DEG, p = ll[1] * DEG, cp = Math.cos(p);
+  return [cp * Math.cos(l), cp * Math.sin(l), Math.sin(p)];
+}
+function eachCoord(g, step, fn) {
+  var i, j, k, c = g.coordinates;
+  if (g.type === 'Polygon') { for (i = 0; i < c.length; i++) for (j = 0; j < c[i].length; j += step) fn(c[i][j]); }
+  else if (g.type === 'MultiPolygon') { for (i = 0; i < c.length; i++) for (j = 0; j < c[i].length; j++) for (k = 0; k < c[i][j].length; k += step) fn(c[i][j][k]); }
+  else if (g.type === 'LineString') { for (i = 0; i < c.length; i += step) fn(c[i]); }
+  else if (g.type === 'MultiLineString') { for (i = 0; i < c.length; i++) for (j = 0; j < c[i].length; j += step) fn(c[i][j]); }
+}
+function capOf(g) {
+  var sx = 0, sy = 0, sz = 0, n = 0, us = [];
+  eachCoord(g, 2, function (p) { var u = unitv(p); us.push(u); sx += u[0]; sy += u[1]; sz += u[2]; n++; });
+  if (!n) return { c: [1, 0, 0], r: Math.PI };
+  var m = Math.sqrt(sx * sx + sy * sy + sz * sz) || 1;
+  var c = [sx / m, sy / m, sz / m], minDot = 1;
+  for (var i = 0; i < us.length; i++) {
+    var d = c[0] * us[i][0] + c[1] * us[i][1] + c[2] * us[i][2];
+    if (d < minDot) minDot = d;
+  }
+  return { c: c, r: Math.acos(Math.max(-1, Math.min(1, minDot))) + 0.03 };
+}
+var viewV = [1, 0, 0], viewAng = Math.PI / 2;
+function capVisible(cap) {
+  var lim = viewAng + cap.r;
+  if (lim >= Math.PI) return true;
+  return cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.cos(lim);
+}
+/* d3's path does the clipping and the resampling that the limb of the globe needs, and costs
+   accordingly. Anything wholly on the near side needs neither, and the scrubber redraws on
+   every tick, so this is the path that matters. */
+function toXYZ(g) {
+  var rings = [], c = g.coordinates, i, j;
+  function add(r) {
+    var a = new Float32Array(r.length * 3);
+    for (var n = 0; n < r.length; n++) { var u = unitv(r[n]); a[n * 3] = u[0]; a[n * 3 + 1] = u[1]; a[n * 3 + 2] = u[2]; }
+    rings.push(a);
+  }
+  if (g.type === 'Polygon') for (i = 0; i < c.length; i++) add(c[i]);
+  else if (g.type === 'MultiPolygon') for (i = 0; i < c.length; i++) for (j = 0; j < c[i].length; j++) add(c[i][j]);
+  else if (g.type === 'LineString') add(c);
+  else if (g.type === 'MultiLineString') for (i = 0; i < c.length; i++) add(c[i]);
+  return rings;
+}
+var FX = [0, 0, 0], FY = [0, 0, 0];
+function setFastProjection(r) {
+  var dl = rotation[0] * DEG, dp = rotation[1] * DEG;
+  FX = [r * Math.sin(dl), r * Math.cos(dl), 0];
+  FY = [-r * Math.sin(dp) * Math.cos(dl), r * Math.sin(dp) * Math.sin(dl), -r * Math.cos(dp)];
+}
+function trace(e, closed) {
+  var cap = e.cap;
+  if (cap.r < 1.5 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.sin(cap.r + 0.03)) {
+    var rings = e.xyz || (e.xyz = toXYZ(e.g.geometry || e.g));
+    for (var i = 0; i < rings.length; i++) {
+      var a = rings[i], n = a.length;
+      ctx.moveTo(CX + FX[0] * a[0] + FX[1] * a[1], CY + FY[0] * a[0] + FY[1] * a[1] + FY[2] * a[2]);
+      for (var k = 3; k < n; k += 3) ctx.lineTo(CX + FX[0] * a[k] + FX[1] * a[k + 1], CY + FY[0] * a[k] + FY[1] * a[k + 1] + FY[2] * a[k + 2]);
+      if (closed) ctx.closePath();
+    }
+  } else path(e.g);
+}
+function planarBox(g) {
+  var x0 = 999, y0 = 999, x1 = -999, y1 = -999;
+  eachCoord(g, 1, function (p) {
+    if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0];
+    if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1];
+  });
+  return [x0, y0, x1, y1];
+}
+function chunkLines(mls, seam) {
+  var out = [];
+  (mls.coordinates || []).forEach(function (line) {
+    var parts = [line];
+    if (seam) {
+      parts = []; var cur = [];
+      for (var i = 0; i < line.length; i++) {
+        var onSeam = Math.abs(line[i][0]) > 179.99;
+        if (onSeam && i && Math.abs(line[i - 1][0]) > 179.99) { if (cur.length > 1) parts.push(cur); cur = []; }
+        cur.push(line[i]);
+      }
+      if (cur.length > 1) parts.push(cur);
+    }
+    parts.forEach(function (pl) {
+      for (var s = 0; s < pl.length - 1; s += 60) {
+        var seg = pl.slice(s, s + 61);
+        if (seg.length < 2) continue;
+        var g = { type: 'LineString', coordinates: seg };
+        out.push({ g: g, cap: capOf(g) });
+      }
+    });
+  });
+  return out;
+}
+
+/* ---------------------------------------------------------------- colour */
+/* Hue is the lineage and shade the polity within it, so a line of succession reads as one
+   colour that ages slightly. A polity too small to read at this zoom keeps its hue but loses
+   almost all of its chroma, which shows the land was held and divided without competing. */
+function entHcl(e, minor) {
+  if (minor) return [e.hue, 15, e.L * 0.78 + 8];
+  return [e.hue, 50, e.L];
+}
+function css(hcl, a) {
+  var c = d3.hcl(hcl[0], hcl[1], hcl[2]).rgb();
+  var r = Math.round(Math.max(0, Math.min(255, c.r))), g = Math.round(Math.max(0, Math.min(255, c.g))), b = Math.round(Math.max(0, Math.min(255, c.b)));
+  return a === undefined ? 'rgb(' + r + ',' + g + ',' + b + ')' : 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+ENT.forEach(function (e) { e.fill = css(entHcl(e, false)); e.tint = css(entHcl(e, true)); });
+
+var PALETTE = {
+  ocean0:  '#0d2036',
+  ocean1:  '#050d1a',
+  land:    '#2e3850',
+  coast:   'rgba(226,238,255,.30)',
+  border:  'rgba(150,185,235,.40)',
+  grat:    'rgba(170,205,240,.10)',
+  edge:    'rgba(8,13,26,.55)',
+  rim:     'rgba(150,205,255,.42)'
+};
+
+/* ----------------------------------------------------------------- time */
+/* Unequal eras, linear within each: nine tenths of what there is to see is in the last fifth
+   of the span, so a linear ribbon would be useless. */
+var ERAS = [
+  { a: -3400, b: -1000, w: 0.12, step: 25, name: 'Bronze Age' },
+  { a: -1000, b:   500, w: 0.21, step: 10, name: 'Classical' },
+  { a:   500, b:  1500, w: 0.22, step: 10, name: 'Medieval' },
+  { a:  1500, b:  1900, w: 0.23, step:  5, name: 'Early modern' },
+  { a:  1900, b:  2024, w: 0.22, step:  1, name: 'Modern' }
+];
+(function () { var x = 0; ERAS.forEach(function (E) { E.x0 = x; x += E.w; E.x1 = x; }); })();
+function eraOf(y) {
+  for (var i = 0; i < ERAS.length; i++) if (y < ERAS[i].b || i === ERAS.length - 1) return ERAS[i];
+  return ERAS[ERAS.length - 1];
+}
+function yearToF(y) {
+  y = Math.max(YMIN, Math.min(YMAX, y));
+  var E = eraOf(y);
+  return E.x0 + (y - E.a) / (E.b - E.a) * E.w;
+}
+function fToYear(f) {
+  f = Math.max(0, Math.min(1, f));
+  for (var i = 0; i < ERAS.length; i++) {
+    var E = ERAS[i];
+    if (f <= E.x1 || i === ERAS.length - 1) return Math.round(E.a + (f - E.x0) / E.w * (E.b - E.a));
+  }
+  return YMAX;
+}
+/* Cliopatria counts in plain integers and uses 0; historians do not, so 0 is shown as 1 BCE */
+function yearLabel(y) {
+  if (y > 0) return y + ' CE';
+  return (y === 0 ? 1 : -y) + ' BCE';
+}
+function yearShort(y) { return y > 0 ? String(y) : (y === 0 ? 1 : -y) + ' BC'; }
+
+var year = 1300;
+function chunkFor(y) {
+  for (var i = 0; i < CHUNKS.length; i++) if (y >= CHUNKS[i][0] && y <= CHUNKS[i][1]) return i;
+  return y < CHUNKS[0][0] ? 0 : CHUNKS.length - 1;
+}
+
+/* ------------------------------------------------------- chunks of geometry */
+var sets = { w: {}, f: {} };      /* built sets, by chunk index */
+var asked = {}, pending = 0, clock = 0;
+
+function buildSet(ci, kind, topo) {
+  var feats = topojson.feature(topo, topo.objects.u).features;
+  var set = feats.map(function (f) {
+    var p = f.properties, e = ENT[p.e];
+    return { g: f, e: e, ei: p.e, f: p.f, t: p.t, a: p.a, k: p.k || null,
+             cap: capOf(f.geometry), box: planarBox(f.geometry) };
+  });
+  set.sort(function (a, b) { return b.a - a.a; });        /* larger first, smaller drawn on top */
+  var byFrom = set.slice().sort(function (a, b) { return a.f - b.f; });
+  var S = { ci: ci, kind: kind, set: set, byFrom: byFrom, used: ++clock };
+  sets[kind][ci] = S;
+  return S;
+}
+window.HA_ONCHUNK = function (ci, kind, topo) {
+  pending--;
+  buildSet(ci, kind, topo);
+  evict(kind, kind === 'w' ? 5 : 3);
+  updateStats();
+  scheduleDraw();
+};
+function evict(kind, keep) {
+  var ks = Object.keys(sets[kind]);
+  if (ks.length <= keep) return;
+  ks.sort(function (a, b) { return sets[kind][a].used - sets[kind][b].used; });
+  for (var i = 0; i < ks.length - keep; i++) {
+    delete sets[kind][ks[i]];
+    delete asked[kind + ks[i]];
+    delete window.HA_CHUNKS[kind][ks[i]];
+  }
+}
+function askChunk(ci, kind) {
+  if (ci < 0 || ci >= CHUNKS.length) return;
+  var key = kind + ci;
+  if (sets[kind][ci] || asked[key]) return;
+  asked[key] = 1; pending++;
+  var s = document.createElement('script');
+  s.src = 'data/c' + (ci < 10 ? '0' : '') + ci + kind + '.js';
+  s.onload = function () { s.remove(); };
+  s.onerror = function () { pending--; delete asked[key]; s.remove(); };
+  document.head.appendChild(s);
+}
+/* the chunk under the scrubber, and its neighbours so a drag does not stall at a boundary */
+function wantChunks(settle) {
+  var ci = chunkFor(year);
+  askChunk(ci, 'w');
+  if (settle) { askChunk(ci + 1, 'w'); askChunk(ci - 1, 'w'); }
+  if (settle && zoom >= 3) askChunk(ci, 'f');
+}
+function currentSet() {
+  var ci = chunkFor(year);
+  var S = (zoom >= 3 && sets.f[ci]) ? sets.f[ci] : sets.w[ci];
+  if (!S) {                       /* nothing for this year yet: keep drawing the nearest we have */
+    var best = null, bd = 1e9;
+    for (var k in sets.w) { var d = Math.abs(+k - ci); if (d < bd) { bd = d; best = sets.w[k]; } }
+    S = best;
+  }
+  if (S) S.used = ++clock;
+  return S;
+}
+
+/* rows alive in the year, largest first.  byFrom is sorted, so the scan stops early. */
+var liveRows = [], liveKey = '';
+function computeLive(S) {
+  if (!S) { liveRows = []; return liveRows; }
+  var key = S.ci + S.kind + '|' + year;
+  if (key === liveKey) return liveRows;
+  liveKey = key;
+  var bf = S.byFrom, lo = 0, hi = bf.length;
+  while (lo < hi) { var mid = (lo + hi) >> 1; if (bf[mid].f <= year) lo = mid + 1; else hi = mid; }
+  var out = [];
+  for (var i = 0; i < lo; i++) if (bf[i].t >= year) out.push(bf[i]);
+  out.sort(function (a, b) { return b.a - a.a; });
+  liveRows = out;
+  return out;
+}
+
+/* ------------------------------------------------------------- projection */
+var skyCv  = document.getElementById('sky');
+var cv     = document.getElementById('globe');
+var ctx    = cv.getContext('2d');
+var skyCtx = skyCv.getContext('2d');
+
+var W = 0, H = 0, DPR = 1, R0 = 1, CX = 0, CY = 0;
+var rotation = [-12, -18, 0];
+var zoom = 1;
+var ZMAX = 64;
+var projection = d3.geoOrthographic().clipAngle(90).precision(0.35);
+var path = d3.geoPath(projection, ctx);
+var sphere = { type: 'Sphere' };
+var opt = { polities: true, edges: true, minor: true, names: true, co: false,
+            cities: true, cnames: false, grat: true, spin: false };
+
+function placePills() {
+  var panel = document.getElementById('controls');
+  var min = panel.classList.contains('min');
+  var list = pillList();
+  list.forEach(function (el) { el.style.display = min ? 'block' : 'none'; });
+  if (!min || !list.length) return;
+  var r = panel.getBoundingClientRect();
+  var leftwards = (r.left + r.width / 2) > window.innerWidth / 2;
+  var edge = leftwards ? r.left : r.right, gap = 8;
+  for (var i = 0; i < list.length; i++) {
+    var el = list[i], w = el.getBoundingClientRect().width;
+    var x = leftwards ? (edge - gap - w) : (edge + gap);
+    if (x < 6 || x + w > window.innerWidth - 6) { el.style.display = 'none'; continue; }
+    el.style.left = Math.round(x) + 'px';
+    el.style.right = 'auto';
+    el.style.top = Math.round(r.top) + 'px';
+    edge = leftwards ? x : x + w;
+  }
+}
+function pillList() { return [document.getElementById('resetfloat')].filter(Boolean); }
+
+function resize() {
+  placePills();
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  [cv, skyCv].forEach(function (c) {
+    c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+  });
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  skyCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  var narrow = W < 700;
+  R0 = Math.min(W, H) * (narrow ? 0.44 : 0.455);
+  CX = W / 2;
+  CY = narrow ? H * 0.42 : H / 2 - 24;
+  drawSky();
+  sizeRibbon();
+  draw();
+}
+
+function applyProjection() {
+  projection.rotate(rotation).scale(R0 * zoom).translate([CX, CY]);
+}
+
+/* ------------------------------------------------------------------- sky */
+var stars = null;
+function drawSky() {
+  var i, n = Math.round((W * H) / 5200);
+  if (!stars || stars.length !== n) {
+    stars = [];
+    for (i = 0; i < n; i++) stars.push([Math.random(), Math.random(), Math.pow(Math.random(), 2.6) * 1.35 + 0.18, 0.25 + Math.random() * 0.6]);
+  }
+  skyCtx.clearRect(0, 0, W, H);
+  var g = skyCtx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.78);
+  g.addColorStop(0, '#0a1222'); g.addColorStop(0.45, '#070c17'); g.addColorStop(1, '#03050a');
+  skyCtx.fillStyle = g; skyCtx.fillRect(0, 0, W, H);
+  var g2 = skyCtx.createRadialGradient(W * 0.16, H * 0.12, 0, W * 0.16, H * 0.12, Math.max(W, H) * 0.55);
+  g2.addColorStop(0, 'rgba(60,80,150,.16)'); g2.addColorStop(1, 'rgba(60,80,150,0)');
+  skyCtx.fillStyle = g2; skyCtx.fillRect(0, 0, W, H);
+  for (i = 0; i < stars.length; i++) {
+    var s = stars[i];
+    skyCtx.globalAlpha = s[3];
+    skyCtx.fillStyle = i % 11 === 0 ? '#cfe0ff' : (i % 7 === 0 ? '#ffe8cf' : '#ffffff');
+    skyCtx.beginPath(); skyCtx.arc(s[0] * W, s[1] * H, s[2], 0, 2 * Math.PI); skyCtx.fill();
+  }
+  skyCtx.globalAlpha = 1;
+}
+
+/* --------------------------------------------------------------- drawing */
+var FONT = "'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+var SERIF = "'Spectral',Georgia,'Times New Roman',serif";
+var hoverCity = null, hoverRow = null, pinnedRow = null, highlightLin = null;
+var interacting = false;
+var cityPts = [], labelBoxes = [], cityPtsSrc = 0;
+var lastDrawMs = 0;
+
+var landSet = world.features.map(function (f) { return { g: f, cap: capOf(f.geometry), box: planarBox(f.geometry) }; });
+
+function strokeLines(list, width, colour) {
+  ctx.beginPath();
+  for (var i = 0; i < list.length; i++) if (capVisible(list[i].cap)) trace(list[i], false);
+  ctx.lineWidth = width; ctx.strokeStyle = colour; ctx.stroke();
+}
+
+/* a row is minor when it stands on the screen too small to carry a full colour or a name */
+var MINOR_PX = 1400;
+function screenPx(a) { var s = a / 40589641; return s * (R0 * zoom) * (R0 * zoom); }
+
+function draw() {
+  var t0 = performance.now();
+  applyProjection();
+  var cx = CX, cy = CY, r = R0 * zoom;
+  var fast = interacting;
+  viewV = unitv([-rotation[0], -rotation[1]]);
+  setFastProjection(r);
+  viewAng = Math.asin(Math.min(1, Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) / r));
+  projection.precision(fast ? 1.4 : 0.35);
+
+  wantChunks(!fast);
+  var S = currentSet();
+  var live = computeLive(S);
+
+  ctx.clearRect(0, 0, W, H);
+
+  var ag = ctx.createRadialGradient(cx, cy, r * 0.985, cx, cy, r * 1.19);
+  ag.addColorStop(0, 'rgba(112,176,255,.30)');
+  ag.addColorStop(0.35, 'rgba(90,150,235,.11)');
+  ag.addColorStop(1, 'rgba(70,130,220,0)');
+  ctx.fillStyle = ag;
+  ctx.beginPath(); ctx.arc(cx, cy, r * 1.19, 0, 2 * Math.PI); ctx.fill();
+
+  /* the lit-sphere gradient is built on the globe's radius, which at a deep zoom runs far past
+     the window and leaves the whole sea in its darkest stop; so it is capped to the screen */
+  var gr = Math.min(r * 1.05, Math.hypot(W, H) * 0.7);
+  ctx.beginPath(); path(sphere);
+  var og = ctx.createRadialGradient(cx - gr * 0.28, cy - gr * 0.32, gr * 0.06, cx, cy, gr);
+  og.addColorStop(0, PALETTE.ocean0); og.addColorStop(1, PALETTE.ocean1);
+  ctx.fillStyle = og; ctx.fill();
+
+  /* the land nobody is recorded as holding this year lies under everything, in the base grey */
+  ctx.fillStyle = PALETTE.land; ctx.strokeStyle = PALETTE.land; ctx.lineWidth = 0.7;
+  var i, e;
+  for (i = 0; i < landSet.length; i++) {
+    if (!capVisible(landSet[i].cap)) continue;
+    ctx.beginPath(); trace(landSet[i], true);
+    ctx.fill(); ctx.stroke();
+  }
+
+  var drawn = 0;
+  if (opt.polities && live.length) {
+    var tiny = MINOR_PX * 0.25, ew = fast ? 0.7 : 0.9;
+    for (i = 0; i < live.length; i++) {
+      e = live[i];
+      if (!capVisible(e.cap)) continue;
+      var px = screenPx(e.a);
+      var fill = (opt.minor && px < MINOR_PX) ? e.e.tint : e.e.fill;
+      ctx.beginPath(); trace(e, true);
+      ctx.fillStyle = fill; ctx.fill();
+      /* Every border is crisp and every change is a cut. The same stroke that draws the
+         border also closes the hairline seam between two neighbours; where a polity is too
+         small to carry one it is stroked in its own colour instead. */
+      if (opt.edges && !(opt.minor && px < tiny)) { ctx.lineWidth = ew; ctx.strokeStyle = PALETTE.edge; }
+      else { ctx.lineWidth = 0.8; ctx.strokeStyle = fill; }
+      ctx.stroke();
+      drawn++;
+    }
+  }
+
+  /* hover lifts the whole lineage: everything else goes quiet behind a veil */
+  var hl = highlightLin !== null ? highlightLin : ((pinnedRow || hoverRow) ? (pinnedRow || hoverRow).e.lin : null);
+  if (hl !== null && opt.polities && !fast) {
+    ctx.save();
+    ctx.beginPath(); path(sphere); ctx.clip();
+    ctx.fillStyle = 'rgba(4,8,18,.52)'; ctx.fillRect(0, 0, W, H);
+    var lifted = [];
+    for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
+    for (i = 0; i < lifted.length; i++) {
+      e = lifted[i];
+      ctx.beginPath(); trace(e, true);
+      ctx.fillStyle = e.e.fill; ctx.fill();
+    }
+    ctx.beginPath();
+    for (i = 0; i < lifted.length; i++) trace(lifted[i], true);
+    ctx.lineWidth = 3.2; ctx.strokeStyle = 'rgba(4,10,24,.55)'; ctx.stroke();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.92)'; ctx.stroke();
+    var focus = pinnedRow || hoverRow;
+    if (focus && highlightLin === null) {
+      ctx.beginPath(); trace(focus, true);
+      ctx.fillStyle = 'rgba(255,255,255,.17)'; ctx.fill();
+      ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  if (opt.co && !fast) {
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath(); path(borders);
+    ctx.lineWidth = 0.8; ctx.strokeStyle = PALETTE.border; ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (opt.grat) {
+    ctx.beginPath(); path(graticule);
+    ctx.lineWidth = 0.55; ctx.strokeStyle = PALETTE.grat; ctx.stroke();
+    ctx.setLineDash([3, 4]); ctx.lineWidth = 0.8;
+    ctx.strokeStyle = 'rgba(255,224,168,.24)';
+    ctx.beginPath(); path(TROPIC_N); ctx.stroke();
+    ctx.beginPath(); path(TROPIC_S); ctx.stroke();
+    ctx.strokeStyle = 'rgba(178,218,255,.22)';
+    ctx.beginPath(); path(POLAR_N); ctx.stroke();
+    ctx.beginPath(); path(POLAR_S); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); path(EQUATOR);
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(198,226,255,.32)'; ctx.stroke();
+  }
+
+  ctx.save();
+  ctx.beginPath(); path(sphere); ctx.clip();
+  var shade = ctx.createRadialGradient(cx - gr * 0.34, cy - gr * 0.38, gr * 0.12, cx, cy, gr * 0.98);
+  shade.addColorStop(0, 'rgba(255,255,255,.055)');
+  shade.addColorStop(0.55, 'rgba(0,0,0,0)');
+  shade.addColorStop(1, 'rgba(0,0,0,.50)');
+  ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  ctx.beginPath(); path(sphere);
+  ctx.lineWidth = 1; ctx.strokeStyle = PALETTE.rim; ctx.stroke();
+
+  labelBoxes = [];
+  if (!fast && opt.polities && opt.names) drawPolityLabels(live);
+  if (opt.cities) drawCities(); else cityPts = [];
+
+  lastDrawMs = performance.now() - t0;
+  liveCount = drawn;
+  if (!fast && liveKey !== statsKey) { statsKey = liveKey; updateStats(); buildBigList(); }
+}
+var liveCount = 0, statsKey = null;
+
+function hits(boxes, box) {
+  for (var b = 0; b < boxes.length; b++) {
+    var o = boxes[b];
+    if (box[0] < o[0] + o[2] && box[0] + box[2] > o[0] &&
+        box[1] < o[1] + o[3] && box[1] + box[3] > o[1]) return true;
+  }
+  return false;
+}
+function stamp(t, x, y, font, colour, halo) {
+  ctx.font = font;
+  ctx.lineWidth = halo || 3;
+  ctx.strokeStyle = 'rgba(3,8,18,.70)';
+  ctx.strokeText(t, x, y);
+  ctx.fillStyle = colour;
+  ctx.fillText(t, x, y);
+}
+
+/* the name does the work the colour cannot: it says who, where the hue only separates neighbours */
+function drawPolityLabels(live) {
+  var centre = [-rotation[0], -rotation[1]];
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  var seen = {};
+  for (var i = 0; i < live.length; i++) {
+    var e = live[i];
+    if (!e.k || screenPx(e.a) < MINOR_PX * 1.6) continue;
+    if (seen[e.ei]) continue;
+    if (!capVisible(e.cap)) continue;
+    if (d3.geoDistance(e.k, centre) > 1.2) continue;
+    var p = projection(e.k);
+    if (!p || p[0] < 34 || p[0] > W - 34 || p[1] < 20 || p[1] > H - 100) continue;
+    var px = Math.sqrt(screenPx(e.a));
+    var size = Math.max(10.5, Math.min(18, 7.5 + px * 0.055));
+    var font = 'italic 500 ' + size.toFixed(1) + 'px ' + SERIF;
+    ctx.font = font;
+    var nm = e.e.name;
+    var w = ctx.measureText(nm).width;
+    if (w > px * 2.3) continue;                    /* do not spill a long name out of a small state */
+    var box = [p[0] - w / 2 - 4, p[1] - size * 0.62, w + 8, size * 1.24];
+    if (hits(labelBoxes, box)) continue;
+    labelBoxes.push(box);
+    seen[e.ei] = 1;
+    stamp(nm, p[0], p[1], font, 'rgba(255,255,255,.95)', 3.4);
+  }
+  ctx.lineJoin = 'miter';
+}
+
+function drawCities() {
+  var centre = [-rotation[0], -rotation[1]];
+  cityPts = [];
+  var labelMin = (W < 700 ? 8e6 : 4e6) / Math.pow(zoom, 1.9);
+  var boxes = labelBoxes.slice();
+  var i, c, p, dist;
+  var minPop = (W < 700 ? 5e6 : 4e6) / Math.pow(zoom, 1.6);
+  var adminZoom = W < 700 ? 2.6 : 2.1;
+  for (i = 0; i < cities.length; i++) {
+    c = cities[i];
+    if (c.rank < 2 && c.pop < minPop && !(c.rank === 1 && zoom >= adminZoom)) continue;
+    if (c.rank === 2 && c.pop < minPop / 4 && zoom < adminZoom * 1.5) continue;
+    dist = d3.geoDistance([c.lon, c.lat], centre);
+    if (dist > 1.5533) continue;
+    p = projection([c.lon, c.lat]);
+    if (!p) continue;
+    if (p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
+    var edge = 1 - Math.min(1, dist / 1.5533);
+    var rad = (c.pop >= 1e7 ? 2.4 : c.pop >= 4e6 ? 2.0 : c.pop >= 1e6 ? 1.8 : 1.5) * (0.85 + 0.35 * Math.min(1, zoom / 3));
+    cityPts.push({ c: c, x: p[0], y: p[1] });
+    ctx.globalAlpha = 0.30 + 0.70 * Math.min(1, edge * 3.2);
+    ctx.beginPath(); ctx.arc(p[0], p[1], rad + 1.2, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(6,12,26,.70)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(p[0], p[1], rad, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  if (interacting) return;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  for (i = 0; i < cityPts.length; i++) {
+    var cp = cityPts[i];
+    boxes.push([cp.x - 3.5, cp.y - 3.5, 7, 7]);
+    var isHover = hoverCity && hoverCity.c === cp.c;
+    var ep = Math.max(cp.c.pop, cp.c.rank === 2 ? 1.4e6 : cp.c.rank === 1 ? 0.7e6 : 0);
+    if (!(isHover || (opt.cnames && ep >= labelMin))) continue;
+    ctx.font = '500 10.5px ' + FONT;
+    var wpx = ctx.measureText(cp.c.name).width;
+    var spots = [[cp.x + 7, cp.y - 0.5], [cp.x - 7 - wpx, cp.y - 0.5],
+                 [cp.x - wpx / 2, cp.y - 13], [cp.x - wpx / 2, cp.y + 13]];
+    var tx = 0, ty = 0, box = null, sp;
+    for (sp = 0; sp < spots.length; sp++) {
+      var sx = spots[sp][0], sy = spots[sp][1];
+      if (sx < 8 || sx + wpx > W - 8 || sy < 12 || sy > H - 12) continue;
+      var nbox = [sx - 2, sy - 7, wpx + 4, 13];
+      if (!isHover && hits(boxes, nbox)) continue;
+      tx = sx; ty = sy; box = nbox; break;
+    }
+    if (!box) continue;
+    boxes.push(box);
+    ctx.lineWidth = 3.2; ctx.strokeStyle = 'rgba(3,8,18,.72)';
+    ctx.strokeText(cp.c.name, tx, ty);
+    ctx.fillStyle = isHover ? '#ffffff' : 'rgba(233,240,250,.88)';
+    ctx.fillText(cp.c.name, tx, ty);
+  }
+  ctx.lineJoin = 'miter';
+}
+
+var drawTimer = null;
+function scheduleDraw() { if (!drawTimer) drawTimer = setTimeout(function () { drawTimer = null; draw(); }, 60); }
+
+/* --------------------------------------------------------------- hit test */
+function inBox(b, lon, lat) {
+  return lon >= b[0] - 0.001 && lon <= b[2] + 0.001 && lat >= b[1] - 0.001 && lat <= b[3] + 0.001;
+}
+/* Polygons of different polities do overlap in places, so the smallest containing one wins:
+   the live list runs largest first, so the scan runs backwards. */
+function unitAt(lonlat) {
+  var live = liveRows;
+  for (var i = live.length - 1; i >= 0; i--) {
+    var e = live[i];
+    if (!inBox(e.box, lonlat[0], lonlat[1])) continue;
+    if (d3.geoContains(e.g, lonlat)) return e;
+  }
+  return null;
+}
+function cityAt(mx, my) {
+  var reach = coarsePointer ? 22 : 12;
+  var best = null, bd = reach * reach;
+  for (var i = 0; i < cityPts.length; i++) {
+    var p = cityPts[i];
+    var d = (p.x - mx) * (p.x - mx) + (p.y - my) * (p.y - my);
+    if (d < bd) { bd = d; best = p; }
+  }
+  return best;
+}
+
+/* ---------------------------------------------------------------- the card */
+var tip = document.getElementById('tip');
+var tipKey = null;
+
+function placeTip(mx, my) {
+  var w = tip.offsetWidth, h = tip.offsetHeight;
+  var x = mx + 18, y = my - h - 14;
+  if (x + w > W - 10) x = mx - w - 18;
+  if (y < 10) y = my + 20;
+  if (y + h > H - 100) y = Math.max(10, H - 100 - h);
+  if (coarsePointer) {
+    x = clamp(mx - w / 2, 8, Math.max(8, W - w - 8));
+    y = my - h - 30;
+    if (y < 8) y = Math.min(my + 30, H - h - 110);
+  }
+  tip.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]; }); }
+function km2(a) { return Math.round(a).toLocaleString('en-AU') + '&nbsp;km&sup2;'; }
+function span(a, b) {
+  if (a === b) return yearLabel(a);
+  if ((a < 0) === (b < 0) || (a <= 0 && b <= 0)) return yearShort(a) + '&ndash;' + yearLabel(b);
+  return yearLabel(a) + ' &ndash; ' + yearLabel(b);
+}
+
+/* Rome > Roman Republic > Roman Empire / Eastern Roman Empire:
+   '>' the same polity under a new form, '/' a branch off the line before it. */
+function chainNames(i) {
+  var e = ENT[i], L = LIN[e.lin];
+  return L.m.slice(0, e.pos + 1).map(function (j) { return ENT[j].name; });
+}
+function pathParts(i, depth) {
+  var e = ENT[i];
+  var here = chainNames(i).map(function (nm) { return ['>', nm]; });
+  here[0][0] = '';
+  if (e.parent >= 0 && depth < 3) {
+    var up = pathParts(e.parent, depth + 1);
+    here[0][0] = '/';              /* the branch carries the mark, at the point it branched */
+    return up.concat(here);
+  }
+  return here;
+}
+function pathHtml(i) {
+  var parts = pathParts(i, 0);
+  if (parts.length > 6) { parts = parts.slice(parts.length - 6); parts[0] = ['', '&hellip; ' + parts[0][1]]; }
+  var out = '';
+  for (var k = 0; k < parts.length; k++) {
+    if (parts[k][0]) out += '<span class="sep">' + (parts[k][0] === '/' ? '/' : '&gt;') + '</span>';
+    var lastOne = k === parts.length - 1;
+    out += (lastOne ? '<b>' : '') + (parts[k][1].indexOf('&hellip;') === 0 ? parts[k][1] : esc(parts[k][1])) + (lastOne ? '</b>' : '');
+  }
+  return out;
+}
+function rowTipHtml(e) {
+  var E = e.e, L = LIN[E.lin];
+  var rows = [];
+  rows.push('Held this shape <b>' + span(e.f, e.t) + '</b>');
+  rows.push(esc(E.name) + ' <b>' + span(E.first, E.last) + '</b>');
+  rows.push('This shape <b>' + km2(e.a) + '</b>');
+  if (E.aggs.length) rows.push('Within ' + E.aggs.map(function (a) { return esc(a.replace(/^\(|\)$/g, '')); }).join(', '));
+  var wl = E.wp ? '<div class="tgo"><a class="wl" href="https://en.wikipedia.org/wiki/' +
+      encodeURIComponent(E.wp.replace(/ /g, '_')) + '" target="_blank" rel="noopener">Wikipedia &rarr;</a></div>' : '';
+  return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
+    '<div class="path">' + pathHtml(E.i) + '</div>' +
+    '<div class="td">' + rows.join('<br>') + '</div>' +
+    '<div class="tzline" style="margin-top:7px;font-size:10.5px;color:var(--ink-faint)">Lineage ' + L.id +
+      ' &middot; ' + L.m.length + (L.m.length === 1 ? ' polity' : ' polities in the line') + '</div>' +
+    (pinnedRow === e ? wl : (wl ? '<div class="hintpin">Click to pin the card</div>' : ''));
+}
+function showRowTip(e, mx, my) {
+  var kk = 'u' + e.ei + '|' + e.f + '|' + (pinnedRow === e ? 'p' : '');
+  if (kk === tipKey) { placeTip(mx, my); return; }
+  tipKey = kk;
+  tip.innerHTML = rowTipHtml(e);
+  tip.classList.add('on');
+  tip.classList.toggle('pin', pinnedRow === e);
+  placeTip(mx, my);
+}
+function showCityTip(cp, mx, my) {
+  var c = cp.c, key = 'c' + c.name + c.country + year;
+  if (key === tipKey) { placeTip(mx, my); return; }
+  tipKey = key;
+  var e = unitAt([c.lon, c.lat]);
+  var where = e ? '<div class="tt"><small>In ' + yearLabel(year) + ' stood in</small>' + esc(e.e.name) + '</div>' +
+                  '<div class="path" style="margin-top:2px">' + pathHtml(e.e.i) + '</div>'
+                : '<div class="tt"><small>In ' + yearLabel(year) + '</small>No polity recorded here</div>';
+  tip.innerHTML = '<div class="tn">' + esc(c.name) + '</div>' +
+    '<div class="tc">' + (c.state ? esc(c.state).toUpperCase() + ', ' : '') + esc(c.country).toUpperCase() +
+    (c.rank === 2 ? ' &middot; CAPITAL' : '') + '</div>' + where;
+  tip.classList.add('on');
+  tip.classList.remove('pin');
+  placeTip(mx, my);
+}
+function hideTip() { if (pinnedRow) return; tip.classList.remove('on'); tip.classList.remove('pin'); tipKey = null; }
+function unpin() { if (!pinnedRow) return; pinnedRow = null; tipKey = null; tip.classList.remove('on'); tip.classList.remove('pin'); draw(); }
+
+/* ------------------------------------------------------------ interaction */
+var pointers = {}, dragStart = null, pinch = null, moved = false;
+var idleTimer = null;
+var spinV = [0, 0], momRaf = null;
+
+function stopMomentum() { cancelAnimationFrame(momRaf); momRaf = null; spinV = [0, 0]; }
+function startMomentum() {
+  if (Math.abs(spinV[0]) + Math.abs(spinV[1]) < 0.004) { spinV = [0, 0]; return; }
+  cancelAnimationFrame(momRaf);
+  var last = performance.now();
+  (function tick(t) {
+    var dt = Math.min(48, t - last); last = t;
+    rotation = [rotation[0] + spinV[0] * dt, clamp(rotation[1] + spinV[1] * dt, -90, 90), 0];
+    var decay = Math.pow(0.9958, dt);
+    spinV[0] *= decay; spinV[1] *= decay;
+    if (Math.abs(spinV[0]) + Math.abs(spinV[1]) > 0.0011) { markInteract(); draw(); momRaf = requestAnimationFrame(tick); }
+    else { momRaf = null; spinV = [0, 0]; interacting = false; draw(); }
+  })(performance.now());
+}
+function markInteract() {
+  interacting = true;
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(function () { interacting = false; draw(); }, 160);
+}
+
+cv.addEventListener('pointerdown', function (e) {
+  cv.setPointerCapture(e.pointerId);
+  pointers[e.pointerId] = [e.clientX, e.clientY];
+  var ids = Object.keys(pointers);
+  moved = false;
+  stopMomentum();
+  if (ids.length === 1) {
+    dragStart = { x: e.clientX, y: e.clientY, rot: rotation.slice(), lastT: 0, lastRot: rotation.slice() };
+    cv.classList.add('dragging');
+  } else if (ids.length === 2) {
+    pinch = { d: dist2(pointers[ids[0]], pointers[ids[1]]), zoom: zoom };
+    dragStart = null;
+  }
+  fadeHint();
+});
+function dist2(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+
+cv.addEventListener('pointermove', function (e) {
+  if (pointers[e.pointerId]) pointers[e.pointerId] = [e.clientX, e.clientY];
+  var ids = Object.keys(pointers);
+  if (ids.length === 2 && pinch) {
+    var nd = dist2(pointers[ids[0]], pointers[ids[1]]);
+    zoom = clamp(pinch.zoom * (nd / pinch.d), 0.82, ZMAX);
+    markInteract(); draw();
+    return;
+  }
+  if (dragStart && ids.length === 1) {
+    var k = 57.29578 / (R0 * zoom);
+    var dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+    if (!moved && Math.abs(dx) + Math.abs(dy) <= 3) return;
+    moved = true;
+    rotation = [dragStart.rot[0] + dx * k * 1.35, clamp(dragStart.rot[1] - dy * k * 1.35, -90, 90), 0];
+    var tnow = performance.now();
+    if (dragStart.lastT) {
+      var sp = Math.max(8, tnow - dragStart.lastT);
+      spinV[0] = spinV[0] * 0.6 + ((rotation[0] - dragStart.lastRot[0]) / sp) * 0.4;
+      spinV[1] = spinV[1] * 0.6 + ((rotation[1] - dragStart.lastRot[1]) / sp) * 0.4;
+    }
+    dragStart.lastT = tnow; dragStart.lastRot = rotation.slice();
+    hideTip(); hoverCity = null; hoverRow = null;
+    markInteract(); draw();
+    return;
+  }
+  hover(e.clientX, e.clientY);
+});
+
+function endPointer(e) {
+  delete pointers[e.pointerId];
+  if (Object.keys(pointers).length < 2) pinch = null;
+  if (Object.keys(pointers).length === 0) { dragStart = null; cv.classList.remove('dragging'); }
+}
+cv.addEventListener('pointerup', function (e) {
+  var wasMoved = moved;
+  var stale = dragStart && performance.now() - dragStart.lastT > 90;
+  endPointer(e);
+  if (wasMoved) { if (stale) spinV = [0, 0]; else startMomentum(); return; }
+  spinV = [0, 0];
+  if (smallScreen() && document.querySelector('.panel:not(.min)')) { foldPanels(null); return; }
+  var cp = opt.cities ? cityAt(e.clientX, e.clientY) : null;
+  if (e.pointerType === 'touch') {
+    /* a touch screen has no hover, so one tap does the looking and a second releases */
+    interacting = false;
+    if (cp) { hoverCity = cp; hoverRow = null; pinnedRow = null; draw(); showCityTip(cp, e.clientX, e.clientY); return; }
+    if (pinnedRow || hoverCity || hoverRow) { pinnedRow = null; hoverCity = null; hoverRow = null; tip.classList.remove('on'); tipKey = null; draw(); return; }
+    doHover(e.clientX, e.clientY);
+    if (hoverRow) { pinnedRow = hoverRow; showRowTip(hoverRow, e.clientX, e.clientY); draw(); }
+    return;
+  }
+  /* click pins the card so its Wikipedia link can be used; click elsewhere releases it */
+  if (cp) { flyTo(cp.c.lon, cp.c.lat); return; }
+  var ll = projection.invert([e.clientX, e.clientY]);
+  var hit = ll && Math.hypot(e.clientX - CX, e.clientY - CY) <= R0 * zoom && opt.polities ? unitAt(ll) : null;
+  if (hit && pinnedRow !== hit) { pinnedRow = hit; hoverRow = hit; showRowTip(hit, e.clientX, e.clientY); draw(); }
+  else unpin();
+});
+cv.addEventListener('pointercancel', endPointer);
+cv.addEventListener('pointerleave', function (e) {
+  endPointer(e);
+  if (e.pointerType === 'touch') return;
+  hideTip(); hoverCity = null;
+  if (hoverRow && !pinnedRow) { hoverRow = null; draw(); }
+});
+
+cv.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  var f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.10 : 0.0034));
+  zoom = clamp(zoom * f, 0.82, ZMAX);
+  markInteract(); draw(); fadeHint();
+}, { passive: false });
+
+cv.addEventListener('dblclick', function (e) {
+  var ll = projection.invert([e.clientX, e.clientY]);
+  if (ll) flyTo(ll[0], ll[1], Math.min(ZMAX, zoom * 2.4));
+});
+
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+var hoverRaf = null, lastHover = [0, 0];
+function hover(mx, my) {
+  lastHover = [mx, my];
+  if (hoverRaf) return;
+  hoverRaf = requestAnimationFrame(function () { hoverRaf = null; doHover(lastHover[0], lastHover[1]); });
+}
+function doHover(mx, my) {
+  if (pinnedRow) { cv.style.cursor = 'pointer'; return; }
+  var cp = opt.cities ? cityAt(mx, my) : null;
+  if (cp) {
+    if (!hoverCity || hoverCity.c !== cp.c) { hoverCity = cp; hoverRow = null; showCityTip(cp, mx, my); draw(); }
+    else showCityTip(cp, mx, my);
+    cv.style.cursor = 'pointer';
+    return;
+  }
+  cv.style.cursor = '';
+  var had = hoverCity; hoverCity = null;
+  var d = Math.hypot(mx - CX, my - CY);
+  var ll = d > R0 * zoom ? null : projection.invert([mx, my]);
+  var e = ll && opt.polities ? unitAt(ll) : null;
+  if (!e) {
+    hideTip();
+    if (hoverRow || had) { hoverRow = null; draw(); }
+    return;
+  }
+  var changed = e !== hoverRow;
+  hoverRow = e;
+  showRowTip(e, mx, my);
+  if (changed || had) draw();
+}
+
+/* ---------------------------------------------------------------- fly-to */
+var flying = null;
+function flyTo(lon, lat, targetZoom) {
+  stopMomentum();
+  var from = rotation.slice(), to = [-lon, -lat, 0];
+  var dl = ((to[0] - from[0] + 540) % 360) - 180;
+  var z0 = zoom, z1 = targetZoom === undefined ? Math.max(zoom, 1.6) : targetZoom;
+  var t0 = performance.now(), dur = 950;
+  if (flying) cancelAnimationFrame(flying);
+  hideTip();
+  (function step(t) {
+    var u = Math.min(1, (t - t0) / dur);
+    var e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+    rotation = [from[0] + dl * e, from[1] + (to[1] - from[1]) * e, 0];
+    zoom = z0 + (z1 - z0) * e;
+    interacting = u < 1;
+    draw();
+    if (u < 1) flying = requestAnimationFrame(step); else flying = null;
+  })(performance.now());
+}
+function zoomForArea(a) { return clamp(1.15 / Math.max(0.09, Math.sqrt(a) / 6371 * 1.5), 1, 8); }
+function resetView() { flyTo(20, 22, 1); }
+
+/* ------------------------------------------------------------ the scrubber */
+var ribwrap = document.getElementById('ribwrap');
+var rib = document.getElementById('ribbon');
+var rctx = rib.getContext('2d');
+var RW = 0, RH = 0;
+var TICKS = [5, 10, 25, 50, 100, 200, 250, 500, 1000, 2000];
+
+/* how many entities were about in each century, as a quiet ground behind the ribbon */
+var DENSITY = (function () {
+  var step = 20, n = Math.ceil((YMAX - YMIN) / step) + 1, a = new Float64Array(n);
+  ENT.forEach(function (e) {
+    var i0 = Math.max(0, Math.floor((e.first - YMIN) / step));
+    var i1 = Math.min(n - 1, Math.ceil((e.last - YMIN) / step));
+    for (var i = i0; i <= i1; i++) a[i]++;
+  });
+  var mx = 1;
+  for (var i = 0; i < n; i++) if (a[i] > mx) mx = a[i];
+  return { step: step, n: n, a: a, max: mx };
+})();
+
+function sizeRibbon() {
+  var r = ribwrap.getBoundingClientRect();
+  RW = Math.max(40, r.width); RH = Math.max(20, r.height);
+  rib.width = Math.round(RW * DPR); rib.height = Math.round(RH * DPR);
+  rib.style.width = RW + 'px'; rib.style.height = RH + 'px';
+  rctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  drawRibbon();
+}
+function drawRibbon() {
+  if (!RW) return;
+  rctx.clearRect(0, 0, RW, RH);
+  var topPad = 15, h = RH - topPad - 2;
+
+  /* the eras, as unequal bands */
+  for (var i = 0; i < ERAS.length; i++) {
+    var E = ERAS[i], x0 = E.x0 * RW, x1 = E.x1 * RW;
+    rctx.fillStyle = i % 2 ? 'rgba(255,255,255,.035)' : 'rgba(255,255,255,.015)';
+    rctx.fillRect(x0, topPad, x1 - x0, h);
+    if (i) {
+      rctx.beginPath(); rctx.moveTo(x0, topPad); rctx.lineTo(x0, topPad + h);
+      rctx.lineWidth = 1; rctx.strokeStyle = 'rgba(255,255,255,.12)'; rctx.stroke();
+    }
+    rctx.font = '9.5px ' + FONT;
+    rctx.textAlign = 'center'; rctx.textBaseline = 'alphabetic';
+    rctx.fillStyle = 'rgba(122,138,166,.95)';
+    var lab = E.name, lw = rctx.measureText(lab).width;
+    if (lw < x1 - x0 - 8) rctx.fillText(lab, (x0 + x1) / 2, 10);
+  }
+
+  /* how crowded the map is, century by century */
+  rctx.beginPath();
+  rctx.moveTo(0, topPad + h);
+  for (var k = 0; k < DENSITY.n; k++) {
+    var y = YMIN + k * DENSITY.step;
+    var x = yearToF(y) * RW;
+    rctx.lineTo(x, topPad + h - (DENSITY.a[k] / DENSITY.max) * (h * 0.66));
+  }
+  rctx.lineTo(RW, topPad + h);
+  rctx.closePath();
+  rctx.fillStyle = 'rgba(142,208,255,.10)';
+  rctx.fill();
+
+  /* century and millennium ticks, as the era's scale allows */
+  rctx.textAlign = 'center'; rctx.textBaseline = 'top';
+  var lastX = -99;
+  for (var e2 = 0; e2 < ERAS.length; e2++) {
+    var Er = ERAS[e2];
+    var pxPerYear = (Er.w * RW) / (Er.b - Er.a), grid = 2000;
+    for (var gi = 0; gi < TICKS.length; gi++) if (TICKS[gi] * pxPerYear >= 62) { grid = TICKS[gi]; break; }
+    for (var yy = Math.ceil(Er.a / grid) * grid; yy <= Er.b; yy += grid) {
+      var xx = yearToF(yy) * RW;
+      if (xx - lastX < 52 || xx > RW - 14) continue;
+      lastX = xx;
+      rctx.beginPath(); rctx.moveTo(xx, topPad + h - 6); rctx.lineTo(xx, topPad + h);
+      rctx.lineWidth = 1; rctx.strokeStyle = 'rgba(255,255,255,.16)'; rctx.stroke();
+      rctx.font = '9px ' + FONT;
+      rctx.fillStyle = 'rgba(108,122,147,.95)';
+      rctx.fillText(yy === 0 ? '1 BC' : yearShort(yy), xx, topPad + h - 19);
+    }
+  }
+
+  /* the handle */
+  var hx = yearToF(year) * RW;
+  rctx.beginPath(); rctx.moveTo(hx, topPad - 4); rctx.lineTo(hx, topPad + h);
+  rctx.lineWidth = 2; rctx.strokeStyle = 'rgba(142,208,255,.95)'; rctx.stroke();
+  rctx.beginPath(); rctx.arc(hx, topPad - 5, 4, 0, 2 * Math.PI);
+  rctx.fillStyle = '#8ed0ff'; rctx.fill();
+}
+
+function setYear(y, quiet) {
+  y = Math.round(clamp(y, YMIN, YMAX));
+  if (y === year) { if (!quiet) drawRibbon(); return; }
+  year = y;
+  liveKey = '';
+  if (pinnedRow) {
+    /* the pinned polity may not hold this shape any more; keep the card on the same entity */
+    var want = pinnedRow.ei;
+    pinnedRow = null; tipKey = null;
+    var S0 = currentSet(); computeLive(S0);
+    for (var i = 0; i < liveRows.length; i++) if (liveRows[i].ei === want) { pinnedRow = liveRows[i]; break; }
+    if (!pinnedRow) { tip.classList.remove('on'); tip.classList.remove('pin'); }
+  }
+  document.getElementById('yearval').innerHTML = year > 0
+    ? year + '<em>CE</em>' : (year === 0 ? 1 : -year) + '<em>BCE</em>';
+  drawRibbon();
+  draw();
+  updateStats();
+  if (pinnedRow) { tipKey = null; showRowTip(pinnedRow, lastHover[0] || CX, lastHover[1] || CY); }
+}
+
+var ribDrag = false;
+function ribYear(clientX) {
+  var r = ribwrap.getBoundingClientRect();
+  return fToYear((clientX - r.left) / r.width);
+}
+ribwrap.addEventListener('pointerdown', function (e) {
+  ribwrap.setPointerCapture(e.pointerId);
+  ribDrag = true; ribwrap.classList.add('dragging');
+  stopPlay();
+  markInteract();
+  setYear(ribYear(e.clientX));
+  fadeHint();
+});
+ribwrap.addEventListener('pointermove', function (e) {
+  if (!ribDrag) return;
+  markInteract();
+  setYear(ribYear(e.clientX));
+});
+function ribEnd(e) {
+  if (!ribDrag) return;
+  ribDrag = false; ribwrap.classList.remove('dragging');
+  interacting = false;
+  draw();
+}
+ribwrap.addEventListener('pointerup', ribEnd);
+ribwrap.addEventListener('pointercancel', ribEnd);
+ribwrap.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  var E = eraOf(year);
+  var n = e.deltaY > 0 ? 1 : -1;
+  setYear(year + n * E.step * (e.shiftKey ? 10 : 1));
+  fadeHint();
+}, { passive: false });
+
+/* play */
+var playing = false, playRaf = null, playLast = 0, playAcc = 0;
+function stopPlay() {
+  playing = false;
+  cancelAnimationFrame(playRaf); playRaf = null;
+  document.getElementById('play').classList.remove('on');
+  document.getElementById('play').innerHTML = '&#9654;';
+}
+function startPlay() {
+  playing = true;
+  document.getElementById('play').classList.add('on');
+  document.getElementById('play').innerHTML = '&#10073;&#10073;';
+  playLast = performance.now(); playAcc = 0;
+  (function tick(t) {
+    if (!playing) { playRaf = null; return; }
+    var dt = Math.min(200, t - playLast); playLast = t;
+    var E = eraOf(year);
+    playAcc += dt;
+    /* a steady rate across the ribbon rather than across the years: each era runs at its own step */
+    var per = 130;
+    while (playAcc >= per) { playAcc -= per; setYear(year + E.step); }
+    if (year >= YMAX) { stopPlay(); return; }
+    playRaf = requestAnimationFrame(tick);
+  })(performance.now());
+}
+function togglePlay() { if (playing) stopPlay(); else startPlay(); }
+document.getElementById('play').addEventListener('click', togglePlay);
+
+/* --------------------------------------------------------------- controls */
+Object.keys(opt).forEach(function (key) {
+  var el = document.getElementById('L-' + key);
+  if (!el) return;
+  el.checked = opt[key];
+  el.addEventListener('change', function () {
+    opt[key] = el.checked;
+    if (key === 'cnames' && opt.cnames && !opt.cities) { opt.cities = true; document.getElementById('L-cities').checked = true; }
+    if (key === 'cities' && !opt.cities && opt.cnames) { opt.cnames = false; document.getElementById('L-cnames').checked = false; }
+    if (key === 'spin') { spinPaused = false; if (opt.spin) startSpin(); }
+    hideTip();
+    draw();
+  });
+});
+var spinRaf = null, spinLast = 0, spinPaused = false;
+function startSpin() {
+  cancelAnimationFrame(spinRaf);
+  spinLast = performance.now();
+  (function tick(t) {
+    if (!opt.spin) { spinRaf = null; return; }
+    var dt = t - spinLast; spinLast = t;
+    if (!dragStart && !flying && !spinPaused && !hoverRow && !hoverCity && !pinnedRow && highlightLin === null) {
+      rotation[0] = (rotation[0] + dt * 0.0042) % 360; draw();
+    }
+    spinRaf = requestAnimationFrame(tick);
+  })(performance.now());
+}
+document.getElementById('resetview').addEventListener('click', function () { resetView(); });
+document.getElementById('resetfloat').addEventListener('click', function (e) { e.stopPropagation(); resetView(); });
+
+/* ----------------------------------------------------------------- legend */
+function buildLegend() {
+  var hr = document.getElementById('hueramp');
+  hr.innerHTML = '';
+  for (var h = 0; h < 360; h += 15) {
+    if (h >= 185 && h <= 275) continue;
+    var d = document.createElement('div');
+    d.style.background = css([h, 50, 63]);
+    hr.appendChild(d);
+  }
+  var sr = document.getElementById('shaderamp');
+  sr.innerHTML = '';
+  for (var k = 0; k < 6; k++) {
+    var c = document.createElement('div');
+    c.style.background = css([150, 50, 72 - k / 5 * 17]);
+    sr.appendChild(c);
+  }
+}
+function buildBigList() {
+  var bl = document.getElementById('biglist');
+  if (!bl) return;
+  var seen = {}, list = [];
+  for (var i = 0; i < liveRows.length && list.length < 24; i++) {
+    var e = liveRows[i];
+    if (seen[e.ei]) continue;
+    seen[e.ei] = 1; list.push(e);
+  }
+  bl.innerHTML = '';
+  list.forEach(function (e) {
+    var b = document.createElement('div');
+    b.className = 'b';
+    b.innerHTML = '<i style="background:' + e.e.fill + '"></i><span>' + esc(e.e.name) + '</span>' +
+                  '<span class="ar">' + (e.a >= 1e6 ? (e.a / 1e6).toFixed(2) + ' M' : Math.round(e.a / 1e3) + ' k') + ' km&sup2;</span>';
+    b.addEventListener('mouseenter', function () { highlightLin = e.e.lin; draw(); });
+    b.addEventListener('mouseleave', function () { highlightLin = null; draw(); });
+    b.addEventListener('click', function () { if (e.k) flyTo(e.k[0], e.k[1], zoomForArea(e.a)); });
+    bl.appendChild(b);
+  });
+}
+function updateStats() {
+  document.getElementById('st-live').textContent =
+    liveRows.length ? liveRows.length.toLocaleString('en-AU') + ' on the map' : (pending ? 'loading…' : 'none recorded');
+}
+
+/* ----------------------------------------------------------------- search */
+var q = document.getElementById('q'), results = document.getElementById('results');
+var selIdx = -1, matches = [];
+function fold(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+var searchList = ENT.map(function (e) {
+  return { name: e.name, kind: span(e.first, e.last).replace(/&ndash;/g, '–').replace(/&nbsp;/g, ' '),
+           ent: e, mid: Math.round((e.first + e.last) / 2), w: (e.last - e.first) };
+});
+cities.forEach(function (c) { searchList.push({ name: c.name, kind: c.country, city: c, w: -1e9 + c.pop / 1e4 }); });
+searchList.forEach(function (s) { s.f = fold(s.name); });
+
+function runSearch() {
+  var v = fold(q.value.trim());
+  results.innerHTML = ''; selIdx = -1;
+  if (v.length < 2) { results.classList.remove('on'); matches = []; return; }
+  var a = searchList.filter(function (s) { return s.f.indexOf(v) === 0; });
+  var b = searchList.filter(function (s) { return s.f.indexOf(v) > 0; });
+  a.sort(function (x, y) { return y.w - x.w; });
+  b.sort(function (x, y) { return y.w - x.w; });
+  matches = a.concat(b).slice(0, 24);
+  if (!matches.length) { results.classList.remove('on'); return; }
+  matches.forEach(function (s, i) {
+    var el = document.createElement('div');
+    el.className = 'r';
+    el.innerHTML = '<span class="nm">' + esc(s.name) + '</span><span class="ct">' + esc(s.kind) + '</span>';
+    el.addEventListener('click', function () { choose(i); });
+    results.appendChild(el);
+  });
+  results.classList.add('on');
+}
+/* a polity found by name sends the scrubber to the middle of its span and flies to it there */
+function choose(i) {
+  var s = matches[i];
+  if (!s) return;
+  results.classList.remove('on');
+  q.value = s.name; q.blur();
+  stopPlay();
+  if (s.city) { flyTo(s.city.lon, s.city.lat, Math.max(2.4, Math.min(zoom, 4))); return; }
+  setYear(s.mid);
+  var e = s.ent;
+  askChunk(chunkFor(year), 'w');
+  var tries = 0;
+  (function find() {
+    computeLive(currentSet());
+    var best = null;
+    for (var k = 0; k < liveRows.length; k++) if (liveRows[k].ei === e.i && (!best || liveRows[k].a > best.a)) best = liveRows[k];
+    if (!best && tries++ < 40) { setTimeout(find, 120); return; }
+    if (!best) return;
+    var anchor = best.k || [(best.box[0] + best.box[2]) / 2, (best.box[1] + best.box[3]) / 2];
+    flyTo(anchor[0], anchor[1], zoomForArea(best.a));
+    setTimeout(function () {
+      pinnedRow = best; tipKey = null;
+      var p = projection(anchor);
+      if (p) { hoverRow = best; showRowTip(best, p[0], p[1]); }
+      draw();
+    }, 1020);
+  })();
+}
+q.addEventListener('input', runSearch);
+q.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    var n = results.children.length; if (!n) return;
+    selIdx = (selIdx + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+    for (var i = 0; i < n; i++) results.children[i].classList.toggle('sel', i === selIdx);
+  } else if (e.key === 'Enter') choose(selIdx < 0 ? 0 : selIdx);
+  else if (e.key === 'Escape') { results.classList.remove('on'); q.blur(); }
+});
+document.addEventListener('click', function (e) {
+  if (!document.getElementById('search').contains(e.target)) results.classList.remove('on');
+  if (pinnedRow && !tip.contains(e.target) && !cv.contains(e.target) && !document.getElementById('scrub').contains(e.target)) unpin();
+});
+
+/* ------------------------------------------------------------- keyboard */
+document.addEventListener('keydown', function (e) {
+  if (document.activeElement === q) return;
+  var E = eraOf(year);
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); stopPlay(); markInteract(); setYear(year - E.step * (e.shiftKey ? 10 : 1)); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); stopPlay(); markInteract(); setYear(year + E.step * (e.shiftKey ? 10 : 1)); }
+  else if (e.key === 'ArrowUp')   { rotation[1] = clamp(rotation[1] + 5 / Math.max(1, zoom * 0.6), -90, 90); draw(); }
+  else if (e.key === 'ArrowDown') { rotation[1] = clamp(rotation[1] - 5 / Math.max(1, zoom * 0.6), -90, 90); draw(); }
+  else if (e.key === '+' || e.key === '=') { zoom = clamp(zoom * 1.4, 0.82, ZMAX); draw(); }
+  else if (e.key === '-' || e.key === '_') { zoom = clamp(zoom / 1.4, 0.82, ZMAX); draw(); }
+  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'Escape') { unpin(); }
+  else return;
+  fadeHint();
+});
+
+var hintEl = document.getElementById('hint'), hintGone = false;
+function fadeHint() {
+  if (hintGone) return;
+  hintGone = true;
+  setTimeout(function () { hintEl.style.opacity = 0; }, 400);
+}
+setTimeout(fadeHint, 11000);
+
+/* ------------------------------------------- panels fold away into corners */
+function smallScreen() {
+  return window.innerWidth <= 860 || window.innerHeight <= 560 ||
+         (coarsePointer && Math.min(window.innerWidth, window.innerHeight) <= 900);
+}
+function foldPanels(except) {
+  document.querySelectorAll('.panel').forEach(function (p) {
+    if (p !== except && !p.classList.contains('min')) {
+      p.classList.add('min');
+      var b = p.querySelector('.pmin');
+      if (b) b.title = 'Restore';
+    }
+  });
+  placePills();
+}
+(function panels() {
+  var small = smallScreen();
+  var list = document.querySelectorAll('.panel');
+  for (var i = 0; i < list.length; i++) {
+    var panel = list[i], btn = panel.querySelector('.pmin');
+    if (!btn) continue;
+    if (small) { panel.classList.add('min'); btn.title = 'Restore'; }
+    (function (p, b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var min = p.classList.toggle('min');
+        b.title = min ? 'Restore' : 'Minimise';
+        if (!min && smallScreen()) foldPanels(p);
+        placePills();
+      });
+    })(panel, btn);
+  }
+})();
+
+/* ------------------------------------------------------------------ boot */
+buildLegend();
+window.addEventListener('resize', function () { resize(); });
+document.fonts && document.fonts.ready && document.fonts.ready.then(function () { draw(); drawRibbon(); placePills(); });
+resize();
+askChunk(chunkFor(year), 'w');
+setYear(year);
+updateStats();
+(function () {
+  rotation = [-40, -40, 0];
+  zoom = 0.86;
+  draw();
+  setTimeout(function () { flyTo(30, 24, 1); }, 260);
+  if (opt.spin) startSpin();
+})();
+
+/* a window on the state, for checking behaviour from outside the page */
+window.HA = {
+  year: function () { return year; },
+  setYear: function (y) { stopPlay(); setYear(y); return year; },
+  setView: function (lon, lat, z) { rotation = [-lon, -lat, 0]; if (z) zoom = z; draw(); },
+  rotation: function () { return rotation.slice(); },
+  zoom: function () { return zoom; },
+  unitAt: function (lon, lat) {
+    var e = unitAt([lon, lat]);
+    return e ? { name: e.e.name, ent: e.ei, lin: e.e.lin, hue: e.e.hue, from: e.f, to: e.t, area: e.a,
+                 fill: e.e.fill, path: pathParts(e.e.i, 0).map(function (p) { return (p[0] ? p[0] + ' ' : '') + p[1]; }).join(' ') } : null;
+  },
+  path: function (name) {
+    for (var i = 0; i < ENT.length; i++) if (ENT[i].name === name) return pathParts(i, 0).map(function (p) { return (p[0] ? p[0] + ' ' : '') + p[1]; }).join(' ');
+    return null;
+  },
+  live: function () { return liveRows.length; },
+  tipOn: function () { return tip.classList.contains('on'); },
+  tipHtml: function () { return tip.innerHTML; },
+  chunksLoaded: function () { return { w: Object.keys(sets.w).map(Number), f: Object.keys(sets.f).map(Number), pending: pending }; },
+  drawMs: function () { var t = performance.now(); draw(); return performance.now() - t; },
+  lastDrawMs: function () { return lastDrawMs; },
+  play: togglePlay,
+  playing: function () { return playing; },
+  flyTo: flyTo,
+  opt: opt
+};
+
+})();
+</script>
+</body>
+</html>

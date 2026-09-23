@@ -3,7 +3,7 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.1, prototype)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.2, prototype)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
@@ -35,6 +35,16 @@ leaves out everything in the sketch that is not needed to answer it.
   of the row under the pointer, the entity's whole span, its area, and a Wikipedia link. Click to pin the
   card (which makes the link usable), click elsewhere or press Escape to release. A pinned card follows
   its polity as the scrubber moves.
+- **Pinning a line.** A pinned card holds the line of succession, not just the polity. Scrub into a year when
+  a predecessor or successor is on the map and the card moves to it, the path extends through to it with
+  its name in white, and the polity first pinned keeps a dotted underline. When nothing of the line is on the
+  map the card stays open and says why. The ribbon shows the pinned polity's years as a band in its colour,
+  and the whole line as segments in their own shades, each labelled with the year it began.
+- **Cards keep clear.** Every card sits wholly clear of its polity on screen, with a margin, and never over
+  the timeline. A hover card waits until the pointer stops or slows right down, so sweeping across a map of
+  many states does not flash a card for each; a click shows one at once.
+- **Ocean names**, in spaced capitals, printed along their parallels so they curve with the globe.
+- **Spin.** Off by default. When on, the space bar or a click on sea, sky or unheld land pauses and resumes it.
 - **Search.** Find a polity by name; it sets the year to the middle of that polity's span and flies to it.
   Cities are searchable too.
 - **Layers.** Polities, borders, minor-polity muting, polity names, modern borders (off by default, as a

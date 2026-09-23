@@ -145,7 +145,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .btn.on{background:rgba(142,208,255,.20);border-color:rgba(142,208,255,.45);color:var(--accent)}
 
 /* ---------- legend ---------- */
-#legend{left:18px;bottom:104px;padding:11px 14px 12px;width:268px}
+#legend{left:18px;bottom:120px;padding:11px 14px 12px;width:268px}
 #legend .lt{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;display:flex;justify-content:space-between}
 .ramp{display:flex;height:15px;border-radius:4px;overflow:hidden}
 .ramp div{flex:1}
@@ -166,7 +166,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
 /* ---------- the scrubber ---------- */
 #scrub{
-  position:absolute;left:18px;right:18px;bottom:14px;height:74px;z-index:6;
+  position:absolute;left:18px;right:18px;bottom:14px;height:90px;z-index:6;
   background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;
   box-shadow:var(--shadow);backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
@@ -197,6 +197,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 #tip .tc{font-size:10.5px;color:var(--ink-faint);letter-spacing:.05em;margin-top:2px}
 #tip .path{font-size:11.5px;letter-spacing:0;color:var(--ink-dim);line-height:1.5;margin-top:4px}
 #tip .path b{font-weight:500;color:var(--ink)}
+#tip .path b.now{font-weight:600;color:#fff}
+#tip .path .pinned{text-decoration:underline dotted rgba(142,208,255,.75);text-underline-offset:3px}
+#tip .pinline{margin-top:6px;font-size:10px;color:var(--ink-faint);letter-spacing:.04em}
 #tip .sep{color:var(--accent);opacity:.75;margin:0 .32em}
 #tip .tt{font-size:15px;margin-top:9px;line-height:1.25}
 #tip .tt small{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px}
@@ -216,7 +219,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .floatbtn:hover{background:rgba(255,255,255,.07);color:var(--ink)}
 
 #hint{
-  position:absolute;left:50%;transform:translateX(-50%);bottom:98px;font-size:11px;color:var(--ink-faint);
+  position:absolute;left:50%;transform:translateX(-50%);bottom:114px;font-size:11px;color:var(--ink-faint);
   letter-spacing:.05em;pointer-events:none;transition:opacity .8s;text-align:center;
 }
 #credit{
@@ -240,7 +243,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   #masthead .yearbox{margin-top:9px;padding-top:9px}
   #yearval{font-size:27px}
 
-  #controls{top:auto;bottom:100px;right:10px;left:10px;width:auto;padding:26px 12px 10px}
+  #controls{top:auto;bottom:112px;right:10px;left:10px;width:auto;padding:26px 12px 10px}
   #controls.min{padding:0 !important}
   .grp+.grp{border-top:0;padding-top:9px;margin-top:0}
   #controls .grp-t{display:none}
@@ -252,7 +255,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   .tog input:checked~span.tl{color:var(--accent)}
   #results{max-height:180px;top:auto;bottom:calc(100% + 6px)}
 
-  #scrub{left:8px;right:8px;bottom:8px;height:60px}
+  #scrub{left:8px;right:8px;bottom:8px;height:72px}
   #legend{display:none}
   #hint{display:none}
   #credit{display:none}
@@ -298,8 +301,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       <label class="tog"><input type="checkbox" id="L-co"><span class="sw"></span><span class="tl">Modern borders</span></label>
       <label class="tog"><input type="checkbox" id="L-cities" checked><span class="sw"></span><span class="tl">Cities</span></label>
       <label class="tog"><input type="checkbox" id="L-cnames"><span class="sw"></span><span class="tl">City names</span></label>
+      <label class="tog"><input type="checkbox" id="L-oceans" checked><span class="sw"></span><span class="tl">Ocean names</span></label>
       <label class="tog"><input type="checkbox" id="L-grat" checked><span class="sw"></span><span class="tl">Graticule</span></label>
-      <label class="tog"><input type="checkbox" id="L-spin"><span class="sw"></span><span class="tl">Slow spin</span></label>
+      <label class="tog"><input type="checkbox" id="L-spin"><span class="sw"></span><span class="tl" id="spinlabel">Slow spin</span></label>
     </div>
     <div class="grp">
       <button class="btn" id="resetview" title="Recentre and fit the globe">Reset view</button>
@@ -330,7 +334,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Polities: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a> (Seshat Global History Databank), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a><br>
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.1
+      &copy; 2026 Laurence F. White &middot; v0.2
     </div>
   </div>
 
@@ -639,7 +643,7 @@ var projection = d3.geoOrthographic().clipAngle(90).precision(0.35);
 var path = d3.geoPath(projection, ctx);
 var sphere = { type: 'Sphere' };
 var opt = { polities: true, edges: true, minor: true, names: true, co: false,
-            cities: true, cnames: false, grat: true, spin: false };
+            cities: true, cnames: false, oceans: true, grat: true, spin: false };
 
 function placePills() {
   var panel = document.getElementById('controls');
@@ -712,7 +716,7 @@ function drawSky() {
 /* --------------------------------------------------------------- drawing */
 var FONT = "'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 var SERIF = "'Spectral',Georgia,'Times New Roman',serif";
-var hoverCity = null, hoverRow = null, pinnedRow = null, highlightLin = null;
+var hoverCity = null, hoverRow = null, pinnedRow = null, pinnedEnt = null, pinAt = null, highlightLin = null;
 var interacting = false;
 var cityPts = [], labelBoxes = [], cityPtsSrc = 0;
 var lastDrawMs = 0;
@@ -790,13 +794,15 @@ function draw() {
   }
 
   /* hover lifts the whole lineage: everything else goes quiet behind a veil */
-  var hl = highlightLin !== null ? highlightLin : ((pinnedRow || hoverRow) ? (pinnedRow || hoverRow).e.lin : null);
-  if (hl !== null && opt.polities && !fast) {
+  var hl = highlightLin !== null ? highlightLin : (pinnedEnt ? pinnedEnt.lin : (hoverRow ? hoverRow.e.lin : null));
+  var lifted = [];
+  if (hl !== null && opt.polities && !fast)
+    for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
+  /* with nothing of the lineage on the map this year, a veil would only dim the map for nothing */
+  if (lifted.length) {
     ctx.save();
     ctx.beginPath(); path(sphere); ctx.clip();
     ctx.fillStyle = 'rgba(4,8,18,.52)'; ctx.fillRect(0, 0, W, H);
-    var lifted = [];
-    for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
     for (i = 0; i < lifted.length; i++) {
       e = lifted[i];
       ctx.beginPath(); trace(e, true);
@@ -850,12 +856,19 @@ function draw() {
   ctx.lineWidth = 1; ctx.strokeStyle = PALETTE.rim; ctx.stroke();
 
   labelBoxes = [];
+  if (!fast && opt.oceans) drawOceanLabels();
   if (!fast && opt.polities && opt.names) drawPolityLabels(live);
   if (opt.cities) drawCities(); else cityPts = [];
 
   lastDrawMs = performance.now() - t0;
   liveCount = drawn;
-  if (!fast && liveKey !== statsKey) { statsKey = liveKey; updateStats(); buildBigList(); }
+  if (!fast && pinnedEnt && pinnedRow && tip.classList.contains('on')) {
+    var rp = refPoint(pinnedRow); placeTip(rp[0], rp[1], pinnedRow, true);
+  }
+  if (!fast && liveKey !== statsKey) {
+    statsKey = liveKey; updateStats(); buildBigList();
+    if (pinnedEnt) { var had = pinnedRow; findPinRow(); if (had !== pinnedRow) { showPinTip(); draw(); } }
+  }
 }
 var liveCount = 0, statsKey = null;
 
@@ -877,6 +890,69 @@ function stamp(t, x, y, font, colour, halo) {
 }
 
 /* the name does the work the colour cannot: it says who, where the hue only separates neighbours */
+var OCEANS = [
+  ['NORTH PACIFIC OCEAN', -160, 30], ['SOUTH PACIFIC OCEAN', -125, -30],
+  ['NORTH ATLANTIC OCEAN', -42, 33], ['SOUTH ATLANTIC OCEAN', -15, -28],
+  ['INDIAN OCEAN', 80, -22], ['SOUTHERN OCEAN', 40, -60], ['SOUTHERN OCEAN', -120, -64],
+  ['ARCTIC OCEAN', 40, 83]
+].map(function (o) { return { t: o[0], ll: [o[1], o[2]] }; });
+/* The ocean names are printed on the globe rather than over it: each letter sits on the anchor's parallel,
+   spaced in degrees of longitude, and is drawn through the projection's own local stretch there, so a name
+   follows the curve of its parallel and foreshortens towards the limb as lettering on a real globe does. */
+function drawOceanLabels() {
+  var centre = [-rotation[0], -rotation[1]];
+  var bottom = document.getElementById('scrub').getBoundingClientRect().top - 16;
+  var r = R0 * zoom, pxDeg = r * DEG, eps = 0.25;
+  var size = clamp(10.5 + zoom * 1.1, 10.5, 15);
+  ctx.font = 'italic 400 ' + size.toFixed(1) + 'px ' + SERIF;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  var track = size * 0.42, wordGap = size * 0.9;
+  for (var i = 0; i < OCEANS.length; i++) {
+    var o = OCEANS[i], lat = o.ll[1], coslat = Math.cos(lat * DEG);
+    if (d3.geoDistance(o.ll, centre) > 1.3) continue;
+    /* lay the letters out along the parallel, in degrees */
+    var chars = [], total = 0;
+    for (var c = 0; c < o.t.length; c++) {
+      var ch = o.t.charAt(c);
+      var adv = ch === ' ' ? wordGap : ctx.measureText(ch).width + track;
+      chars.push([ch, total + adv / 2, adv]); total += adv;
+    }
+    total -= track;
+    var degPerPx = 1 / (pxDeg * coslat);
+    var glyphs = [], bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9, ok = true, dmax = 0;
+    for (c = 0; c < chars.length; c++) {
+      if (chars[c][0] === ' ') continue;
+      var lon = o.ll[0] + (chars[c][1] - total / 2) * degPerPx;
+      var d = d3.geoDistance([lon, lat], centre);
+      if (d > 1.45) { ok = false; break; }
+      dmax = Math.max(dmax, d);
+      var p = projection([lon, lat]);
+      var pe = projection([lon + eps, lat]), pw = projection([lon - eps, lat]);
+      var pn = projection([lon, lat + eps]), ps = projection([lon, lat - eps]);
+      if (!p || !pe || !pw || !pn || !ps) { ok = false; break; }
+      var ex = (pe[0] - pw[0]) / (2 * eps * pxDeg * coslat), ey = (pe[1] - pw[1]) / (2 * eps * pxDeg * coslat);
+      var nx = (pn[0] - ps[0]) / (2 * eps * pxDeg), ny = (pn[1] - ps[1]) / (2 * eps * pxDeg);
+      glyphs.push([chars[c][0], p, ex, ey, nx, ny]);
+      bx0 = Math.min(bx0, p[0]); bx1 = Math.max(bx1, p[0]); by0 = Math.min(by0, p[1]); by1 = Math.max(by1, p[1]);
+    }
+    if (!ok || !glyphs.length) continue;
+    if (bx0 < 24 || bx1 > W - 24 || by0 < 24 || by1 > bottom) continue;
+    var box = [bx0 - size * 0.6, by0 - size * 0.7, bx1 - bx0 + size * 1.2, by1 - by0 + size * 1.4];
+    if (hits(labelBoxes, box)) continue;
+    labelBoxes.push(box);
+    ctx.globalAlpha = 0.9 * Math.sqrt(Math.max(0, 1 - dmax / 1.45));
+    ctx.fillStyle = 'rgba(150,192,235,.85)';
+    for (var g = 0; g < glyphs.length; g++) {
+      var G = glyphs[g];
+      /* east along the parallel is the glyph's x; south, the reverse of north, its y */
+      ctx.setTransform(DPR * G[2], DPR * G[3], -DPR * G[4], -DPR * G[5], DPR * G[1][0], DPR * G[1][1]);
+      ctx.fillText(G[0], 0, 0);
+    }
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  ctx.globalAlpha = 1;
+}
+
 function drawPolityLabels(live) {
   var centre = [-rotation[0], -rotation[1]];
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
@@ -995,8 +1071,75 @@ function cityAt(mx, my) {
 var tip = document.getElementById('tip');
 var tipKey = null;
 
-function placeTip(mx, my) {
+/* Where a polity stands on the screen, for keeping its card clear of it. Cached for the view in hand,
+   since a hover asks many times without the globe moving. */
+var boundsPath = d3.geoPath(projection), boxCache = { row: null, key: '', b: null };
+function screenBox(e) {
+  var key = rotation[0].toFixed(3) + ',' + rotation[1].toFixed(3) + ',' + zoom.toFixed(4) + ',' + W + ',' + H;
+  if (boxCache.row === e && boxCache.key === key) return boxCache.b;
+  applyProjection();
+  var b = boundsPath.bounds(e.g);
+  if (!isFinite(b[0][0]) || !isFinite(b[1][0]) || b[1][0] <= b[0][0]) b = null;
+  boxCache = { row: e, key: key, b: b };
+  return b;
+}
+/* a point to hang a pinned card from once the view has moved: the label anchor, or the middle of the shape */
+function refPoint(e) {
+  if (e.k && d3.geoDistance(e.k, [-rotation[0], -rotation[1]]) < 1.5) { var p = projection(e.k); if (p) return p; }
+  var b = screenBox(e);
+  return b ? [(b[0][0] + b[1][0]) / 2, (b[0][1] + b[1][1]) / 2] : [CX, CY];
+}
+function obstacleRects() {
+  var out = [];
+  ['masthead', 'controls', 'legend'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el || el.offsetParent === null) return;
+    var r = el.getBoundingClientRect();
+    if (r.width && r.height) out.push(r);
+  });
+  return out;
+}
+function overlapArea(x, y, w, h, r) {
+  var ox = Math.min(x + w, r.right) - Math.max(x, r.left), oy = Math.min(y + h, r.bottom) - Math.max(y, r.top);
+  return ox > 0 && oy > 0 ? ox * oy : 0;
+}
+var tipXY = null;
+/* The card sits wholly clear of its polity, with a margin, and never over the timeline; it prefers
+   to stay off the panels and close to the pointer. A pinned card holds its place while that place is
+   still clear, so it does not jump about on every tick of the scrub. With no room anywhere it falls
+   back to sitting by the pointer. */
+function placeTip(mx, my, e, keep) {
   var w = tip.offsetWidth, h = tip.offsetHeight;
+  var pad = 10, buf = 16;
+  var bottom = document.getElementById('scrub').getBoundingClientRect().top - 10;
+  var b = e ? screenBox(e) : null;
+  if (b) {
+    var x0 = b[0][0] - buf, y0 = b[0][1] - buf, x1 = b[1][0] + buf, y1 = b[1][1] + buf;
+    var panels = obstacleRects();
+    var cands = [[x1, my - h / 2], [x0 - w, my - h / 2], [mx - w / 2, y0 - h], [mx - w / 2, y1],
+                 [x1, y0], [x1, y1 - h], [x0 - w, y0], [x0 - w, y1 - h]];
+    if (keep && tipXY) cands.unshift([tipXY[0], tipXY[1], true]);
+    var best = null, bs = Infinity;
+    for (var c = 0; c < cands.length; c++) {
+      var x = clamp(cands[c][0], pad, W - w - pad), y = clamp(cands[c][1], pad, bottom - h);
+      if (y < pad - 0.5 || x < pad - 0.5) continue;
+      if (x < x1 && x + w > x0 && y < y1 && y + h > y0) continue;          /* over the polity */
+      var sc = Math.hypot(x + w / 2 - mx, y + h / 2 - my);
+      for (var k = 0; k < panels.length; k++) sc += overlapArea(x, y, w, h, panels[k]) * 0.08;
+      if (cands[c][2]) {
+        /* where it already is: kept only while it is still near its polity and off the panels */
+        var gap = Math.max(x0 - (x + w), x - x1, y0 - (y + h), y - y1), onPanel = 0;
+        for (k = 0; k < panels.length; k++) onPanel += overlapArea(x, y, w, h, panels[k]);
+        if (gap <= 120 && !onPanel) sc = -1;
+      }
+      if (sc < bs) { bs = sc; best = [x, y]; }
+    }
+    if (best) {
+      tipXY = best;
+      tip.style.transform = 'translate(' + Math.round(best[0]) + 'px,' + Math.round(best[1]) + 'px)';
+      return;
+    }
+  }
   var x = mx + 18, y = my - h - 14;
   if (x + w > W - 10) x = mx - w - 18;
   if (y < 10) y = my + 20;
@@ -1006,25 +1149,25 @@ function placeTip(mx, my) {
     y = my - h - 30;
     if (y < 8) y = Math.min(my + 30, H - h - 110);
   }
+  tipXY = [x, y];
   tip.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
 }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]; }); }
 function km2(a) { return Math.round(a).toLocaleString('en-AU') + '&nbsp;km&sup2;'; }
 function span(a, b) {
   if (a === b) return yearLabel(a);
-  if ((a < 0) === (b < 0) || (a <= 0 && b <= 0)) return yearShort(a) + '&ndash;' + yearLabel(b);
+  if ((a < 0) === (b < 0) || (a <= 0 && b <= 0)) return (a > 0 ? a : (a === 0 ? 1 : -a)) + '&ndash;' + yearLabel(b);
   return yearLabel(a) + ' &ndash; ' + yearLabel(b);
 }
 
 /* Rome > Roman Republic > Roman Empire / Eastern Roman Empire:
    '>' the same polity under a new form, '/' a branch off the line before it. */
-function chainNames(i) {
+/* The path runs from the start of the line to the polity, or on past it to a later polity of the same
+   line when the scrubber has moved on (upto is that polity's place in the line). */
+function pathParts(i, depth, upto) {
   var e = ENT[i], L = LIN[e.lin];
-  return L.m.slice(0, e.pos + 1).map(function (j) { return ENT[j].name; });
-}
-function pathParts(i, depth) {
-  var e = ENT[i];
-  var here = chainNames(i).map(function (nm) { return ['>', nm]; });
+  var end = Math.max(e.pos, upto == null ? e.pos : upto);
+  var here = L.m.slice(0, end + 1).map(function (j) { return ['>', ENT[j].name, j]; });
   here[0][0] = '';
   if (e.parent >= 0 && depth < 3) {
     var up = pathParts(e.parent, depth + 1);
@@ -1033,14 +1176,18 @@ function pathParts(i, depth) {
   }
   return here;
 }
-function pathHtml(i) {
-  var parts = pathParts(i, 0);
-  if (parts.length > 6) { parts = parts.slice(parts.length - 6); parts[0] = ['', '&hellip; ' + parts[0][1]]; }
+/* now: the polity to show in white (the one on the map this year); pinned: the one clicked, if it differs */
+function pathHtml(i, upto, now, pinned) {
+  if (now === undefined) now = i;
+  var parts = pathParts(i, 0, upto), cut = false;
+  if (parts.length > 7) { parts = parts.slice(parts.length - 7); cut = true; }
   var out = '';
   for (var k = 0; k < parts.length; k++) {
-    if (parts[k][0]) out += '<span class="sep">' + (parts[k][0] === '/' ? '/' : '&gt;') + '</span>';
-    var lastOne = k === parts.length - 1;
-    out += (lastOne ? '<b>' : '') + (parts[k][1].indexOf('&hellip;') === 0 ? parts[k][1] : esc(parts[k][1])) + (lastOne ? '</b>' : '');
+    if (parts[k][0] && !(cut && k === 0)) out += '<span class="sep">' + (parts[k][0] === '/' ? '/' : '&gt;') + '</span>';
+    var nm = (cut && k === 0 ? '&hellip; ' : '') + esc(parts[k][1]), j = parts[k][2];
+    if (j === now) out += '<b class="now' + (j === pinned ? ' pinned' : '') + '">' + nm + '</b>';
+    else if (j === pinned) out += '<span class="pinned">' + nm + '</span>';
+    else out += nm;
   }
   return out;
 }
@@ -1054,20 +1201,23 @@ function rowTipHtml(e) {
   var wl = E.wp ? '<div class="tgo"><a class="wl" href="https://en.wikipedia.org/wiki/' +
       encodeURIComponent(E.wp.replace(/ /g, '_')) + '" target="_blank" rel="noopener">Wikipedia &rarr;</a></div>' : '';
   return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
-    '<div class="path">' + pathHtml(E.i) + '</div>' +
+    '<div class="path">' + (pinnedEnt && pinnedRow === e
+        ? pathHtml(pinnedEnt.i, E.pos, E.i, pinnedEnt.i) : pathHtml(E.i)) + '</div>' +
     '<div class="td">' + rows.join('<br>') + '</div>' +
     '<div class="tzline" style="margin-top:7px;font-size:10.5px;color:var(--ink-faint)">Lineage ' + L.id +
       ' &middot; ' + L.m.length + (L.m.length === 1 ? ' polity' : ' polities in the line') + '</div>' +
+    (pinnedRow === e && pinnedEnt !== E ? '<div class="pinline">' + (E.pos > pinnedEnt.pos ? 'Successor' : 'Predecessor') +
+        ' of <span class="pinned">' + esc(pinnedEnt.name) + '</span>, which you pinned</div>' : '') +
     (pinnedRow === e ? wl : (wl ? '<div class="hintpin">Click to pin the card</div>' : ''));
 }
 function showRowTip(e, mx, my) {
   var kk = 'u' + e.ei + '|' + e.f + '|' + (pinnedRow === e ? 'p' : '');
-  if (kk === tipKey) { placeTip(mx, my); return; }
+  if (kk === tipKey) { placeTip(mx, my, e, pinnedRow === e); return; }
   tipKey = kk;
   tip.innerHTML = rowTipHtml(e);
   tip.classList.add('on');
   tip.classList.toggle('pin', pinnedRow === e);
-  placeTip(mx, my);
+  placeTip(mx, my, e, pinnedRow === e);
 }
 function showCityTip(cp, mx, my) {
   var c = cp.c, key = 'c' + c.name + c.country + year;
@@ -1084,8 +1234,53 @@ function showCityTip(cp, mx, my) {
   tip.classList.remove('pin');
   placeTip(mx, my);
 }
-function hideTip() { if (pinnedRow) return; tip.classList.remove('on'); tip.classList.remove('pin'); tipKey = null; }
-function unpin() { if (!pinnedRow) return; pinnedRow = null; tipKey = null; tip.classList.remove('on'); tip.classList.remove('pin'); draw(); }
+function absentTipHtml(E) {
+  var why;
+  if (year < E.first) why = 'Not yet on the map &ndash; first appears <b>' + yearLabel(E.first) + '</b>';
+  else if (year > E.last) why = 'No longer on the map &ndash; last seen <b>' + yearLabel(E.last) + '</b>';
+  else why = 'No shape recorded for this year: Cliopatria has a gap in this polity&rsquo;s record here';
+  var wl = E.wp ? '<div class="tgo"><a class="wl" href="https://en.wikipedia.org/wiki/' +
+      encodeURIComponent(E.wp.replace(/ /g, '_')) + '" target="_blank" rel="noopener">Wikipedia &rarr;</a></div>' : '';
+  return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
+    '<div class="path">' + pathHtml(E.i, null, -1, E.i) + '</div>' +
+    '<div class="td">' + why + '<br>' + esc(E.name) + ' <b>' + span(E.first, E.last) + '</b></div>' + wl;
+}
+/* show the pinned polity's card where it was pinned: its shape this year, or a note of its absence */
+function showPinTip() {
+  if (!pinnedEnt) return;
+  tipKey = null;
+  if (pinnedRow) { var at = refPoint(pinnedRow); showRowTip(pinnedRow, at[0], at[1]); }
+  else {
+    var wasOn = tip.classList.contains('on');
+    tip.innerHTML = absentTipHtml(pinnedEnt);
+    tip.classList.add('on'); tip.classList.add('pin');
+    if (!wasOn || !tipXY) { var a = pinAt || [CX, CY]; placeTip(a[0], a[1]); }
+  }
+}
+/* The pin holds a line of succession as well as a polity: in a year when the pinned polity is off the
+   map but a predecessor or successor in its line is on it, the card moves to that one. */
+function findPinRow() {
+  pinnedRow = null;
+  if (!pinnedEnt) return;
+  var best = null, alt = null;
+  for (var i = 0; i < liveRows.length; i++) {
+    var r = liveRows[i];
+    if (r.ei === pinnedEnt.i) { if (!best || r.a > best.a) best = r; }
+    else if (r.e.lin === pinnedEnt.lin && (!alt || r.a > alt.a)) alt = r;
+  }
+  pinnedRow = best || alt;
+}
+function pinRow(row, mx, my) {
+  pinnedEnt = row.e; pinnedRow = row; hoverRow = row; pinAt = [mx, my];
+  showPinTip(); drawRibbon(); draw();
+}
+function hideTip() { if (pinnedEnt) return; tip.classList.remove('on'); tip.classList.remove('pin'); tipKey = null; }
+function unpin() {
+  if (!pinnedEnt) return;
+  pinnedRow = null; pinnedEnt = null; pinAt = null; tipKey = null;
+  tip.classList.remove('on'); tip.classList.remove('pin');
+  drawRibbon(); draw();
+}
 
 /* ------------------------------------------------------------ interaction */
 var pointers = {}, dragStart = null, pinch = null, moved = false;
@@ -1113,6 +1308,7 @@ function markInteract() {
 }
 
 cv.addEventListener('pointerdown', function (e) {
+  clearTimeout(dwellTimer); dwellTimer = null;
   cv.setPointerCapture(e.pointerId);
   pointers[e.pointerId] = [e.clientX, e.clientY];
   var ids = Object.keys(pointers);
@@ -1174,25 +1370,28 @@ cv.addEventListener('pointerup', function (e) {
   if (e.pointerType === 'touch') {
     /* a touch screen has no hover, so one tap does the looking and a second releases */
     interacting = false;
-    if (cp) { hoverCity = cp; hoverRow = null; pinnedRow = null; draw(); showCityTip(cp, e.clientX, e.clientY); return; }
-    if (pinnedRow || hoverCity || hoverRow) { pinnedRow = null; hoverCity = null; hoverRow = null; tip.classList.remove('on'); tipKey = null; draw(); return; }
+    if (cp) { unpin(); hoverCity = cp; hoverRow = null; draw(); showCityTip(cp, e.clientX, e.clientY); return; }
+    if (pinnedEnt || hoverCity || hoverRow) { unpin(); hoverCity = null; hoverRow = null; tip.classList.remove('on'); tipKey = null; draw(); return; }
     doHover(e.clientX, e.clientY);
-    if (hoverRow) { pinnedRow = hoverRow; showRowTip(hoverRow, e.clientX, e.clientY); draw(); }
+    if (hoverRow) pinRow(hoverRow, e.clientX, e.clientY);
     return;
   }
   /* click pins the card so its Wikipedia link can be used; click elsewhere releases it */
   if (cp) { flyTo(cp.c.lon, cp.c.lat); return; }
   var ll = projection.invert([e.clientX, e.clientY]);
   var hit = ll && Math.hypot(e.clientX - CX, e.clientY - CY) <= R0 * zoom && opt.polities ? unitAt(ll) : null;
-  if (hit && pinnedRow !== hit) { pinnedRow = hit; hoverRow = hit; showRowTip(hit, e.clientX, e.clientY); draw(); }
-  else unpin();
+  if (hit && (!pinnedEnt || pinnedEnt !== hit.e)) { unpin(); pinRow(hit, e.clientX, e.clientY); return; }
+  if (hit) { unpin(); return; }
+  if (pinnedEnt) { unpin(); return; }
+  if (opt.spin) setSpinPaused(!spinPaused);
 });
 cv.addEventListener('pointercancel', endPointer);
 cv.addEventListener('pointerleave', function (e) {
+  clearTimeout(dwellTimer); dwellTimer = null;
   endPointer(e);
   if (e.pointerType === 'touch') return;
   hideTip(); hoverCity = null;
-  if (hoverRow && !pinnedRow) { hoverRow = null; draw(); }
+  if (hoverRow && !pinnedEnt) { hoverRow = null; draw(); }
 });
 
 cv.addEventListener('wheel', function (e) {
@@ -1210,14 +1409,38 @@ cv.addEventListener('dblclick', function (e) {
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
 var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-var hoverRaf = null, lastHover = [0, 0];
+/* A card that flashes up for every country the pointer crosses is a distraction, so the card and the
+   lifted lineage wait until the pointer stops or slows right down. While it is still moving fast, a card
+   already open stays only as long as the pointer is over the same polity. A click shows one at once. */
+var hoverRaf = null, lastHover = [0, 0], dwellTimer = null;
+var moveAt = { x: 0, y: 0, t: 0 }, moveV = 0;
+var SLOW = 0.12, DWELL = 260;          /* pixels per millisecond; milliseconds */
 function hover(mx, my) {
+  var t = performance.now(), dt = Math.max(1, t - moveAt.t);
+  var v = dt > 250 ? 0 : Math.hypot(mx - moveAt.x, my - moveAt.y) / dt;
+  moveV = moveV * 0.5 + v * 0.5;
+  moveAt = { x: mx, y: my, t: t };
   lastHover = [mx, my];
+  clearTimeout(dwellTimer);
+  dwellTimer = setTimeout(function () { dwellTimer = null; moveV = 0; doHover(lastHover[0], lastHover[1]); }, DWELL);
   if (hoverRaf) return;
-  hoverRaf = requestAnimationFrame(function () { hoverRaf = null; doHover(lastHover[0], lastHover[1]); });
+  hoverRaf = requestAnimationFrame(function () {
+    hoverRaf = null;
+    if (moveV <= SLOW || pinnedEnt) { doHover(lastHover[0], lastHover[1]); return; }
+    passOver(lastHover[0], lastHover[1]);
+  });
+}
+/* moving fast: keep an open card while the pointer stays on its polity, and drop it the moment it leaves */
+function passOver(mx, my) {
+  if (hoverCity) { hoverCity = null; tip.classList.remove('on'); tipKey = null; draw(); }
+  if (!hoverRow) return;
+  var ll = Math.hypot(mx - CX, my - CY) > R0 * zoom ? null : projection.invert([mx, my]);
+  var e = ll && opt.polities ? unitAt(ll) : null;
+  if (e === hoverRow) { placeTip(mx, my, e); return; }
+  hoverRow = null; hideTip(); draw();
 }
 function doHover(mx, my) {
-  if (pinnedRow) { cv.style.cursor = 'pointer'; return; }
+  if (pinnedEnt) { cv.style.cursor = 'pointer'; return; }
   var cp = opt.cities ? cityAt(mx, my) : null;
   if (cp) {
     if (!hoverCity || hoverCity.c !== cp.c) { hoverCity = cp; hoverRow = null; showCityTip(cp, mx, my); draw(); }
@@ -1295,10 +1518,11 @@ function sizeRibbon() {
 function drawRibbon() {
   if (!RW) return;
   rctx.clearRect(0, 0, RW, RH);
-  var topPad = 15, h = RH - topPad - 2;
+  var topPad = 26, h = RH - topPad - 2;
+  var i, x, w;
 
-  /* the eras, as unequal bands */
-  for (var i = 0; i < ERAS.length; i++) {
+  /* the eras, as unequal bands, named under the row of years */
+  for (i = 0; i < ERAS.length; i++) {
     var E = ERAS[i], x0 = E.x0 * RW, x1 = E.x1 * RW;
     rctx.fillStyle = i % 2 ? 'rgba(255,255,255,.035)' : 'rgba(255,255,255,.015)';
     rctx.fillRect(x0, topPad, x1 - x0, h);
@@ -1309,16 +1533,15 @@ function drawRibbon() {
     rctx.font = '9.5px ' + FONT;
     rctx.textAlign = 'center'; rctx.textBaseline = 'alphabetic';
     rctx.fillStyle = 'rgba(122,138,166,.95)';
-    var lab = E.name, lw = rctx.measureText(lab).width;
-    if (lw < x1 - x0 - 8) rctx.fillText(lab, (x0 + x1) / 2, 10);
+    var lw = rctx.measureText(E.name).width;
+    if (lw < x1 - x0 - 8) rctx.fillText(E.name, (x0 + x1) / 2, 22);
   }
 
   /* how crowded the map is, century by century */
   rctx.beginPath();
   rctx.moveTo(0, topPad + h);
   for (var k = 0; k < DENSITY.n; k++) {
-    var y = YMIN + k * DENSITY.step;
-    var x = yearToF(y) * RW;
+    x = yearToF(YMIN + k * DENSITY.step) * RW;
     rctx.lineTo(x, topPad + h - (DENSITY.a[k] / DENSITY.max) * (h * 0.66));
   }
   rctx.lineTo(RW, topPad + h);
@@ -1326,8 +1549,89 @@ function drawRibbon() {
   rctx.fillStyle = 'rgba(142,208,255,.10)';
   rctx.fill();
 
-  /* century and millennium ticks, as the era's scale allows */
-  rctx.textAlign = 'center'; rctx.textBaseline = 'top';
+  /* The pinned polity's years, in its own colour, across the ribbon; beneath, every polity of its
+     lineage in its own shade, so the line of succession reads as a run of segments. */
+  var by = topPad + h - 5, L = null, px0 = 0, px1 = 0;
+  if (pinnedEnt) {
+    L = LIN[pinnedEnt.lin];
+    for (var m = 0; m < L.m.length; m++) {
+      var M = ENT[L.m[m]];
+      var mx0 = yearToF(M.first) * RW, mx1 = Math.max(mx0 + 2, yearToF(M.last + 1) * RW);
+      rctx.globalAlpha = (M === pinnedEnt || (pinnedRow && M === pinnedRow.e)) ? 1 : 0.55;
+      rctx.fillStyle = M.fill;
+      rctx.fillRect(mx0, by, Math.max(1.5, mx1 - mx0 - 1), 5);   /* a hairline between successive polities */
+    }
+    px0 = yearToF(pinnedEnt.first) * RW; px1 = Math.max(px0 + 2, yearToF(pinnedEnt.last + 1) * RW);
+    rctx.fillStyle = pinnedEnt.fill;
+    rctx.globalAlpha = 0.22;
+    rctx.fillRect(px0, topPad, px1 - px0, h - 5);
+    rctx.globalAlpha = 1;
+    rctx.beginPath();
+    rctx.moveTo(px0 + 0.5, topPad); rctx.lineTo(px0 + 0.5, topPad + h);
+    rctx.moveTo(px1 - 0.5, topPad); rctx.lineTo(px1 - 0.5, topPad + h);
+    rctx.lineWidth = 1; rctx.strokeStyle = pinnedEnt.fill; rctx.stroke();
+  }
+
+  /* the handle */
+  var hx = yearToF(year) * RW;
+  rctx.beginPath(); rctx.moveTo(hx, topPad - 4); rctx.lineTo(hx, topPad + h);
+  rctx.lineWidth = 2; rctx.strokeStyle = 'rgba(142,208,255,.95)'; rctx.stroke();
+  rctx.beginPath(); rctx.arc(hx, topPad - 5, 4, 0, 2 * Math.PI);
+  rctx.fillStyle = '#8ed0ff'; rctx.fill();
+
+  /* ---- the years. The top row holds the handle's year; the lower one, just over the lineage bar, where
+     each polity of the pinned line begins and where the line ends, in their own colours. The plain century
+     ticks give way to those wherever they would collide. */
+  var rows = { top: [], low: [] };
+  function place(row, cx, wd) {
+    var lx = clamp(cx - wd / 2, 1, RW - wd - 1);
+    for (var q = 0; q < rows[row].length; q++) {
+      var o = rows[row][q];
+      if (lx < o[1] + 4 && lx + wd > o[0] - 4) return null;
+    }
+    rows[row].push([lx, lx + wd]);
+    return lx + wd / 2;
+  }
+  rctx.textAlign = 'center'; rctx.textBaseline = 'alphabetic';
+
+  /* above the handle, on a small dark pill */
+  rctx.font = '600 10.5px ' + FONT;
+  var ht = yearLabel(year);
+  w = rctx.measureText(ht).width + 10;
+  x = place('top', hx, w);
+  rctx.fillStyle = 'rgba(10,15,25,.92)';
+  rctx.beginPath();
+  if (rctx.roundRect) rctx.roundRect(x - w / 2, 0, w, 13, 4); else rctx.rect(x - w / 2, 0, w, 13);
+  rctx.fill();
+  rctx.fillStyle = '#ffffff';
+  rctx.fillText(ht, x, 10);
+
+  if (pinnedEnt) {
+    /* and over the lineage bar: where each polity of the line begins, and where the line ends */
+    rctx.font = '500 9px ' + FONT;
+    var ly = by - 3;
+    var marks = [];
+    for (var m2 = 0; m2 < L.m.length; m2++) marks.push([ENT[L.m[m2]].first, ENT[L.m[m2]], false]);
+    var lastM = ENT[L.m[L.m.length - 1]];
+    marks.push([lastM.last, lastM, true]);
+    /* the pinned polity and the one on the map now claim their places first */
+    marks.sort(function (p1, p2) {
+      function rank(mk) { return (mk[1] === pinnedEnt ? 0 : (pinnedRow && mk[1] === pinnedRow.e) ? 1 : 2); }
+      return rank(p1) - rank(p2) || p1[0] - p2[0];
+    });
+    for (var mk = 0; mk < marks.length; mk++) {
+      var yv = marks[mk][0], ME = marks[mk][1];
+      var tx = yearShort(yv), tw = rctx.measureText(tx).width;
+      var cx = yearToF(marks[mk][2] ? yv + 1 : yv) * RW;
+      var at = place('low', cx, tw);
+      if (at === null) continue;
+      rctx.fillStyle = ME.fill;
+      rctx.fillText(tx, at, ly);
+    }
+  }
+
+  /* century and millennium ticks, as the era's scale allows and the labels above leave room */
+  rctx.font = '9px ' + FONT;
   var lastX = -99;
   for (var e2 = 0; e2 < ERAS.length; e2++) {
     var Er = ERAS[e2];
@@ -1339,39 +1643,30 @@ function drawRibbon() {
       lastX = xx;
       rctx.beginPath(); rctx.moveTo(xx, topPad + h - 6); rctx.lineTo(xx, topPad + h);
       rctx.lineWidth = 1; rctx.strokeStyle = 'rgba(255,255,255,.16)'; rctx.stroke();
-      rctx.font = '9px ' + FONT;
+      var tt = yy === 0 ? '1 BC' : yearShort(yy);
+      var tpos = place('low', xx, rctx.measureText(tt).width);
+      if (tpos === null) continue;
       rctx.fillStyle = 'rgba(108,122,147,.95)';
-      rctx.fillText(yy === 0 ? '1 BC' : yearShort(yy), xx, topPad + h - 19);
+      rctx.fillText(tt, tpos, pinnedEnt ? by - 3 : topPad + h - 10);
     }
   }
-
-  /* the handle */
-  var hx = yearToF(year) * RW;
-  rctx.beginPath(); rctx.moveTo(hx, topPad - 4); rctx.lineTo(hx, topPad + h);
-  rctx.lineWidth = 2; rctx.strokeStyle = 'rgba(142,208,255,.95)'; rctx.stroke();
-  rctx.beginPath(); rctx.arc(hx, topPad - 5, 4, 0, 2 * Math.PI);
-  rctx.fillStyle = '#8ed0ff'; rctx.fill();
 }
 
-function setYear(y, quiet) {
-  y = Math.round(clamp(y, YMIN, YMAX));
-  if (y === year) { if (!quiet) drawRibbon(); return; }
-  year = y;
-  liveKey = '';
-  if (pinnedRow) {
-    /* the pinned polity may not hold this shape any more; keep the card on the same entity */
-    var want = pinnedRow.ei;
-    pinnedRow = null; tipKey = null;
-    var S0 = currentSet(); computeLive(S0);
-    for (var i = 0; i < liveRows.length; i++) if (liveRows[i].ei === want) { pinnedRow = liveRows[i]; break; }
-    if (!pinnedRow) { tip.classList.remove('on'); tip.classList.remove('pin'); }
-  }
+function showYear() {
   document.getElementById('yearval').innerHTML = year > 0
     ? year + '<em>CE</em>' : (year === 0 ? 1 : -year) + '<em>BCE</em>';
+}
+function setYear(y, quiet) {
+  y = Math.round(clamp(y, YMIN, YMAX));
+  if (y === year) { showYear(); if (!quiet) drawRibbon(); return; }
+  year = y;
+  liveKey = '';
+  if (pinnedEnt) { computeLive(currentSet()); findPinRow(); }
+  showYear();
   drawRibbon();
   draw();
   updateStats();
-  if (pinnedRow) { tipKey = null; showRowTip(pinnedRow, lastHover[0] || CX, lastHover[1] || CY); }
+  if (pinnedEnt) showPinTip();
 }
 
 var ribDrag = false;
@@ -1445,19 +1740,23 @@ Object.keys(opt).forEach(function (key) {
     opt[key] = el.checked;
     if (key === 'cnames' && opt.cnames && !opt.cities) { opt.cities = true; document.getElementById('L-cities').checked = true; }
     if (key === 'cities' && !opt.cities && opt.cnames) { opt.cnames = false; document.getElementById('L-cnames').checked = false; }
-    if (key === 'spin') { spinPaused = false; if (opt.spin) startSpin(); }
+    if (key === 'spin') { setSpinPaused(false); if (opt.spin) startSpin(); }
     hideTip();
     draw();
   });
 });
 var spinRaf = null, spinLast = 0, spinPaused = false;
+function setSpinPaused(v) {
+  spinPaused = !!v;
+  document.getElementById('spinlabel').textContent = opt.spin && spinPaused ? 'Slow spin (paused)' : 'Slow spin';
+}
 function startSpin() {
   cancelAnimationFrame(spinRaf);
   spinLast = performance.now();
   (function tick(t) {
     if (!opt.spin) { spinRaf = null; return; }
     var dt = t - spinLast; spinLast = t;
-    if (!dragStart && !flying && !spinPaused && !hoverRow && !hoverCity && !pinnedRow && highlightLin === null) {
+    if (!dragStart && !flying && !spinPaused && !hoverRow && !hoverCity && !pinnedEnt && highlightLin === null) {
       rotation[0] = (rotation[0] + dt * 0.0042) % 360; draw();
     }
     spinRaf = requestAnimationFrame(tick);
@@ -1501,7 +1800,12 @@ function buildBigList() {
                   '<span class="ar">' + (e.a >= 1e6 ? (e.a / 1e6).toFixed(2) + ' M' : Math.round(e.a / 1e3) + ' k') + ' km&sup2;</span>';
     b.addEventListener('mouseenter', function () { highlightLin = e.e.lin; draw(); });
     b.addEventListener('mouseleave', function () { highlightLin = null; draw(); });
-    b.addEventListener('click', function () { if (e.k) flyTo(e.k[0], e.k[1], zoomForArea(e.a)); });
+    b.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      var anchor = e.k || [(e.box[0] + e.box[2]) / 2, (e.box[1] + e.box[3]) / 2];
+      unpin(); flyTo(anchor[0], anchor[1], zoomForArea(e.a));
+      setTimeout(function () { var p = projection(anchor); pinRow(e, p ? p[0] : CX, p ? p[1] : CY); }, 1000);
+    });
     bl.appendChild(b);
   });
 }
@@ -1547,6 +1851,7 @@ function choose(i) {
   results.classList.remove('on');
   q.value = s.name; q.blur();
   stopPlay();
+  unpin();
   if (s.city) { flyTo(s.city.lon, s.city.lat, Math.max(2.4, Math.min(zoom, 4))); return; }
   setYear(s.mid);
   var e = s.ent;
@@ -1561,10 +1866,8 @@ function choose(i) {
     var anchor = best.k || [(best.box[0] + best.box[2]) / 2, (best.box[1] + best.box[3]) / 2];
     flyTo(anchor[0], anchor[1], zoomForArea(best.a));
     setTimeout(function () {
-      pinnedRow = best; tipKey = null;
       var p = projection(anchor);
-      if (p) { hoverRow = best; showRowTip(best, p[0], p[1]); }
-      draw();
+      pinRow(best, p ? p[0] : CX, p ? p[1] : CY);
     }, 1020);
   })();
 }
@@ -1580,7 +1883,7 @@ q.addEventListener('keydown', function (e) {
 });
 document.addEventListener('click', function (e) {
   if (!document.getElementById('search').contains(e.target)) results.classList.remove('on');
-  if (pinnedRow && !tip.contains(e.target) && !cv.contains(e.target) && !document.getElementById('scrub').contains(e.target)) unpin();
+  if (pinnedEnt && !tip.contains(e.target) && !cv.contains(e.target) && !document.getElementById('scrub').contains(e.target)) unpin();
 });
 
 /* ------------------------------------------------------------- keyboard */
@@ -1593,7 +1896,12 @@ document.addEventListener('keydown', function (e) {
   else if (e.key === 'ArrowDown') { rotation[1] = clamp(rotation[1] - 5 / Math.max(1, zoom * 0.6), -90, 90); draw(); }
   else if (e.key === '+' || e.key === '=') { zoom = clamp(zoom * 1.4, 0.82, ZMAX); draw(); }
   else if (e.key === '-' || e.key === '_') { zoom = clamp(zoom / 1.4, 0.82, ZMAX); draw(); }
-  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  else if (e.key === ' ') {
+    e.preventDefault();
+    if (playing) stopPlay();
+    else if (opt.spin) setSpinPaused(!spinPaused);
+    else startPlay();
+  }
   else if (e.key === 'Escape') { unpin(); }
   else return;
   fadeHint();
@@ -1676,8 +1984,27 @@ window.HA = {
   live: function () { return liveRows.length; },
   tipOn: function () { return tip.classList.contains('on'); },
   tipHtml: function () { return tip.innerHTML; },
+  pinned: function () { return pinnedEnt ? { name: pinnedEnt.name, onMap: !!pinnedRow, lin: pinnedEnt.lin } : null; },
+  pinByName: function (name) {
+    computeLive(currentSet());
+    for (var i = 0; i < liveRows.length; i++) if (liveRows[i].e.name === name) { unpin(); pinRow(liveRows[i], CX, CY); return true; }
+    return false;
+  },
+  unpin: function () { unpin(); },
+  spinPaused: function () { return spinPaused; },
+  tipClear: function () {
+    var e = pinnedRow || hoverRow;
+    var t = tip.getBoundingClientRect(), sc = document.getElementById('scrub').getBoundingClientRect();
+    var b = e ? screenBox(e) : null;
+    var overPolity = !!b && t.left < b[1][0] && t.right > b[0][0] && t.top < b[1][1] && t.bottom > b[0][1];
+    return { on: tip.classList.contains('on'), overPolity: overPolity, overTimeline: t.bottom > sc.top,
+             gap: b ? Math.round(Math.max(b[0][0] - t.right, t.left - b[1][0], b[0][1] - t.bottom, t.top - b[1][1])) : null };
+  },
+  pathText: function () { var el = tip.querySelector('.path'); return el ? el.textContent : ''; },
+  nowName: function () { var el = tip.querySelector('.path b.now'); return el ? el.textContent : null; },
   chunksLoaded: function () { return { w: Object.keys(sets.w).map(Number), f: Object.keys(sets.f).map(Number), pending: pending }; },
   drawMs: function () { var t = performance.now(); draw(); return performance.now() - t; },
+  drawMsScrub: function () { var was = interacting; interacting = true; var t = performance.now(); draw(); var ms = performance.now() - t; interacting = was; return ms; },
   lastDrawMs: function () { return lastDrawMs; },
   play: togglePlay,
   playing: function () { return playing; },

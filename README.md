@@ -3,16 +3,15 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.3, prototype)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.4)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
 so a line of succession holds its colour across the whole scrub. Hover a polity and the card names it,
 gives its succession path, and lifts the rest of its lineage out of the map.
 
-This is the prototype stage of the design sketched in `..\history-atlas\world-history-atlas-sketch_20260921.md`.
-It answers one question — whether scrubbing through history on this globe is compelling — and deliberately
-leaves out everything in the sketch that is not needed to answer it.
+It is an early stage of a larger design. For now every border is crisp and every change a cut, and several
+things a historical atlas should show are still to come; *What it does not do yet* lists them.
 
 # What it does
 
@@ -20,9 +19,9 @@ leaves out everything in the sketch that is not needed to answer it.
   linear within each, so the last five centuries get the room their detail needs. Drag it, wheel over it,
   step with the arrow keys by the era's own unit, or press space to play. The year reads out in the masthead.
   Behind the ribbon, a faint curve shows how many polities were about in each period.
-- **The globe.** Canvas orthographic globe with drag, momentum, pinch and wheel zoom, fly-to, and the
-  near-side fast path carried over from the river valleys atlas, which is what makes a redraw on every
-  scrub tick affordable.
+- **The globe.** An orthographic globe with drag, momentum, pinch and wheel zoom and fly-to, drawn on the
+  graphics card with WebGL where the browser allows and in 2D otherwise (see *Rendering*), so it redraws on
+  every tick of the scrub without stutter.
 - **Colour.** A hue per lineage, assigned greedily over a graph of which lineages were ever neighbours in
   space while alive at the same time, weighted by the length of the shared border times the years it was
   shared. Lineages that never met may share a hue. Blue is kept for water. Within a lineage, lightness
@@ -41,7 +40,8 @@ leaves out everything in the sketch that is not needed to answer it.
   a predecessor or successor is on the map and the card moves to it, the path extends through to it with
   its name in white, and the polity first pinned keeps a dotted underline. When nothing of the line is on the
   map the card stays open and says why. The ribbon shows the pinned polity's years as a band in its colour,
-  and the whole line as segments in their own shades, each labelled with the year it began.
+  and the whole line as segments in their own shades, each labelled with the year it began. A selection
+  stays lifted, white border and all, while the globe is dragged or spins and while the year runs.
 - **Cards keep clear.** Every card sits wholly clear of its polity on screen, with a margin, and never over
   the timeline. A hover card waits until the pointer stops or slows right down, so sweeping across a map of
   many states does not flash a card for each; a click shows one at once.
@@ -52,11 +52,30 @@ leaves out everything in the sketch that is not needed to answer it.
 - **Layers.** Polities, borders, minor-polity muting, polity names, modern borders (off by default, as a
   faint reference), cities, city names, graticule, slow spin (off — a spinning globe fights the scrubber).
 
-# What it does not do
+# What it does not do yet
 
-Every border is crisp and every change is a cut. There are no soft or feathered edges, no precision
-grades, no peoples without states, no deep time, no core sample, no events, no period cities, no WebGL
-and no morphing between keyframes. Those belong to the later stages in the sketch.
+Every border is crisp and every change is a cut. There are no soft or feathered edges for borders nobody
+could have drawn at the time, no grades of precision or confidence, no peoples without states, no
+migrations, no battles or other events, no cities that come and go with the period, no deep time and no
+morphing between keyframes. These are planned for later stages.
+
+# Rendering
+
+The heavy layers are drawn on the graphics card with WebGL 2 (`lib/globe-gl.js`, shared with the other
+globes as they move across); a 2D canvas on top keeps the light ones – atmosphere, graticule, highlight
+outlines, shading, labels and cities. Where WebGL 2 is missing, or the browser takes the context away, the
+page draws everything in 2D as before; `?gl=0` forces that, for comparison.
+
+- **Polities** are filled without being cut into triangles: each outline is drawn as a fan of triangles into
+  the stencil buffer, then painted where the count came out odd. Shapes wholly on the near side are placed on
+  the sphere by the vertex shader, from buffers uploaded once per chunk; the few crossing the limb are clipped
+  by d3 first. Borders are drawn together in one call.
+- **The land beneath**, where no polity is recorded, is looked up per pixel in a 4096 by 2048 image of the
+  world's land made at load, out to zoom 2; beyond that it is drawn from outlines. Profiling showed that
+  clipping the detailed coastline at the limb was two thirds of every frame, in 2D and WebGL alike.
+- At the world view a frame while scrubbing takes about 3 ms against about 10 ms in 2D (measured headless
+  on the machine's own graphics card), and the two renderers differ in under 0.2 per cent of pixels.
+  `HA.profile(years, scrub)` breaks a frame down by layer.
 
 # The data
 
@@ -86,8 +105,8 @@ times over. The rule used here, decided by looking at the file rather than assum
   by its own members. The membership is not thrown away — the card says which aggregate a polity was within.
 - **`Type = RELATION` — not drawn.** 385 rows over 50 names, all parenthesised, all of the form
   `(Allegiance of X to Y)`, `(Alliance between X and Y)`, `(Personal union…)`, `(Vassalage…)`. These are
-  relationships rather than territory. They are the raw material for the "manner of holding" layer in the
-  sketch, which is a later stage.
+  relationships rather than territory. They are the raw material for a planned layer showing the manner of
+  holding – vassals and tributaries hatched in their overlord's colour.
 
 Two further facts about the file, checked rather than assumed. Rows of one entity never overlap in time,
 though 427 pairs leave a gap, so an entity can be absent from the map for a period and return. Polygons of
@@ -135,7 +154,7 @@ its real heir, which is how an early run had the Roman Empire continuing into th
 neighbours and the Russian Empire into Armenia. The successors that are not the continuation start lines of
 their own, and remember the polity they branched from — the card shows it, the colour does not inherit it.
 
-That yields 1,129 lineages over 1,540 entities. Hand corrections live in `build\lineage_overrides.json` and always outrank an automatic edge,
+That yields 1,129 lineages over 1,541 entities (1,540 in Cliopatria, and Mali split from the Mali Federation). Hand corrections live in `build\lineage_overrides.json` and always outrank an automatic edge,
 keyed by entity name. An `add` there is taken as authority and skips the handover test, because the cases
 that need correcting are exactly the ones where the shapes do not line up: Cliopatria has the Rashidun
 Caliphate and the Umayyads holding separate ground through the First Fitna, and the Sui already reduced to
@@ -154,8 +173,12 @@ curl -sL -o raw/cliopatria.geojson.zip \
   https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/cliopatria.geojson.zip
 cd raw && unzip cliopatria.geojson.zip && cd ..
 python fetch_wikidata.py        # once; caches raw/wd_succession.json
-python build_data.py            # about 2.5 minutes, needs roughly 4 GB of memory
+python verify_dates.py          # optional: the Wikipedia sentences behind the correction dates
+python build_data.py            # about 4 minutes, needs roughly 4 GB of memory
 ```
+
+The corrections in `data_overrides.json` and `lineage_overrides.json` are applied as the build reads the
+source, so a rebuild always includes them.
 
 `build_data.py` writes `data\base.js` (entities, lineages, hues, countries, cities) and two files per time
 chunk. Chunks are 500 years before 0 CE, 250 years to 1500, and 100 years after, nineteen in all; a row
@@ -169,13 +192,16 @@ a server.
 
 # Testing
 
-`window.HA` exposes `year`, `setYear`, `setView`, `unitAt(lon, lat)`, `path(name)`, `live`, `tipHtml`,
-`drawMs`, `chunksLoaded`, `play` and `opt`, for driving the page headlessly.
+`window.HA` exposes, among others, `year`, `setYear`, `setView`, `unitAt(lon, lat)`, `path(name)`, `live`,
+`tipHtml`, `pinned`, `pinByName`, `goTo`, `chunksLoaded`, `play`, `opt`, `renderer`, `drawMs`,
+`drawMsSync` (waits for the graphics card) and `profile(years, scrub)`, for driving the page headlessly.
 
-Checked with Playwright at 1600 × 1000: no console errors; the worst frame over a 200-year scrub at the
-world view is about 33 ms and the worst settled frame about 29 ms; `unitAt` returns the Roman Empire at
-Rome in 100 CE, the Tang at Chang'an in 700, the Inca at Cusco in 1500, the Mughals at Delhi in 1600 and
-the First French Empire at Paris in 1812.
+Checked with Playwright, headless on the machine's own graphics card (`--use-angle=d3d11 --enable-gpu`;
+without it Chromium draws WebGL in software): no console errors in WebGL or 2D; a scrubbing frame at the
+world view about 3 ms in WebGL and 10 ms in 2D; the two renderers differ in under 0.2 per cent of pixels;
+`unitAt` returns the Roman Empire at Rome in 100 CE, the Tang at Chang'an in 700, the Inca at Cusco in 1500,
+the Mughals at Delhi in 1600 and the First French Empire at Paris in 1812. Pinning, cards, links, the
+ribbon, spin and the hover delay each have their own scripted checks.
 
 # Credits
 

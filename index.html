@@ -41,6 +41,7 @@ body{
 }
 #stage{position:fixed;inset:0}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#gl{pointer-events:none}
 #globe{cursor:grab}
 #globe.dragging{cursor:grabbing}
 
@@ -268,6 +269,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 <body>
 <div id="stage">
   <canvas id="sky"></canvas>
+  <canvas id="gl" aria-hidden="true"></canvas>
   <canvas id="globe"></canvas>
 
   <div id="tip"></div>
@@ -337,7 +339,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Polities: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a> (Seshat Global History Databank), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a><br>
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.3
+      &copy; 2026 Laurence F. White &middot; v0.4
     </div>
   </div>
 
@@ -350,6 +352,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 </div>
 
 <script src="lib/globe-libs.js"></script>
+<script src="lib/globe-gl.js"></script>
 <script>
 /* the chunks arrive as script tags, so the page works from file:// too */
 window.HA_CHUNKS = {};
@@ -499,6 +502,7 @@ function css(hcl, a) {
   return a === undefined ? 'rgb(' + r + ',' + g + ',' + b + ')' : 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 }
 ENT.forEach(function (e) { e.fill = css(entHcl(e, false)); e.tint = css(entHcl(e, true)); });
+if (window.GlobeGL) ENT.forEach(function (e) { e.fillV = GlobeGL.rgba(e.fill); e.tintV = GlobeGL.rgba(e.tint); });
 
 var PALETTE = {
   ocean0:  '#0d2036',
@@ -566,6 +570,9 @@ function buildSet(ci, kind, topo) {
   set.sort(function (a, b) { return b.a - a.a; });        /* larger first, smaller drawn on top */
   var byFrom = set.slice().sort(function (a, b) { return a.f - b.f; });
   var S = { ci: ci, kind: kind, set: set, byFrom: byFrom, used: ++clock };
+  if (GL) {
+    S.gl = GL.set(set.map(function (e, k) { e.gi = k; return e.xyz || (e.xyz = toXYZ(e.g.geometry)); }));
+  }
   sets[kind][ci] = S;
   return S;
 }
@@ -581,6 +588,7 @@ function evict(kind, keep) {
   if (ks.length <= keep) return;
   ks.sort(function (a, b) { return sets[kind][a].used - sets[kind][b].used; });
   for (var i = 0; i < ks.length - keep; i++) {
+    if (GL && sets[kind][ks[i]]) GL.drop(sets[kind][ks[i]].gl);
     delete sets[kind][ks[i]];
     delete asked[kind + ks[i]];
     delete window.HA_CHUNKS[kind][ks[i]];
@@ -637,6 +645,19 @@ var skyCv  = document.getElementById('sky');
 var cv     = document.getElementById('globe');
 var ctx    = cv.getContext('2d');
 var skyCtx = skyCv.getContext('2d');
+/* The heavy layers - ocean, land, every polity's fill and border, the veil - go to the graphics card when it
+   can take them; the 2D canvas on top keeps the light ones. Without WebGL 2, or with ?gl=0, all is 2D. */
+var glCv = document.getElementById('gl');
+var GL = (window.GlobeGL && !/[?&]gl=0\b/.test(location.search)) ? GlobeGL.create(glCv) : null;
+if (!GL) glCv.style.display = 'none';
+/* if the browser takes the graphics context away (memory pressure, a driver reset), carry on in 2D */
+glCv.addEventListener('webglcontextlost', function (ev) {
+  ev.preventDefault();
+  GL = null; glCv.style.display = 'none';
+  setTimeout(function () { draw(); }, 0);
+});
+var clipRings = GL ? GlobeGL.ringCollector() : null;
+var clipPath = null;          /* made on first use: the projection is defined further down */
 
 var W = 0, H = 0, DPR = 1, R0 = 1, CX = 0, CY = 0;
 var rotation = [-12, -18, 0];
@@ -679,6 +700,7 @@ function resize() {
   });
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   skyCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (GL) GL.resize(W, H, DPR);
   var narrow = W < 700;
   R0 = Math.min(W, H) * (narrow ? 0.44 : 0.455);
   CX = W / 2;
@@ -725,6 +747,83 @@ var cityPts = [], labelBoxes = [], cityPtsSrc = 0;
 var lastDrawMs = 0;
 
 var landSet = world.features.map(function (f) { return { g: f, cap: capOf(f.geometry), box: planarBox(f.geometry) }; });
+/* The land under the polities is detailed Natural Earth coastline, 45,000 points, and every outline crossing
+   the limb had to be clipped afresh each frame: two thirds of the frame, in 2D and WebGL alike. It only shows
+   where no polity covers it, so out to zoom 3 a copy simplified to a tenth of a degree (well under a pixel)
+   is drawn instead, without the specks too small to see. Hit testing keeps the detailed outlines. */
+function simplifyRing(r, tol) {
+  var n = r.length;
+  if (n < 5) return r;
+  var keep = new Uint8Array(n), stack = [[0, n - 1]], t2 = tol * tol;
+  keep[0] = keep[n - 1] = 1;
+  while (stack.length) {
+    var seg = stack.pop(), a = seg[0], b = seg[1], ax = r[a][0], ay = r[a][1], bx = r[b][0], by = r[b][1];
+    var dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy, best = -1, bi = -1;
+    for (var i = a + 1; i < b; i++) {
+      var px = r[i][0] - ax, py = r[i][1] - ay, d;
+      if (L) { var t = Math.max(0, Math.min(1, (px * dx + py * dy) / L)); var qx = px - t * dx, qy = py - t * dy; d = qx * qx + qy * qy; }
+      else d = px * px + py * py;
+      if (d > best) { best = d; bi = i; }
+    }
+    if (best > t2) { keep[bi] = 1; stack.push([a, bi], [bi, b]); }
+  }
+  var out = [];
+  for (var k = 0; k < n; k++) if (keep[k]) out.push(r[k]);
+  return out.length >= 4 ? out : null;
+}
+function simplifyGeom(g, tol, minSpan) {
+  var polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [], out = [];
+  polys.forEach(function (poly) {
+    var b = planarBox({ type: 'Polygon', coordinates: [poly[0]] });
+    if (b[2] - b[0] < minSpan && b[3] - b[1] < minSpan) return;
+    var rings = [];
+    for (var i = 0; i < poly.length; i++) { var r = simplifyRing(poly[i], tol); if (r) rings.push(r); else if (!i) return; }
+    out.push(rings);
+  });
+  return out.length ? { type: 'MultiPolygon', coordinates: out } : null;
+}
+var landLo = landSet.map(function (l) {
+  var g = simplifyGeom(l.g.geometry, 0.1, 0.3);
+  return g ? { g: { type: 'Feature', geometry: g }, cap: l.cap, box: l.box } : null;
+}).filter(Boolean);
+var landGL = GL ? GL.set(landSet.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;
+var landGLlo = GL ? GL.set(landLo.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;
+function landNow() { return zoom < 3 ? landLo : landSet; }
+/* Below zoom 2 the card looks the land up in a flat image of it instead of drawing outlines: exact at the
+   limb, and no clipping at all, which had become the largest part of the frame. Drawn once, just after the
+   first frame, from the detailed coastline; 4096 by 2048 is sharp to about zoom 2, where outlines take over. */
+var MASK_ZOOM = 2;
+function buildLandMask() {
+  if (!GL || GL.hasMask()) return;
+  var mw = 4096, mh = 2048, c = document.createElement('canvas');
+  c.width = mw; c.height = mh;
+  var m = c.getContext('2d');
+  m.fillStyle = '#000'; m.fillRect(0, 0, mw, mh);
+  var eq = d3.geoEquirectangular().scale(mw / (2 * Math.PI)).translate([mw / 2, mh / 2]).precision(0.2);
+  var pth = d3.geoPath(eq, m);
+  m.beginPath(); for (var i = 0; i < landSet.length; i++) pth(landSet[i].g);
+  m.fillStyle = '#fff'; m.fill();
+  GL.landMask(c);
+  scheduleDraw();
+}
+/* wholly on the near side: the card places its corners itself; otherwise d3 clips it at the limb first */
+function nearSide(e) {
+  var cap = e.cap;
+  return cap.r < 1.5 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.sin(cap.r + 0.03);
+}
+/* Clipping for the card uses its own projection with d3's adaptive resampling off: the corners are close
+   enough together to need none, and resampling long simplified edges was most of the cost of clipping. */
+var clipProj = d3.geoOrthographic().clipAngle(90).precision(0);
+function clipped(e) {
+  if (!clipPath) clipPath = d3.geoPath(clipProj, clipRings);
+  clipProj.rotate(projection.rotate()).scale(projection.scale()).translate(projection.translate());
+  clipRings.reset(); clipPath(e.g); return clipRings.rings;
+}
+var GLC = window.GlobeGL ? {
+  land: GlobeGL.rgba(PALETTE.land), edge: GlobeGL.rgba(PALETTE.edge),
+  ocean0: GlobeGL.rgba(PALETTE.ocean0).slice(0, 3), ocean1: GlobeGL.rgba(PALETTE.ocean1).slice(0, 3),
+  veil: [4 / 255, 8 / 255, 18 / 255, 0.52]
+} : null;
 
 function strokeLines(list, width, colour) {
   ctx.beginPath();
@@ -736,8 +835,15 @@ function strokeLines(list, width, colour) {
 var MINOR_PX = 1400;
 function screenPx(a) { var s = a / 40589641; return s * (R0 * zoom) * (R0 * zoom); }
 
+var prof = null;
+function tick(k) {
+  if (!prof) return;
+  var t = performance.now();
+  prof[k] = (prof[k] || 0) + t - prof._t; prof._t = t;
+}
 function draw() {
   var t0 = performance.now();
+  if (prof) prof._t = t0;
   applyProjection();
   var cx = CX, cy = CY, r = R0 * zoom;
   var fast = interacting;
@@ -749,19 +855,35 @@ function draw() {
   wantChunks(!fast);
   var S = currentSet();
   var live = computeLive(S);
+  tick('data');
 
   ctx.clearRect(0, 0, W, H);
+
+  /* hover lifts the whole lineage: everything else goes quiet behind a veil */
+  var i, e;
+  var hl = highlightLin !== null ? highlightLin : (pinnedEnt ? pinnedEnt.lin : (hoverRow ? hoverRow.e.lin : null));
+  var lifted = [];
+  /* a selection (pinned, or picked from the list) stays lifted while the globe turns or the year runs;
+     only a passing hover gives way to the lighter frames of a drag */
+  if (hl !== null && opt.polities && (!fast || pinnedEnt || highlightLin !== null))
+    for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
 
   var ag = ctx.createRadialGradient(cx, cy, r * 0.985, cx, cy, r * 1.19);
   ag.addColorStop(0, 'rgba(112,176,255,.30)');
   ag.addColorStop(0.35, 'rgba(90,150,235,.11)');
   ag.addColorStop(1, 'rgba(70,130,220,0)');
   ctx.fillStyle = ag;
-  ctx.beginPath(); ctx.arc(cx, cy, r * 1.19, 0, 2 * Math.PI); ctx.fill();
+  /* a ring, not a disc: a radial gradient carries its first colour inwards, and over the WebGL globe
+     that would wash the whole disc a third of the way to blue */
+  ctx.beginPath(); ctx.arc(cx, cy, r * 1.19, 0, 2 * Math.PI); ctx.arc(cx, cy, r * 0.985, 0, 2 * Math.PI, true); ctx.fill();
 
   /* the lit-sphere gradient is built on the globe's radius, which at a deep zoom runs far past
      the window and leaves the whole sea in its darkest stop; so it is capped to the screen */
   var gr = Math.min(r * 1.05, Math.hypot(W, H) * 0.7);
+  var drawn = 0;
+  tick('atmosphere');
+  if (GL) drawn = drawGL(live, lifted, fast, gr);
+  else {
   ctx.beginPath(); path(sphere);
   var og = ctx.createRadialGradient(cx - gr * 0.28, cy - gr * 0.32, gr * 0.06, cx, cy, gr);
   og.addColorStop(0, PALETTE.ocean0); og.addColorStop(1, PALETTE.ocean1);
@@ -769,14 +891,13 @@ function draw() {
 
   /* the land nobody is recorded as holding this year lies under everything, in the base grey */
   ctx.fillStyle = PALETTE.land; ctx.strokeStyle = PALETTE.land; ctx.lineWidth = 0.7;
-  var i, e;
-  for (i = 0; i < landSet.length; i++) {
-    if (!capVisible(landSet[i].cap)) continue;
-    ctx.beginPath(); trace(landSet[i], true);
+  var LS = landNow();
+  for (i = 0; i < LS.length; i++) {
+    if (!capVisible(LS[i].cap)) continue;
+    ctx.beginPath(); trace(LS[i], true);
     ctx.fill(); ctx.stroke();
   }
 
-  var drawn = 0;
   if (opt.polities && live.length) {
     var tiny = MINOR_PX * 0.25, ew = fast ? 0.7 : 0.9;
     for (i = 0; i < live.length; i++) {
@@ -796,20 +917,20 @@ function draw() {
     }
   }
 
-  /* hover lifts the whole lineage: everything else goes quiet behind a veil */
-  var hl = highlightLin !== null ? highlightLin : (pinnedEnt ? pinnedEnt.lin : (hoverRow ? hoverRow.e.lin : null));
-  var lifted = [];
-  if (hl !== null && opt.polities && !fast)
-    for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
+  }                                     /* end of the 2D-only layers */
+  tick('ocean, land, polities');
+
   /* with nothing of the lineage on the map this year, a veil would only dim the map for nothing */
   if (lifted.length) {
     ctx.save();
     ctx.beginPath(); path(sphere); ctx.clip();
-    ctx.fillStyle = 'rgba(4,8,18,.52)'; ctx.fillRect(0, 0, W, H);
-    for (i = 0; i < lifted.length; i++) {
-      e = lifted[i];
-      ctx.beginPath(); trace(e, true);
-      ctx.fillStyle = e.e.fill; ctx.fill();
+    if (!GL) {
+      ctx.fillStyle = 'rgba(4,8,18,.52)'; ctx.fillRect(0, 0, W, H);
+      for (i = 0; i < lifted.length; i++) {
+        e = lifted[i];
+        ctx.beginPath(); trace(e, true);
+        ctx.fillStyle = e.e.fill; ctx.fill();
+      }
     }
     ctx.beginPath();
     for (i = 0; i < lifted.length; i++) trace(lifted[i], true);
@@ -824,6 +945,7 @@ function draw() {
     ctx.restore();
   }
 
+  tick('lift');
   if (opt.co && !fast) {
     ctx.setLineDash([4, 3]);
     ctx.beginPath(); path(borders);
@@ -858,10 +980,13 @@ function draw() {
   ctx.beginPath(); path(sphere);
   ctx.lineWidth = 1; ctx.strokeStyle = PALETTE.rim; ctx.stroke();
 
+  tick('graticule, shading, rim');
   labelBoxes = [];
   if (!fast && opt.oceans) drawOceanLabels();
   if (!fast && opt.polities && opt.names) drawPolityLabels(live);
+  tick('labels');
   if (opt.cities) drawCities(); else cityPts = [];
+  tick('cities');
 
   lastDrawMs = performance.now() - t0;
   liveCount = drawn;
@@ -874,6 +999,52 @@ function draw() {
   }
 }
 var liveCount = 0, statsKey = null;
+
+/* ocean, land, polities, borders and the veil, on the graphics card; returns how many polities were drawn */
+function drawGL(live, lifted, fast, gr) {
+  var r = R0 * zoom, i, e, n = 0;
+  GL.frame(FX, FY, CX, CY, r, viewV);
+  var masked = GL.hasMask() && zoom < MASK_ZOOM;
+  GL.ocean(GLC.ocean0, GLC.ocean1, CX - gr * 0.28, CY - gr * 0.32, gr * 0.06, CX, CY, gr, masked ? GLC.land.slice(0, 3) : null);
+  var LS = masked ? [] : landNow(), LG = LS === landLo ? landGLlo : landGL;
+  var near = [];
+  for (i = 0; i < LS.length; i++) {
+    e = LS[i];
+    if (!capVisible(e.cap)) continue;
+    if (nearSide(e)) near.push(i);
+    else GL.screen(clipped(e), GLC.land, GLC.land);
+  }
+  GL.fillMany(LG, near, GLC.land); GL.linesMany(LG, near, GLC.land);
+  tick('land');
+  var S = currentSet();
+  if (opt.polities && live.length && S && S.gl) {
+    var tiny = MINOR_PX * 0.25, edged = [];
+    for (i = 0; i < live.length; i++) {
+      e = live[i];
+      if (!capVisible(e.cap)) continue;
+      var px = screenPx(e.a), minor = opt.minor && px < MINOR_PX;
+      var fill = minor ? e.e.tintV : e.e.fillV;
+      var dark = opt.edges && !(opt.minor && px < tiny);
+      if (nearSide(e) && S.set[e.gi] === e) {
+        GL.fill(S.gl, e.gi, fill);
+        if (dark) edged.push(e.gi); else GL.lines(S.gl, e.gi, fill);
+      } else GL.screen(clipped(e), fill, dark ? GLC.edge : fill);
+      n++;
+    }
+    /* the dark borders all at once, over every fill: the same look as each stroked in turn, near enough */
+    GL.linesMany(S.gl, edged, GLC.edge);
+    tick('polities');
+    if (lifted.length) {
+      GL.veil(GLC.veil);
+      for (i = 0; i < lifted.length; i++) {
+        e = lifted[i];
+        if (nearSide(e) && S.set[e.gi] === e) GL.fill(S.gl, e.gi, e.e.fillV);
+        else GL.screen(clipped(e), e.e.fillV, null);
+      }
+    }
+  }
+  return n;
+}
 
 function hits(boxes, box) {
   for (var b = 0; b < boxes.length; b++) {
@@ -2014,6 +2185,7 @@ buildLegend();
 window.addEventListener('resize', function () { resize(); });
 document.fonts && document.fonts.ready && document.fonts.ready.then(function () { draw(); drawRibbon(); placePills(); });
 resize();
+if (GL) setTimeout(buildLandMask, 400);
 askChunk(chunkFor(year), 'w');
 setYear(year);
 updateStats();
@@ -2052,6 +2224,20 @@ window.HA = {
   },
   unpin: function () { unpin(); },
   spinPaused: function () { return spinPaused; },
+  renderer: function () { return GL ? 'webgl: ' + GL.renderer() : '2d'; },
+  profile: function (years, scrub) {
+    var out = {}, acc = { _t: 0 }, total = 0, was = interacting;
+    for (var i = 0; i < years.length; i++) {
+      prof = null; setYear(years[i], true);            /* the year's own redraw is not counted */
+      prof = acc; interacting = !!scrub;
+      var t = performance.now(); draw(); tick('draw calls'); if (GL) GL.gl.finish(); tick('graphics card'); total += performance.now() - t;
+    }
+    prof = null; interacting = was;
+    for (var k in acc) if (k !== '_t') out[k] = Math.round(acc[k] / years.length * 100) / 100;
+    out.total = Math.round(total / years.length * 100) / 100;
+    return out;
+  },
+  drawMsSync: function () { var t = performance.now(); draw(); if (GL) GL.gl.finish(); return performance.now() - t; },
   ribSegs: function () {
     var r = ribwrap.getBoundingClientRect();
     return ribSegs.map(function (g) { return { name: g.ent.name, x: r.left + (g.x0 + g.x1) / 2, y: r.top + g.y1 - 4, w: g.x1 - g.x0 }; });

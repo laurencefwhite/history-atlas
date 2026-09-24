@@ -198,6 +198,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 #tip .path{font-size:11.5px;letter-spacing:0;color:var(--ink-dim);line-height:1.5;margin-top:4px}
 #tip .path b{font-weight:500;color:var(--ink)}
 #tip .path b.now{font-weight:600;color:#fff}
+#tip.pin .path a.pl{color:inherit;text-decoration:none;cursor:pointer;border-radius:3px}
+#tip.pin .path a.pl:hover{color:var(--accent);background:rgba(142,208,255,.10)}
+#tip .tgo .dot{color:var(--ink-faint)}
 #tip .path .pinned{text-decoration:underline dotted rgba(142,208,255,.75);text-underline-offset:3px}
 #tip .pinline{margin-top:6px;font-size:10px;color:var(--ink-faint);letter-spacing:.04em}
 #tip .sep{color:var(--accent);opacity:.75;margin:0 .32em}
@@ -334,7 +337,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Polities: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a> (Seshat Global History Databank), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a><br>
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.2
+      &copy; 2026 Laurence F. White &middot; v0.3
     </div>
   </div>
 
@@ -557,7 +560,7 @@ function buildSet(ci, kind, topo) {
   var feats = topojson.feature(topo, topo.objects.u).features;
   var set = feats.map(function (f) {
     var p = f.properties, e = ENT[p.e];
-    return { g: f, e: e, ei: p.e, f: p.f, t: p.t, a: p.a, k: p.k || null,
+    return { g: f, e: e, ei: p.e, f: p.f, t: p.t, a: p.a, k: p.k || null, s: p.s || '',
              cap: capOf(f.geometry), box: planarBox(f.geometry) };
   });
   set.sort(function (a, b) { return b.a - a.a; });        /* larger first, smaller drawn on top */
@@ -1169,46 +1172,67 @@ function pathParts(i, depth, upto) {
   var end = Math.max(e.pos, upto == null ? e.pos : upto);
   var here = L.m.slice(0, end + 1).map(function (j) { return ['>', ENT[j].name, j]; });
   here[0][0] = '';
-  if (e.parent >= 0 && depth < 3) {
-    var up = pathParts(e.parent, depth + 1);
+  /* a line that branched off another records the branch on its first polity, so every later polity of the
+     line looks there for it: Byzantium's path runs back through Rome, not just to the Eastern Empire */
+  var head = ENT[L.m[0]];
+  if (head.parent >= 0 && depth < 3) {
+    var up = pathParts(head.parent, depth + 1);
     here[0][0] = '/';              /* the branch carries the mark, at the point it branched */
     return up.concat(here);
   }
   return here;
 }
 /* now: the polity to show in white (the one on the map this year); pinned: the one clicked, if it differs */
-function pathHtml(i, upto, now, pinned) {
+function pathHtml(i, upto, now, pinned, links) {
   if (now === undefined) now = i;
   var parts = pathParts(i, 0, upto), cut = false;
   if (parts.length > 7) { parts = parts.slice(parts.length - 7); cut = true; }
   var out = '';
   for (var k = 0; k < parts.length; k++) {
     if (parts[k][0] && !(cut && k === 0)) out += '<span class="sep">' + (parts[k][0] === '/' ? '/' : '&gt;') + '</span>';
-    var nm = (cut && k === 0 ? '&hellip; ' : '') + esc(parts[k][1]), j = parts[k][2];
-    if (j === now) out += '<b class="now' + (j === pinned ? ' pinned' : '') + '">' + nm + '</b>';
-    else if (j === pinned) out += '<span class="pinned">' + nm + '</span>';
-    else out += nm;
+    var nm = (cut && k === 0 ? '&hellip; ' : '') + esc(parts[k][1]), j = parts[k][2], one;
+    if (j === now) one = '<b class="now' + (j === pinned ? ' pinned' : '') + '">' + nm + '</b>';
+    else if (j === pinned) one = '<span class="pinned">' + nm + '</span>';
+    else one = nm;
+    out += links && j !== now ? '<a class="pl" data-e="' + j + '" title="Go to ' + esc(parts[k][1]) + ', ' +
+        span(ENT[j].first, ENT[j].last).replace(/&ndash;/g, '\u2013').replace(/&nbsp;/g, ' ') + '">' + one + '</a>' : one;
   }
   return out;
 }
+/* one quiet line on a pinned card saying what can be done with it */
+function pinHint(pathHtmlText) {
+  var t = coarsePointer ? 'Tap' : 'Click';
+  var go = pathHtmlText.indexOf('class="pl"') >= 0 ? t + ' a name in the line to go to it &middot; ' : '';
+  return '<div class="hintpin">' + go + (coarsePointer ? 'tap the map to release' : 'Esc or a click away releases it') + '</div>';
+}
+function linksHtml(E, row) {
+  var ls = [];
+  if (E.wp) ls.push('<a class="wl" href="https://en.wikipedia.org/wiki/' + encodeURIComponent(E.wp.replace(/ /g, '_')) +
+                    '" target="_blank" rel="noopener">Wikipedia &rarr;</a>');
+  if (E.wd) ls.push('<a class="wl" href="https://www.wikidata.org/wiki/' + encodeURIComponent(E.wd) +
+                    '" target="_blank" rel="noopener">Wikidata &rarr;</a>');
+  /* the Seshat record is per shape: the Roman Principate and the Dominate are two records for one empire */
+  if (row && row.s) ls.push('<a class="wl" href="https://seshat-db.com/core/polity/' + encodeURIComponent(row.s) +
+                    '/" target="_blank" rel="noopener" title="Seshat Global History Databank">Seshat &rarr;</a>');
+  return ls.length ? '<div class="tgo">' + ls.join('<span class="dot">&middot;</span>') + '</div>' : '';
+}
 function rowTipHtml(e) {
   var E = e.e, L = LIN[E.lin];
+  var pathPart = pinnedEnt && pinnedRow === e ? pathHtml(pinnedEnt.i, E.pos, E.i, pinnedEnt.i, true) : pathHtml(E.i);
   var rows = [];
   rows.push('Held this shape <b>' + span(e.f, e.t) + '</b>');
   rows.push(esc(E.name) + ' <b>' + span(E.first, E.last) + '</b>');
   rows.push('This shape <b>' + km2(e.a) + '</b>');
   if (E.aggs.length) rows.push('Within ' + E.aggs.map(function (a) { return esc(a.replace(/^\(|\)$/g, '')); }).join(', '));
-  var wl = E.wp ? '<div class="tgo"><a class="wl" href="https://en.wikipedia.org/wiki/' +
-      encodeURIComponent(E.wp.replace(/ /g, '_')) + '" target="_blank" rel="noopener">Wikipedia &rarr;</a></div>' : '';
+  var wl = linksHtml(E, e);
   return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
-    '<div class="path">' + (pinnedEnt && pinnedRow === e
-        ? pathHtml(pinnedEnt.i, E.pos, E.i, pinnedEnt.i) : pathHtml(E.i)) + '</div>' +
+    '<div class="path">' + pathPart + '</div>' +
     '<div class="td">' + rows.join('<br>') + '</div>' +
     '<div class="tzline" style="margin-top:7px;font-size:10.5px;color:var(--ink-faint)">Lineage ' + L.id +
       ' &middot; ' + L.m.length + (L.m.length === 1 ? ' polity' : ' polities in the line') + '</div>' +
     (pinnedRow === e && pinnedEnt !== E ? '<div class="pinline">' + (E.pos > pinnedEnt.pos ? 'Successor' : 'Predecessor') +
         ' of <span class="pinned">' + esc(pinnedEnt.name) + '</span>, which you pinned</div>' : '') +
-    (pinnedRow === e ? wl : (wl ? '<div class="hintpin">Click to pin the card</div>' : ''));
+    (pinnedRow === e ? wl + pinHint(pathPart) : (wl ? '<div class="hintpin">Click to pin the card</div>' : ''));
 }
 function showRowTip(e, mx, my) {
   var kk = 'u' + e.ei + '|' + e.f + '|' + (pinnedRow === e ? 'p' : '');
@@ -1239,11 +1263,11 @@ function absentTipHtml(E) {
   if (year < E.first) why = 'Not yet on the map &ndash; first appears <b>' + yearLabel(E.first) + '</b>';
   else if (year > E.last) why = 'No longer on the map &ndash; last seen <b>' + yearLabel(E.last) + '</b>';
   else why = 'No shape recorded for this year: Cliopatria has a gap in this polity&rsquo;s record here';
-  var wl = E.wp ? '<div class="tgo"><a class="wl" href="https://en.wikipedia.org/wiki/' +
-      encodeURIComponent(E.wp.replace(/ /g, '_')) + '" target="_blank" rel="noopener">Wikipedia &rarr;</a></div>' : '';
+  var wl = linksHtml(E);
   return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
-    '<div class="path">' + pathHtml(E.i, null, -1, E.i) + '</div>' +
-    '<div class="td">' + why + '<br>' + esc(E.name) + ' <b>' + span(E.first, E.last) + '</b></div>' + wl;
+    '<div class="path">' + pathHtml(E.i, null, -1, E.i, true) + '</div>' +
+    '<div class="td">' + why + '<br>' + esc(E.name) + ' <b>' + span(E.first, E.last) + '</b></div>' + wl +
+    pinHint(pathHtml(E.i, null, -1, E.i, true));
 }
 /* show the pinned polity's card where it was pinned: its shape this year, or a note of its absence */
 function showPinTip() {
@@ -1493,6 +1517,7 @@ var rib = document.getElementById('ribbon');
 var rctx = rib.getContext('2d');
 var RW = 0, RH = 0;
 var TICKS = [5, 10, 25, 50, 100, 200, 250, 500, 1000, 2000];
+var ribSegs = [];          /* the pinned line's segments on the ribbon, for clicking */
 
 /* how many entities were about in each century, as a quiet ground behind the ribbon */
 var DENSITY = (function () {
@@ -1552,6 +1577,7 @@ function drawRibbon() {
   /* The pinned polity's years, in its own colour, across the ribbon; beneath, every polity of its
      lineage in its own shade, so the line of succession reads as a run of segments. */
   var by = topPad + h - 5, L = null, px0 = 0, px1 = 0;
+  ribSegs = [];
   if (pinnedEnt) {
     L = LIN[pinnedEnt.lin];
     for (var m = 0; m < L.m.length; m++) {
@@ -1560,6 +1586,7 @@ function drawRibbon() {
       rctx.globalAlpha = (M === pinnedEnt || (pinnedRow && M === pinnedRow.e)) ? 1 : 0.55;
       rctx.fillStyle = M.fill;
       rctx.fillRect(mx0, by, Math.max(1.5, mx1 - mx0 - 1), 5);   /* a hairline between successive polities */
+      ribSegs.push({ x0: mx0, x1: mx1, y0: by - 13, y1: by + 8, ent: M });
     }
     px0 = yearToF(pinnedEnt.first) * RW; px1 = Math.max(px0 + 2, yearToF(pinnedEnt.last + 1) * RW);
     rctx.fillStyle = pinnedEnt.fill;
@@ -1674,7 +1701,20 @@ function ribYear(clientX) {
   var r = ribwrap.getBoundingClientRect();
   return fToYear((clientX - r.left) / r.width);
 }
+/* the segment of the pinned line under a point of the ribbon, if any; narrow ones get a little slack */
+function ribSegAt(clientX, clientY) {
+  if (!ribSegs.length) return null;
+  var r = ribwrap.getBoundingClientRect(), x = clientX - r.left, y = clientY - r.top, best = null;
+  for (var i = 0; i < ribSegs.length; i++) {
+    var g = ribSegs[i], slack = Math.max(0, (6 - (g.x1 - g.x0)) / 2);
+    if (y < g.y0 || y > g.y1 || x < g.x0 - slack || x > g.x1 + slack) continue;
+    if (!best || g.x1 - g.x0 < best.x1 - best.x0) best = g;
+  }
+  return best;
+}
 ribwrap.addEventListener('pointerdown', function (e) {
+  var seg = ribSegAt(e.clientX, e.clientY);
+  if (seg) { e.preventDefault(); goToEntity(seg.ent); return; }
   ribwrap.setPointerCapture(e.pointerId);
   ribDrag = true; ribwrap.classList.add('dragging');
   stopPlay();
@@ -1683,7 +1723,12 @@ ribwrap.addEventListener('pointerdown', function (e) {
   fadeHint();
 });
 ribwrap.addEventListener('pointermove', function (e) {
-  if (!ribDrag) return;
+  if (!ribDrag) {
+    var seg = ribSegAt(e.clientX, e.clientY);
+    ribwrap.style.cursor = seg ? 'pointer' : '';
+    ribwrap.title = seg ? 'Go to ' + seg.ent.name : '';
+    return;
+  }
   markInteract();
   setYear(ribYear(e.clientX));
 });
@@ -1853,15 +1898,24 @@ function choose(i) {
   stopPlay();
   unpin();
   if (s.city) { flyTo(s.city.lon, s.city.lat, Math.max(2.4, Math.min(zoom, 4))); return; }
-  setYear(s.mid);
-  var e = s.ent;
-  askChunk(chunkFor(year), 'w');
+  goToEntity(s.ent, s.mid);
+}
+/* Send the scrubber to a year of the polity's, fly to its largest shape there and pin it. From a card the
+   year is the nearest one inside its span, so stepping along a line of succession moves the scrubber only
+   as far as it must; if the polity has no shape in that year, its midpoint is tried instead. */
+function goToEntity(e, y) {
+  stopPlay();
+  if (y === undefined) y = year < e.first ? e.first : year > e.last ? e.last : year;
+  var mid = Math.round((e.first + e.last) / 2), triedMid = y === mid;
+  unpin();
+  setYear(y);
   var tries = 0;
   (function find() {
     computeLive(currentSet());
     var best = null;
     for (var k = 0; k < liveRows.length; k++) if (liveRows[k].ei === e.i && (!best || liveRows[k].a > best.a)) best = liveRows[k];
-    if (!best && tries++ < 40) { setTimeout(find, 120); return; }
+    if (!best && (pending || !sets.w[chunkFor(year)]) && tries++ < 40) { setTimeout(find, 120); return; }
+    if (!best && !triedMid) { triedMid = true; tries = 0; setYear(mid); setTimeout(find, 60); return; }
     if (!best) return;
     var anchor = best.k || [(best.box[0] + best.box[2]) / 2, (best.box[1] + best.box[3]) / 2];
     flyTo(anchor[0], anchor[1], zoomForArea(best.a));
@@ -1871,6 +1925,12 @@ function choose(i) {
     }, 1020);
   })();
 }
+tip.addEventListener('click', function (ev) {
+  var a = ev.target.closest && ev.target.closest('a.pl');
+  if (!a) return;
+  ev.preventDefault(); ev.stopPropagation();
+  goToEntity(ENT[+a.getAttribute('data-e')]);
+});
 q.addEventListener('input', runSearch);
 q.addEventListener('keydown', function (e) {
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -1992,6 +2052,11 @@ window.HA = {
   },
   unpin: function () { unpin(); },
   spinPaused: function () { return spinPaused; },
+  ribSegs: function () {
+    var r = ribwrap.getBoundingClientRect();
+    return ribSegs.map(function (g) { return { name: g.ent.name, x: r.left + (g.x0 + g.x1) / 2, y: r.top + g.y1 - 4, w: g.x1 - g.x0 }; });
+  },
+  goTo: function (name) { for (var i = 0; i < ENT.length; i++) if (ENT[i].name === name) { goToEntity(ENT[i]); return true; } return false; },
   tipClear: function () {
     var e = pinnedRow || hoverRow;
     var t = tip.getBoundingClientRect(), sc = document.getElementById('scrub').getBoundingClientRect();

@@ -1,0 +1,344 @@
+{
+  "_note": "Corrections to Cliopatria itself, applied as the file is read, before anything else. 'clip' removes the ground of one polity ('by') from another's shapes over a span of years, splitting a shape at the ends of the span. 'rename' gives a polity a new name from a year, splitting its rows there; the renamed rows become a polity of their own, continuing the same line. Every entry says why.",
+  "clip": [
+    {
+      "polity": "French Fifth Republic",
+      "by": "People's Democratic Republic of Algeria",
+      "from": 1962,
+      "to": 2023,
+      "why": "Cliopatria's 1961-2023 shape for France still includes Algeria; Algeria became independent in 1962 and has its own rows from 1963, so the two overlapped for sixty years."
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "Sultanate of Oman",
+      "from": 1973,
+      "to": 2023,
+      "why": "Wikipedia, \"Oman\": \"the oldest independent state in the Arab world ... ruled by the Al Bu Said dynasty since 1744\""
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "United Arab Emirates",
+      "from": 1973,
+      "to": 2023,
+      "why": "Wikipedia, \"United Arab Emirates\": \"full independence as the United Arab Emirates in 1971\""
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "State of Qatar",
+      "from": 1973,
+      "to": 2023,
+      "why": "Wikipedia, \"Qatar\": \"a British protectorate in 1916 and gained independence in 1971\""
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "Kingdom of Bahrain",
+      "from": 1973,
+      "to": 2023,
+      "why": "Wikipedia, \"Bahrain\": \"In 1971, it declared independence\""
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "State of Kuwait",
+      "from": 1961,
+      "to": 1968,
+      "why": "Wikipedia, \"Kuwait\": \"protectorate agreements with the United Kingdom ended in June 1961\""
+    },
+    {
+      "polity": "Kingdom of Great Britain",
+      "by": "Republic of Cyprus",
+      "from": 1961,
+      "to": 1968,
+      "why": "Wikipedia, \"Cyprus\": \"Cyprus was granted independence in 1960\""
+    },
+    {
+      "polity": "Netherlands Antilles",
+      "by": "Republic of Suriname",
+      "from": 1976,
+      "to": 2023,
+      "why": "Wikipedia, \"Suriname\": \"On 25 November 1975, it became independent\""
+    },
+    {
+      "polity": "United States of America",
+      "by": "Japan",
+      "from": 1953,
+      "to": 1966,
+      "why": "Wikipedia, \"Occupation of Japan\": \"until the Treaty of San Francisco took effect on April 28, 1952\""
+    },
+    {
+      "polity": "United States of America",
+      "by": "Republic of Korea",
+      "from": 1948,
+      "to": 1966,
+      "why": "Wikipedia, \"South Korea\": \"the southern zone became the Republic of Korea in August 1948\""
+    },
+    {
+      "polity": "United States of America",
+      "by": "Federal Republic of Germany",
+      "from": 1955,
+      "to": 1966,
+      "why": "Wikipedia, \"West Germany\": \"On 5 May 1955 West Germany was declared to have the authority of a sovereign state\""
+    },
+    {
+      "polity": "United States of America",
+      "by": "Republic of Vietnam",
+      "from": 1973,
+      "to": 1975,
+      "why": "Wikipedia, \"Paris Peace Accords\": \"signed ... on January 27, 1973\"; the United States never held Vietnamese territory"
+    },
+    {
+      "polity": "United States of America",
+      "by": "Socialist Republic of Vietnam",
+      "from": 1976,
+      "to": 2005,
+      "why": "Wikipedia, \"Paris Peace Accords\": \"signed ... on January 27, 1973\"; the United States never held Vietnamese territory"
+    },
+    {
+      "polity": "United States of America",
+      "by": "Republic of Iraq",
+      "from": 2014,
+      "to": 2023,
+      "why": "Wikipedia, \"Coalition Provisional Authority\": \"the CPA transferred sovereignty to the Iraqi Interim Government\" in June 2004"
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Canada",
+      "from": 1949,
+      "to": 1957,
+      "why": "Wikipedia, \"Newfoundland and Labrador\": \"On March 31, 1949, it became the tenth ... province to join the Canadian Confederation\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "New Zealand",
+      "from": 1948,
+      "to": 1957,
+      "why": "Wikipedia, \"Statute of Westminster Adoption Act 1947\": \"formally accepted the full external autonomy offered by the British Parliament\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Solomon Islands",
+      "from": 1979,
+      "to": 1995,
+      "why": "Wikipedia, \"Solomon Islands\": \"Independence was obtained ... in 1978\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Republic of Fiji",
+      "from": 1973,
+      "to": 1995,
+      "why": "Wikipedia, \"Fiji\": \"a Crown colony until 1970, when it gained independence\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Commonwealth of The Bahamas",
+      "from": 1973,
+      "to": 1995,
+      "why": "Wikipedia, \"The Bahamas\": \"an independent Commonwealth realm separate from the United Kingdom in 1973\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Belize",
+      "from": 1983,
+      "to": 1995,
+      "why": "Wikipedia, \"Belize\": \"achieved its independence from the United Kingdom on 21 September 1981\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Sultanate of Brunei",
+      "from": 1987,
+      "to": 1995,
+      "why": "Wikipedia, \"Brunei\": \"gained its independence from the United Kingdom on 1 January 1984\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Commonwealth of Dominica",
+      "from": 1979,
+      "to": 1995,
+      "why": "Wikipedia, \"Dominica\": \"gained independence as a republic in 1978\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Saint Lucia",
+      "from": 1979,
+      "to": 1995,
+      "why": "Wikipedia, \"Saint Lucia\": \"On 22 February 1979, Saint Lucia became an independent state\""
+    },
+    {
+      "polity": "British Colonial Empire",
+      "by": "Guyana",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"Guyana\": \"It gained independence in 1966\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Republic of Kenya",
+      "from": 1963,
+      "to": 1968,
+      "why": "Wikipedia, \"Kenya\": \"the declaration of Kenya's independence in 1963\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Republic of Uganda",
+      "from": 1963,
+      "to": 1968,
+      "why": "Wikipedia, \"Uganda\": \"Uganda gained independence in 1962\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Zambia",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"Zambia\": \"On 24 October 1964, Zambia became independent\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Republic of Botswana",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"Botswana\": \"an independent Commonwealth republic ... on 30 September 1966\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Malawi",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"Malawi\": \"In 1964, Nyasaland became independent\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Lesotho",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"Lesotho\": \"It achieved independence in 1966\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Republic of The Gambia",
+      "from": 1967,
+      "to": 1968,
+      "why": "Wikipedia, \"The Gambia\": \"In 1965 ... the Gambia gained independence\""
+    },
+    {
+      "polity": "British East Africa",
+      "by": "Sultanate of Zanzibar",
+      "from": 1963,
+      "to": 1966,
+      "why": "Wikipedia, \"Sultanate of Zanzibar\": British rule ended in December 1963"
+    },
+    {
+      "polity": "French Fifth Republic",
+      "by": "Republic of Djibouti",
+      "from": 1979,
+      "to": 2023,
+      "why": "Wikipedia, \"Djibouti\": \"independence from France in 1977\""
+    },
+    {
+      "polity": "French Fifth Republic",
+      "by": "Republic of Cabo Verde",
+      "from": 1976,
+      "to": 2023,
+      "why": "Wikipedia, \"Cape Verde\": \"Cape Verde became independent in 1975\"; it was Portuguese, never French"
+    },
+    {
+      "polity": "Francoist Spain",
+      "by": "Equatorial Guinea",
+      "from": 1969,
+      "to": 1972,
+      "why": "Wikipedia, \"Equatorial Guinea\": \"it gained independence in 1968\""
+    },
+    {
+      "polity": "Estado Novo",
+      "by": "Republic of Guinea-Bissau",
+      "from": 1974,
+      "to": 1975,
+      "why": "Wikipedia, \"Guinea-Bissau\": \"independence, declared in 1973 and recognised in 1974\""
+    },
+    {
+      "polity": "Spanish Empire",
+      "by": "Dominican Republic",
+      "from": 1865,
+      "to": 1872,
+      "why": "Wikipedia, \"Dominican Restoration War\": \"On March 3, 1865, Queen Isabella II signed the annulment of the annexation\""
+    },
+    {
+      "polity": "United Arab Republic",
+      "by": "Republic of Syria",
+      "from": 1961,
+      "to": 1962,
+      "why": "Wikipedia, \"United Arab Republic\": \"until Syria seceded from the union following the 1961 Syrian coup d'etat\""
+    },
+    {
+      "polity": "United Arab Republic",
+      "by": "Ba'athist Syria",
+      "from": 1963,
+      "to": 1966,
+      "why": "Wikipedia, \"United Arab Republic\": \"until Syria seceded from the union following the 1961 Syrian coup d'etat\""
+    },
+    {
+      "polity": "Netherlands",
+      "by": "Luxembourg",
+      "from": 1890,
+      "to": 1914,
+      "why": "Wikipedia, \"Luxembourg\": \"in 1890 ... the Dutch monarchy ceased to hold\" the grand ducal title"
+    },
+    {
+      "polity": "Denmark-Norway",
+      "by": "Kingdom of Iceland",
+      "from": 1918,
+      "to": 1921,
+      "why": "Wikipedia, \"Danish-Icelandic Act of Union\": \"on 1 December 1918, recognized Iceland as a fully independent and sovereign state\""
+    },
+    {
+      "polity": "Gran Colombia",
+      "by": "Bolivia",
+      "from": 1825,
+      "to": 1829,
+      "why": "Wikipedia, \"Bolivia\": \"on 6 August 1825 ... named it in honor of Simon Bolivar\"; never part of Gran Colombia"
+    },
+    {
+      "polity": "Free City of Danzig",
+      "by": "Kingdom of Lithuania",
+      "from": 1924,
+      "to": 1935,
+      "why": "Wikipedia, \"Klaipeda Revolt\": \"took place in January 1923 in the Klaipeda Region\"; Danzig never held Memel"
+    },
+    {
+      "polity": "Kingdom of Sardinia",
+      "by": "French Consulate",
+      "from": 1803,
+      "to": 1804,
+      "why": "Wikipedia, \"Piedmont\": \"France annexed it in September 1802\""
+    },
+    {
+      "polity": "Kingdom of Sardinia",
+      "by": "First French Empire",
+      "from": 1805,
+      "to": 1813,
+      "why": "Wikipedia, \"Piedmont\": \"France annexed it in September 1802\""
+    },
+    {
+      "polity": "Papal States",
+      "by": "First French Empire",
+      "from": 1809,
+      "to": 1810,
+      "why": "Wikipedia, \"Papal States\": \"on 17 May 1809, the remainder of the Papal States (including Rome) was annexed to the First French Empire\""
+    },
+    {
+      "polity": "People's Republic of China",
+      "by": "Republic of China",
+      "from": 1953,
+      "to": 2023,
+      "why": "Wikipedia, \"Taiwan\": \"the government of the Republic of China moved to Taiwan in 1949\""
+    }
+  ],
+  "rename": [
+    {
+      "polity": "Mali Federation",
+      "from": 1961,
+      "name": "Mali",
+      "wikipedia": "Mali",
+      "wikidata": "Q912",
+      "why": "The Mali Federation lasted only from 1959 to 1960; Cliopatria keeps the name to 2024, for what is the Republic of Mali."
+    }
+  ]
+}

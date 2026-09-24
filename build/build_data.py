@@ -50,6 +50,72 @@ log('reading Cliopatria')
 with open(os.path.join(RAW, 'cliopatria_polities_only.geojson'), 'r', encoding='utf-8') as f:
     gj = json.load(f)
 
+# ------------------------------------------------------------------ 1a. corrections to the source
+DOVR = os.path.join(HERE, 'data_overrides.json')
+dover = json.load(open(DOVR, encoding='utf-8')) if os.path.exists(DOVR) else {}
+from shapely.ops import unary_union
+def _piece(ft, fy, ty, geom=None, **props):
+    q = dict(ft['properties']); q['FromYear'] = fy; q['ToYear'] = ty; q.update(props)
+    g = ft['geometry'] if geom is None else mapping(geom)
+    return {'type': 'Feature', 'properties': q, 'geometry': g}
+def _apply_overrides(feats):
+    clips = dover.get('clip', []) or []
+    renames = dover.get('rename', []) or []
+    # the cutter is the ground the other polity held during the span being corrected - only those
+    # shapes, or a polity that once held more (the Republic of China before 1949) would cut too much
+    cutters = {}
+    for ci_, c in enumerate(clips):
+        gs = []
+        for ft in feats:
+            q = ft['properties']
+            if q.get('Name') == c['by'] and ft['geometry'] and int(q['FromYear']) <= c['to'] and int(q['ToYear']) >= c['from']:
+                g = shape(ft['geometry']); gs.append(g if g.is_valid else g.buffer(0))
+        cutters[ci_] = unary_union(gs).buffer(0.03) if gs else None
+        if not gs:
+            log('  ! clip: no shapes of %s in %d-%d' % (c['by'], c['from'], c['to']))
+    out, nclip, nren = [], 0, 0
+    for ft in feats:
+        p0 = ft['properties']
+        pieces = [ft]
+        for ci_, c in enumerate(clips):
+            nxt = []
+            for f2 in pieces:
+                q = f2['properties']
+                fy, ty = int(q['FromYear']), int(q['ToYear'])
+                cut = cutters.get(ci_)
+                if q.get('Name') != c['polity'] or cut is None or ty < c['from'] or fy > c['to']:
+                    nxt.append(f2); continue
+                a, b = max(fy, c['from']), min(ty, c['to'])
+                if fy < a: nxt.append(_piece(f2, fy, a - 1))
+                g = shape(f2['geometry']); g = g if g.is_valid else g.buffer(0)
+                rest = g.difference(cut)
+                if not rest.is_empty and rest.area > 0:
+                    area = float(q.get('Area') or 0) * rest.area / g.area if g.area else q.get('Area')
+                    nxt.append(_piece(f2, a, b, rest, Area=area)); nclip += 1
+                if ty > b: nxt.append(_piece(f2, b + 1, ty))
+            pieces = nxt
+        for r0 in renames:
+            nxt = []
+            for f2 in pieces:
+                q = f2['properties']
+                fy, ty = int(q['FromYear']), int(q['ToYear'])
+                if q.get('Name') != r0['polity'] or ty < r0['from']:
+                    nxt.append(f2); continue
+                extra = {'Name': r0['name'], 'Wikipedia': r0.get('wikipedia', q.get('Wikipedia')),
+                         'Wikidata': r0.get('wikidata', q.get('Wikidata'))}
+                if fy < r0['from']:
+                    nxt.append(_piece(f2, fy, r0['from'] - 1)); nxt.append(_piece(f2, r0['from'], ty, **extra))
+                else:
+                    nxt.append(_piece(f2, fy, ty, **extra))
+                nren += 1
+            pieces = nxt
+        out.extend(pieces)
+    log('  %d shapes clipped, %d renamed' % (nclip, nren))
+    return out
+if dover:
+    log('applying corrections to the source')
+    gj['features'] = _apply_overrides(gj['features'])
+
 ents = {}          # name -> entity dict
 rows = []          # row dicts, in file order
 chunk_files = {}
@@ -82,7 +148,7 @@ for ft in gj['features']:
     e = ent_of(p)
     fy, ty = int(p['FromYear']), int(p['ToYear'])
     r = {'i': ROWN[0], 'e': e['idx'], 'f': fy, 't': ty,
-         'a': float(p['Area'] or 0), 'ent': e}
+         'a': float(p['Area'] or 0), 'ent': e, 's': (p.get('SeshatID') or '').strip()}
     ROWN[0] += 1
     e['rows'].append(r)
     e['first'] = min(e['first'], fy)
@@ -98,18 +164,7 @@ for ft in gj['features']:
         sg = None
     r['sg'] = sg
     r['bounds'] = sg.bounds if sg is not None and not sg.is_empty else None
-    # anchor: pole of inaccessibility of the largest part, for rows big enough to label
-    r['k'] = None
-    if sg is not None and not sg.is_empty and r['a'] >= 12000:
-        try:
-            parts = list(sg.geoms) if sg.geom_type == 'MultiPolygon' else [sg]
-            big = max(parts, key=lambda q: q.area)
-            mic = shapely.maximum_inscribed_circle(big, 0.05)
-            c = mic.coords[0]
-            r['k'] = [round(c[0], 2), round(c[1], 2)]
-        except Exception:
-            c = sg.representative_point()
-            r['k'] = [round(c.x, 2), round(c.y, 2)]
+    r['k'] = None                    # placed later, once every shape is known
     # write the raw geometry into every chunk it is alive in
     feat = {'type': 'Feature', 'properties': {'r': r['i'], 'e': e['idx'], 'f': fy, 't': ty,
                                               'a': round(r['a'], 1)}, 'geometry': g}
@@ -135,6 +190,71 @@ for ci, (ca, cb) in enumerate(CHUNKS):
 ENTS = sorted(ents.values(), key=lambda e: e['idx'])
 for e in ENTS:
     e['rows'].sort(key=lambda r: r['f'])
+
+# ------------------------------------------------------------------ 1b. labels on ground the polity shows
+# Overlapping shapes are drawn larger first, smaller over it, so a polity shows only where no smaller
+# polity lies on top of it. Its label anchor - the pole of inaccessibility - is found on that visible
+# ground, not on its whole shape, or a name can land on a neighbour (France's did on Algeria). The same
+# pass lists every pair of shapes that overlap substantially while both are alive, for review.
+log('placing labels on the ground each polity shows, and listing overlaps')
+cand = [r for r in rows if r['sg'] is not None and not r['sg'].is_empty]
+atree = STRtree([r['sg'] for r in cand])
+overlaps, hidden = [], 0
+def _anchor(g):
+    parts = list(g.geoms) if g.geom_type in ('MultiPolygon', 'GeometryCollection') else [g]
+    parts = [q for q in parts if q.geom_type == 'Polygon' and not q.is_empty]
+    if not parts:
+        return None
+    big = max(parts, key=lambda q: q.area)
+    try:
+        c = shapely.maximum_inscribed_circle(big, 0.05).coords[0]
+        return [round(c[0], 2), round(c[1], 2)]
+    except Exception:
+        c = big.representative_point()
+        return [round(c.x, 2), round(c.y, 2)]
+for r in cand:
+    rg, span = r['sg'], r['t'] - r['f'] + 1
+    covers = []
+    for j in atree.query(rg):
+        s2 = cand[j]
+        if s2 is r or s2['e'] == r['e']:
+            continue
+        yrs = min(r['t'], s2['t']) - max(r['f'], s2['f']) + 1
+        if yrs <= 0:
+            continue
+        try:
+            if not rg.intersects(s2['sg']):
+                continue
+            inter = rg.intersection(s2['sg']).area
+        except Exception:
+            continue
+        small = min(rg.area, s2['sg'].area)
+        if not small or inter <= 0:
+            continue
+        frac = inter / small
+        if s2['i'] > r['i'] and frac > 0.2:
+            overlaps.append((frac * yrs * min(r['a'], s2['a']), r, s2, yrs, frac))
+        if s2['sg'].area < rg.area and yrs >= 0.5 * span and frac > 0.02:
+            covers.append(s2['sg'])
+    if r['a'] < 12000:
+        continue
+    ground = rg
+    if covers:
+        try:
+            ground = rg.difference(unary_union(covers))
+        except Exception:
+            ground = rg
+    if ground.is_empty or ground.area < 0.08 * rg.area:
+        hidden += 1                   # all but hidden under smaller polities: no label
+        continue
+    r['k'] = _anchor(ground)
+log('  %d overlapping pairs; %d labelled shapes lie almost wholly under smaller ones' % (len(overlaps), hidden))
+overlaps.sort(key=lambda t: -t[0])
+with open(os.path.join(WORK, 'overlap_report.tsv'), 'w', encoding='utf-8') as f:
+    f.write('polity_a\tyears_a\tpolity_b\tyears_b\tyears_together\tshare_of_smaller\n')
+    for w_, a_, b_, yrs, frac in overlaps[:500]:
+        f.write('%s\t%d-%d\t%s\t%d-%d\t%d\t%.2f\n' % (a_['ent']['name'], a_['f'], a_['t'], b_['ent']['name'],
+                                                     b_['f'], b_['t'], yrs, frac))
 
 # ------------------------------------------------------------------ 2. lineage graph
 log('building the succession graph')
@@ -206,6 +326,8 @@ for a, b in overrides.get('drop', []):
     if a in byname and b in byname:
         edges.discard((byname[a]['idx'], byname[b]['idx']))
 forced = set()
+for r0 in dover.get('rename', []) or []:
+    overrides.setdefault('add', []).append([r0['polity'], r0['name']])
 for a, b in overrides.get('add', []):
     if a in byname and b in byname:
         e2 = (byname[a]['idx'], byname[b]['idx'])
@@ -256,22 +378,22 @@ log('  %d edges survive the handover test (%d forced by hand)' % (len(edges), le
 # happened to contain it.
 preds = collections.defaultdict(list)
 for (a, b), v in W.items():
-    preds[b].append((v[1], ENTS[a]['ls'].area, a))
+    preds[b].append((1 if (a, b) in forced else 0, v[1], ENTS[a]['ls'].area, a))   # a hand edge wins outright
 mainpred = {}
 for b, lst in preds.items():
     lst.sort(reverse=True)
-    mainpred[b] = lst[0][2]
+    mainpred[b] = lst[0][-1]
 
 # And each entity hands its lineage on to at most one successor: the one that took over most
 # of it.  Measured the other way about, against the predecessor's area, or a tiny splinter
 # lying wholly inside the old state would inherit the line ahead of its real heir.
 succs = collections.defaultdict(list)
 for b, a in mainpred.items():
-    succs[a].append((W[(a, b)][0], ENTS[b]['ls'].area, b))
+    succs[a].append((1 if (a, b) in forced else 0, W[(a, b)][0], ENTS[b]['ls'].area, b))
 cont = {}
 for a, lst in succs.items():
     lst.sort(reverse=True)
-    cont[a] = lst[0][2]
+    cont[a] = lst[0][-1]
 
 # walk the chains
 lin_of = {}
@@ -480,6 +602,8 @@ def topo_to_js(topo_path, ci, kind, out_path):
         g['properties'] = {'e': p.get('e'), 'f': p.get('f'), 't': p.get('t'), 'a': p.get('a')}
         if r and r['k']:
             g['properties']['k'] = r['k']
+        if r and r['s']:
+            g['properties']['s'] = r['s']
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write('HA_CHUNK(%d,"%s",' % (ci, kind))
         json.dump(topo, f, separators=(',', ':'))

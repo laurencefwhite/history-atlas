@@ -3,7 +3,7 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.2, prototype)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.3, prototype)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
@@ -32,9 +32,11 @@ leaves out everything in the sketch that is not needed to answer it.
   Roman Empire resolves into its own colours once it fills the window.
 - **The card.** Short name, then the succession path — `Roman Kingdom > Roman Republic > Roman Empire /
   Eastern Roman Empire`, where `>` is the same polity under a new form and `/` a branch — then the dates
-  of the row under the pointer, the entity's whole span, its area, and a Wikipedia link. Click to pin the
-  card (which makes the link usable), click elsewhere or press Escape to release. A pinned card follows
-  its polity as the scrubber moves.
+  of the row under the pointer, the entity's whole span and its area. Click to pin the card, click elsewhere
+  or press Escape to release. A pinned card links to Wikipedia, Wikidata and the Seshat Global History
+  Databank; Seshat keeps a record per phase, so the Roman Empire's card links to the Principate in 117 and
+  the Dominate in 300. Every name in a pinned card's path can be clicked to go to that polity, and so can
+  every segment of the pinned line on the ribbon.
 - **Pinning a line.** A pinned card holds the line of succession, not just the polity. Scrub into a year when
   a predecessor or successor is on the map and the card moves to it, the path extends through to it with
   its name in white, and the polity first pinned keeps a dotted underline. When nothing of the line is on the
@@ -94,6 +96,31 @@ over it, and the hit test takes the smallest polygon containing the point.
 
 Cliopatria counts years as plain integers and does use 0. Historians do not, so year 0 is shown as 1 BCE.
 
+## Corrections to Cliopatria
+
+Cliopatria is a large hand-built dataset and has errors, most of them of one kind: a colonial power or a
+federation whose shape still covers a country after that country became sovereign, so the two are drawn one
+over the other for decades. The build lists every pair of shapes that overlap substantially while both are
+alive in `build\work\overlap_report.tsv`; most are legitimate (principalities within Kievan Rus', vassals
+within empires, wartime occupations), and the rest are corrected in `build\data_overrides.json`.
+
+- **`clip`** removes one polity's ground from another's shapes over a span of years. The span starts at the
+  date of sovereignty, or when the sovereign country's own shape begins in Cliopatria if that is later, so no
+  ground is left empty; and it ends where the overlap ends, so a restored state keeps its ground. The cut uses
+  only the shapes the other polity held during that span.
+- **`rename`** gives a polity a new name from a year, continuing the same line.
+
+There are 47 clips and one rename, each with its reason and, for the dates, the Wikipedia sentence it rests
+on: France losing Algeria from 1962 and Djibouti after 1977; Britain the Gulf states, Kuwait, Cyprus and a
+dozen African, Caribbean and Pacific countries after their independence; the United States Japan, South Korea,
+West Germany, Vietnam and Iraq once each was sovereign; the Kingdom of Sardinia losing Piedmont to France in
+1802 and the Papal States annexed in 1809; the People's Republic of China without Taiwan; and "Mali
+Federation" renamed Mali from 1961, since the federation lasted only from 1959 to 1960. The dates were checked
+against Wikipedia by `build\verify_dates.py`, which writes the sentences to `build\work\date_checks.tsv`.
+
+Each label is also placed on ground its polity actually shows: overlapping shapes are drawn larger first and
+smaller over it, so a label anchored on the whole shape could land on a smaller neighbour drawn on top.
+
 ## The lineage graph
 
 Edges come from Wikidata first, then from a fallback rule: entity B's first row begins within 25 years of
@@ -108,7 +135,7 @@ its real heir, which is how an early run had the Roman Empire continuing into th
 neighbours and the Russian Empire into Armenia. The successors that are not the continuation start lines of
 their own, and remember the polity they branched from — the card shows it, the colour does not inherit it.
 
-That yields 1,129 lineages over 1,540 entities. Hand corrections live in `build\lineage_overrides.json`,
+That yields 1,129 lineages over 1,540 entities. Hand corrections live in `build\lineage_overrides.json` and always outrank an automatic edge,
 keyed by entity name. An `add` there is taken as authority and skips the handover test, because the cases
 that need correcting are exactly the ones where the shapes do not line up: Cliopatria has the Rashidun
 Caliphate and the Umayyads holding separate ground through the First Fitna, and the Sui already reduced to

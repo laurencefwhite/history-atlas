@@ -339,6 +339,22 @@
       "wikipedia": "Mali",
       "wikidata": "Q912",
       "why": "The Mali Federation lasted only from 1959 to 1960; Cliopatria keeps the name to 2024, for what is the Republic of Mali."
+    },
+    {
+      "polity": "Denmark-Norway",
+      "from": 1815,
+      "name": "Denmark",
+      "wikipedia": "Denmark",
+      "wikidata": "Q35",
+      "why": "Wikipedia, \"Denmark–Norway\": \"The Dano-Norwegian union lasted until 1814, when the Treaty of Kiel decreed that Norway ... be ceded to Sweden\"; Cliopatria keeps the name to 1940."
+    },
+    {
+      "polity": "Estado Novo",
+      "from": 1979,
+      "name": "People's Republic of Angola",
+      "wikipedia": "People's Republic of Angola",
+      "wikidata": "Q2208280",
+      "why": "The row from 1979 is Cabinda. Wikipedia, \"Estado Novo (Portugal)\": the Carnation Revolution of 25 April 1974 'led to the end of the Estado Novo'; \"Cabinda Province\": the Alvor Agreement of 1975 'reconfirmed Cabinda's status as part of Angola'."
     }
   ]
 }

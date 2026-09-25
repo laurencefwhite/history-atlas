@@ -3,7 +3,7 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.4)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.5)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
@@ -47,16 +47,27 @@ things a historical atlas should show are still to come; *What it does not do ye
   many states does not flash a card for each; a click shows one at once.
 - **Ocean names**, in spaced capitals, printed along their parallels so they curve with the globe.
 - **Spin.** Off by default. When on, the space bar or a click on sea, sky or unheld land pauses and resumes it.
+- **Cities over time.** A city appears from its founding or first record and, if it was abandoned or
+  destroyed, disappears at that date: Carthage to 698, Pompeii to 79, Teotihuacan about 100 BCE to 550 CE.
+  Extinct cities are drawn in a warm tint while they stand; from the year they were abandoned or destroyed
+  they stay on as ruins, a darkened dot with an italic name ("Ruins of Carthage" on the card), under their
+  own layer. A click on a city pins its card, as for a polity, with links to Wikipedia, Wikidata and, for
+  ancient places, Pleiades; the card stays with the city as the year moves, and says so when the city is not
+  yet founded or already gone. 259 cities carry the name or spelling widely used
+  at the time (Londinium, Lugdunum, Byzantium and Constantinople, Chang'an, Edo, Batavia, Léopoldville,
+  Peking and Bombay before the modern forms), and the card lists them, marking years that are only
+  approximate. A modern city with no reliable date appears from 1500.
 - **Search.** Find a polity by name; it sets the year to the middle of that polity's span and flies to it.
-  Cities are searchable too.
+  Cities are searchable too, by any name they have borne; a city not standing in the year sets the scrubber
+  into its time.
 - **Layers.** Polities, borders, minor-polity muting, polity names, modern borders (off by default, as a
-  faint reference), cities, city names, graticule, slow spin (off — a spinning globe fights the scrubber).
+  faint reference), cities, city names, ruins, graticule, slow spin (off — a spinning globe fights the scrubber).
 
 # What it does not do yet
 
 Every border is crisp and every change is a cut. There are no soft or feathered edges for borders nobody
 could have drawn at the time, no grades of precision or confidence, no peoples without states, no
-migrations, no battles or other events, no cities that come and go with the period, no deep time and no
+migrations, no battles or other events, no city sizes that change with the period, no deep time and no
 morphing between keyframes. These are planned for later stages.
 
 # Rendering
@@ -91,6 +102,31 @@ a batched SPARQL query and cached in `build\raw\wd_succession.json`.
 
 Coastlines, modern country borders and the city list come from **Natural Earth**, by way of the river
 valleys atlas's own base file.
+
+## Cities and their dates
+
+`build\fetch_cities.py` matches each of the 732 modern cities to Natural Earth's full populated-places file,
+which carries a Wikidata id, and fetches inception (P571), earliest record (P1249) and end (P576).
+`build\build_cities.py` adds extinct cities: Wikidata places with a Pleiades id (P1584) that Pleiades counts
+as a settlement or either source counts as a ruin, excluding anything Wikidata also classes as a living
+town. Their start is Wikidata's, or the start of their first Pleiades period; their end is Wikidata's, or
+the end of their last Pleiades period before 1500. A place with no known end is left out rather than drawn
+standing to this day. Dot size for an extinct city comes from the number of Wikipedia editions that cover it.
+
+Wikidata's inception is often a municipal date (Osaka 1889, Hong Kong 1997), so `build\city_overrides.json`
+corrects dates and gives names over time by hand, each with its reason and the Wikipedia sentence it rests
+on; `build\verify_city_dates.py` checks those sentences. Cities whose only date is administrative are left
+undated.
+
+Names over time: `build\fetch_renames.py` gathers candidates from Wikipedia's lists of renamed cities, its
+lists of Latin and Greek place names, and Wikidata's dated official names. Each region's candidates were
+then checked against English Wikipedia and dated, and names the lists miss were added; the rule is the name
+or spelling widely used at the time, not only formal renamings. Every year carries its basis: a quoted
+Wikipedia sentence, a stated convention for gradual changes (a Latin name in the west runs to the end of
+Roman rule there, 410 in Britain and 476 elsewhere, unless the city's history gives a better date), a circa
+date, or, flagged, general knowledge. `build\merge_city_names.py` checks the tables and writes
+`build\city_names.json`, which `build_cities.py` applies before the hand corrections. Of the 732 modern
+cities 575 are dated and 259 have names over time; 174 extinct cities are added.
 
 ## What is drawn, and what is not
 
@@ -129,12 +165,14 @@ within empires, wartime occupations), and the rest are corrected in `build\data_
   only the shapes the other polity held during that span.
 - **`rename`** gives a polity a new name from a year, continuing the same line.
 
-There are 47 clips and one rename, each with its reason and, for the dates, the Wikipedia sentence it rests
+There are 47 clips and three renames, each with its reason and, for the dates, the Wikipedia sentence it rests
 on: France losing Algeria from 1962 and Djibouti after 1977; Britain the Gulf states, Kuwait, Cyprus and a
 dozen African, Caribbean and Pacific countries after their independence; the United States Japan, South Korea,
 West Germany, Vietnam and Iraq once each was sovereign; the Kingdom of Sardinia losing Piedmont to France in
-1802 and the Papal States annexed in 1809; the People's Republic of China without Taiwan; and "Mali
-Federation" renamed Mali from 1961, since the federation lasted only from 1959 to 1960. The dates were checked
+1802 and the Papal States annexed in 1809; the People's Republic of China without Taiwan; "Mali
+Federation" renamed Mali from 1961, since the federation lasted only from 1959 to 1960; "Denmark-Norway"
+renamed Denmark from 1815, the union having ended with the Treaty of Kiel in 1814; and a stray "Estado Novo"
+shape over Cabinda from 1979 given to Angola. The dates were checked
 against Wikipedia by `build\verify_dates.py`, which writes the sentences to `build\work\date_checks.tsv`.
 
 Each label is also placed on ground its polity actually shows: overlapping shapes are drawn larger first and
@@ -173,6 +211,10 @@ curl -sL -o raw/cliopatria.geojson.zip \
   https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/cliopatria.geojson.zip
 cd raw && unzip cliopatria.geojson.zip && cd ..
 python fetch_wikidata.py        # once; caches raw/wd_succession.json
+python fetch_cities.py          # once; caches raw/wd_cities.json (needs raw/ne_places/places_full.csv)
+python fetch_renames.py         # once; candidate earlier names, work/city_renames.tsv
+python merge_city_names.py      # the checked tables of names to city_names.json
+python build_cities.py          # writes data/cities.js; caches raw/wd_ancient.json and Pleiades periods
 python verify_dates.py          # optional: the Wikipedia sentences behind the correction dates
 python build_data.py            # about 4 minutes, needs roughly 4 GB of memory
 ```
@@ -206,7 +248,8 @@ ribbon, spin and the hover delay each have their own scripted checks.
 # Credits
 
 Polity boundaries from [Cliopatria](https://github.com/Seshat-Global-History-Databank/cliopatria) (Seshat
-Global History Databank), CC BY 4.0. Succession from [Wikidata](https://www.wikidata.org). Coastlines,
+Global History Databank), CC BY 4.0. Succession and city dates from [Wikidata](https://www.wikidata.org).
+Ancient places and their periods from [Pleiades](https://pleiades.stoa.org), CC BY 3.0. Coastlines,
 countries and cities from [Natural Earth](https://www.naturalearthdata.com). Built on the engine of the
 river valleys atlas.
 

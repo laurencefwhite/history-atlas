@@ -1,0 +1,724 @@
+{
+  "_note": "Hand corrections for build_cities.py. 'modern': cities in the modern list – 'from' and 'to' replace Wikidata's dates (null means undated, shown in every year); 'names' gives the name in use from each year on. 'extinct': dates fixed for a ruined or abandoned city, or a city added with its position. Every year below was checked against Wikipedia by verify_city_dates.py (sentences in work/city_date_checks.tsv) or is marked as undated for want of a checked year.",
+  "modern": {
+    "Istanbul": {
+      "from": -667,
+      "names": [
+        [
+          -667,
+          "Byzantium"
+        ],
+        [
+          330,
+          "Constantinople"
+        ],
+        [
+          1930,
+          "Istanbul"
+        ]
+      ],
+      "why": "Wikipedia 'Byzantium': founding 'usually given as 667 BC on the authority of Herodotus'; 'Constantinople': capital from 330; 'Istanbul': the name 'officially changed as İstanbul on 28 March 1930'."
+    },
+    "Mexico City": {
+      "from": 1325,
+      "names": [
+        [
+          1325,
+          "Tenochtitlan"
+        ],
+        [
+          1521,
+          "Mexico City"
+        ]
+      ],
+      "why": "Wikipedia 'Tenochtitlan': founding date 13 March 1325 (chosen in 1925, the exact date unclear); captured by the Tlaxcaltec and the Spanish in 1521."
+    },
+    "Tokyo": {
+      "from": 1457,
+      "names": [
+        [
+          1457,
+          "Edo"
+        ],
+        [
+          1868,
+          "Tokyo"
+        ]
+      ],
+      "why": "Wikipedia 'Edo': 'Edo grew from a fishing village in Musashi Province in 1457'; 'Edo Castle': built in 1457; 'Tokyo': renamed after the Meiji Restoration (1868)."
+    },
+    "Ho Chi Minh City": {
+      "from": 1698,
+      "names": [
+        [
+          1698,
+          "Saigon"
+        ],
+        [
+          1976,
+          "Ho Chi Minh City"
+        ]
+      ],
+      "why": "Wikipedia 'Ho Chi Minh City': part of the Nguyễn lords' domain from 1698; the name given after reunification in 1976."
+    },
+    "Singapore": {
+      "from": 1819,
+      "why": "Wikipedia 'Singapore': 'Its contemporary era began in 1819, when Stamford Raffles established Singapore'; Wikidata's 1965 is independence."
+    },
+    "Hong Kong": {
+      "from": 1841,
+      "why": "Wikipedia 'Hong Kong': a British colony from 1841–1842; Wikidata's 1997 is the handover."
+    },
+    "Nagoya": {
+      "from": 1610,
+      "why": "Wikipedia 'Nagoya': 'In 1610, the shogun Tokugawa Ieyasu moved the capital of Owari Province from Kiyosu to Nagoya'; Wikidata's 1889 is municipal incorporation."
+    },
+    "Sapporo": {
+      "from": 1868,
+      "why": "Wikipedia 'Sapporo': 1868 is 'the officially recognized year celebrated as the \"birth\" of Sapporo'; Wikidata's 1922 is a later status."
+    },
+    "Hiroshima": {
+      "from": 1589,
+      "why": "Wikipedia 'Hiroshima': 'Hiroshima was founded in 1589 as a castle town'; Wikidata's 1889 is municipal incorporation."
+    },
+    "Osaka": {
+      "from": null,
+      "why": "Wikidata's 1889 is municipal incorporation; the city is far older. No founding year checked, so undated."
+    },
+    "Fukuoka": {
+      "from": null,
+      "why": "Wikidata's 1889 is municipal incorporation; undated."
+    },
+    "Matsuyama": {
+      "from": null,
+      "why": "Wikidata's 1889 is municipal incorporation; undated."
+    },
+    "Nagano": {
+      "from": null,
+      "why": "Wikidata's 1966 is a municipal merger; undated."
+    },
+    "Naha": {
+      "from": null,
+      "why": "Wikidata's 1921 is municipal status; undated."
+    },
+    "Changchun": {
+      "from": null,
+      "why": "Wikidata's 1889 is an administrative date; undated."
+    },
+    "Taipei": {
+      "from": null,
+      "why": "Wikidata's 1967 is special-municipality status; undated."
+    },
+    "Kaohsiung": {
+      "from": null,
+      "why": "Wikidata's 2010 is a municipal merger; undated."
+    },
+    "Taichung": {
+      "from": null,
+      "why": "Wikidata's 2010 is a municipal merger; undated."
+    },
+    "Chongqing": {
+      "from": null,
+      "why": "Wikidata's 1929 is municipal status; the city is ancient. Undated."
+    },
+    "Wuhan": {
+      "from": null,
+      "why": "Wuhan is a 20th-century merger of older cities; undated."
+    },
+    "Mianyang": {
+      "from": null,
+      "why": "Wikidata's 1985 is prefecture-level status; undated."
+    },
+    "Linyi": {
+      "from": null,
+      "why": "Wikidata's 1994 is prefecture-level status; undated."
+    },
+    "Tongliao": {
+      "from": null,
+      "why": "Wikidata's 1999 is prefecture-level status; undated."
+    },
+    "Anshan": {
+      "from": null,
+      "why": "Wikidata's 1937 is municipal status; undated."
+    },
+    "Gwangju": {
+      "from": null,
+      "to": null,
+      "why": "Wikidata's 1986 and 2026 are administrative changes; undated."
+    },
+    "Budapest": {
+      "from": null,
+      "why": "Wikidata's 1873 is the merger of Buda, Pest and Óbuda; undated."
+    },
+    "Benin City": {
+      "from": null,
+      "why": "Wikidata's 1899 postdates the old capital of the Benin Kingdom; undated."
+    },
+    "Trichy": {
+      "from": null,
+      "why": "Wikidata's 1866 is municipal status; undated."
+    },
+    "Bhubaneswar": {
+      "from": null,
+      "why": "Wikidata's 1948 is its selection as state capital; the temple city is ancient. Undated."
+    },
+    "Quetta": {
+      "from": null,
+      "why": "Wikidata's 1876 is British occupation; undated."
+    },
+    "Pondicherry": {
+      "from": null,
+      "why": "Wikidata's 1954 is the transfer to India; undated."
+    },
+    "Thimphu": {
+      "from": null,
+      "why": "Wikidata's 1955 is its designation as capital; undated."
+    },
+    "Suez": {
+      "from": null,
+      "why": "Wikidata's 1859 is the canal's start; the port is older. Undated."
+    },
+    "Tabuk": {
+      "from": null,
+      "why": "Wikidata's 1915 is an administrative date; undated."
+    },
+    "Kabul": {
+      "from": null,
+      "why": "Wikidata's 1200 understates an ancient city; undated."
+    },
+    "Tehran": {
+      "from": null,
+      "why": "Wikidata's 1794 is its designation as capital; undated."
+    }
+  },
+  "extinct": {
+    "Carthage": {
+      "to": 698,
+      "why": "Wikipedia 'Carthage': destroyed by Rome in 146 BC and refounded; 'sacked and destroyed by Umayyad forces after the Battle of Carthage in 698'."
+    },
+    "Karakorum": {
+      "from": 1220,
+      "to": 1388,
+      "why": "Wikipedia 'Karakorum': 'the actual foundation of a city is usually said to have occurred only in 1220'; the permanent palace destroyed by the Ming in 1388."
+    },
+    "Pompeii": {
+      "to": 79,
+      "why": "Wikipedia 'Pompeii': buried in the eruption of Mount Vesuvius in 79 AD."
+    },
+    "Cahokia": {
+      "to": 1350,
+      "why": "Wikipedia 'Cahokia': 'by 1350 CE the city was abandoned'."
+    },
+    "Merv": {
+      "to": 1221,
+      "why": "Wikipedia 'Merv': 'In 1221, the city opened its gates to an invading Mongol horde, resulting in massive destruction'."
+    },
+    "Pripyat": {
+      "from": 1970,
+      "to": 1986,
+      "why": "Wikipedia 'Pripyat': founded on 4 February 1970, evacuated on 27 April 1986."
+    },
+    "Teotihuacan": {
+      "from": -100,
+      "to": 550,
+      "lat": 19.6925,
+      "lon": -98.8438,
+      "links": 90,
+      "why": "Wikipedia 'Teotihuacan': 'thought to have been established around 100 BCE'; 'major monuments were sacked and systematically burned around 550 CE'."
+    },
+    "Ashkelon": {
+      "from": -2000,
+      "to": 1270,
+      "lat": 31.667,
+      "lon": 34.567,
+      "links": 77,
+      "qid": "Q60956",
+      "wikipedia": "Ashkelon",
+      "approx": true,
+      "why": "Wikipedia 'Ashkelon': 'The archaeological site of Ascalon, today known as Tel Ashkelon, was the oldest and largest seaport in Canaan, part of Philistia, the pentapolis... of the Philistines'; 'The modern city is named after the ancient seaport of Ascalon, which was destroyed in 1270 and whose remains are on the southwestern edge of the modern metropolis.' The Mamluk town of al-Majdal was 'established by Baybars following the destruction of Ascalon' nearby, and modern Israeli Ashkelon was founded in 1949 further inland at al-Majdal, so the ancient/medieval city is a distinct, abandoned site."
+    },
+    "Avdat": {
+      "from": -300,
+      "to": 730,
+      "lat": 30.794,
+      "lon": 34.773,
+      "links": 25,
+      "qid": "Q791665",
+      "wikipedia": "Avdat",
+      "approx": true,
+      "why": "Wikipedia 'Avdat': 'inhabited with intermissions between the 3rd century BCE and the mid-7th century CE by Nabataeans... then by Roman army veterans, and Byzantines'; 'the town continued to be inhabited by the Nabataeans continuously from this period until its destruction by earthquake in the early 8th century CE.'"
+    },
+    "Shivta": {
+      "from": -100,
+      "to": 800,
+      "lat": 30.88,
+      "lon": 34.63,
+      "links": 25,
+      "qid": "Q2037692",
+      "wikipedia": "Shivta",
+      "approx": true,
+      "why": "Wikipedia 'Shivta': 'Roman ruins from the first century BCE have been unearthed in the southern part of the town'; 'After the Arab conquest in the 7th century CE, the population dwindled. Shivta was finally abandoned in the 8th or 9th century CE.'"
+    },
+    "Mampsis": {
+      "from": -100,
+      "to": 550,
+      "lat": 31.025,
+      "lon": 35.064,
+      "links": 21,
+      "qid": "Q2391522",
+      "wikipedia": "Mampsis",
+      "approx": true,
+      "why": "Wikipedia 'Mampsis': 'Mampsis was founded in the 1st century BCE as trade post between Petra and Gaza'; 'When this funding ceased, the city went into decline and had practically ceased to exist by the middle of the 6th century C.E.'"
+    },
+    "Scythopolis": {
+      "from": -63,
+      "to": 749,
+      "lat": 32.5,
+      "lon": 35.5,
+      "links": 51,
+      "qid": "Q152368",
+      "wikipedia": "Beit She'an",
+      "approx": true,
+      "why": "Wikipedia 'Beit She'an': 'Beit She'an was refounded and rebuilt by Gabinius [63 BCE]... Scythopolis prospered and became the leading city of the Decapolis'; 'On January 18, 749, Umayyad Baysan was devastated by a catastrophic earthquake... the city never recovered its magnificence.' The classical city (Scythopolis/Baysan) is a distinct, largely abandoned archaeological site next to, not the same footprint as, the present-day Israeli town of Beit She'an, whose built-up area stands on the smaller post-749 settlement. Named here as the city was then called."
+    },
+    "Gerasa": {
+      "from": -331,
+      "to": 1121,
+      "lat": 32.281,
+      "lon": 35.897,
+      "links": 50,
+      "qid": "Q31565",
+      "wikipedia": "Jerash",
+      "approx": true,
+      "why": "Wikipedia 'Jerash': 'ancient Greek inscriptions from the city support that the city was founded by Alexander the Great and his general Perdiccas... in the spring of 331 BC'; 'In 749, a devastating earthquake destroyed large parts of it'; 'The Crusaders immediately abandoned Jerash... Jerash was then deserted and reappeared in the historical record at the beginning of Ottoman rule... in the early 16th century'; 'In 1838 Jerash was described as a ruin.' The Roman/Byzantine ruins (Gerasa) are a separate site from the present-day Jordanian town of Jerash, resettled by Circassian refugees only from 1878. Named here as the city was then called."
+    },
+    "Umm el-Jimal": {
+      "from": 50,
+      "to": 850,
+      "lat": 32.327,
+      "lon": 36.37,
+      "links": 25,
+      "qid": "Q3107493",
+      "wikipedia": "Umm el-Jimal",
+      "approx": true,
+      "why": "Wikipedia 'Umm el-Jimal': 'The Nabataean peoples were the first to build permanent homesteads in the area in the first century AD'; 'the population decreased and the site was slowly abandoned with the help of an earthquake in circa 749... The site was completely deserted under the Abbasid Caliphs in the ninth century.' A modern village was resettled on the ruins only in the early 20th century, after roughly a thousand years empty."
+    },
+    "Umm ar-Rasas": {
+      "from": 100,
+      "to": 800,
+      "lat": 31.501,
+      "lon": 35.92,
+      "links": 39,
+      "qid": "Q822842",
+      "wikipedia": "Umm ar-Rasas",
+      "approx": true,
+      "why": "Wikipedia 'Umm ar-Rasas': 'The Roman military utilized the site as a strategic garrison, but it was later converted and inhabited by Christian and Islamic communities'; the mosaic floor of the Church of St Stephen 'was made in 785', during Abbasid rule; after the Muslim conquest 'many of the monasteries and churches built by Byzantine Christians were ultimately abandoned.' No modern town stands on the site."
+    },
+    "Ayla": {
+      "from": 656,
+      "to": 1068,
+      "lat": 29.532,
+      "lon": 35.006,
+      "links": 77,
+      "qid": "Q180522",
+      "wikipedia": "Aqaba",
+      "approx": true,
+      "why": "Wikipedia 'Aqaba': 'Aila fell to the Islamic armies by 629, and the ancient settlement was left to decay, while a new Arab city was established outside its walls under Uthman ibn Affan, known as Ayla'; 'The city was \"completely destroyed\" by the 1068 Near East earthquake', after which the site 'was a simple fishing village of little importance' for centuries — a distinct, older site from the present-day city of Aqaba, which grew up around the later Mamluk/Ottoman fort."
+    },
+    "Imwas": {
+      "from": -200,
+      "to": 1967,
+      "lat": 31.841,
+      "lon": 34.992,
+      "links": 8,
+      "qid": "Q11711969",
+      "wikipedia": "Imwas",
+      "approx": true,
+      "why": "Wikipedia 'Imwas': Emmaus was 'fortified by General Bacchides in 160 BCE'; renamed Nicopolis in 221 CE and continued through the Byzantine, Umayyad, Crusader, Mamluk and Ottoman periods as Imwas; 'In 1967, the village's population was expelled and its buildings razed by Israeli forces as part of the Naksa during the Six-Day War.' Names: Wikipedia 'Imwas': 'rebuilt and renamed Nicopolis ... by Elagabalus in 221 CE'; 'Emmaus Nicopolis': the Roman name 'until the conquest of Palestine by the Rashidun Caliphate' (about 640).",
+      "names": [
+        [
+          -200,
+          "Emmaus"
+        ],
+        [
+          221,
+          "Nicopolis"
+        ],
+        [
+          640,
+          "Imwas",
+          1
+        ]
+      ]
+    },
+    "Bayt Jibrin": {
+      "from": -200,
+      "to": 1948,
+      "lat": 31.605,
+      "lon": 34.898,
+      "links": 14,
+      "qid": "Q556637",
+      "wikipedia": "Bayt Jibrin",
+      "approx": true,
+      "why": "Wikipedia 'Bayt Jibrin': the Aramaic name Beth Gabra is 'attested from at least the Early Roman period'; in 200 CE Septimius Severus 'gave it the status of a city under a new Greek name, Eleutheropolis'; the town continued through Byzantine, Umayyad, Crusader (as Bethgibelin), Mamluk and Ottoman rule until, on 27 October 1948, Israeli forces 'occupied Bayt Jibrin and its police fort', after IDF bombing had 'set off a \"panic flight\" of residents'; a kibbutz was founded on the village's land in 1949. Names: Wikipedia 'Bayt Jibrin': 'the Roman and Byzantine city of Beth Gabra'; 'In the year 200 CE, Roman Emperor Septimius Severus gave it the status of a city under a new Greek name, Eleutheropolis'; the Arabic name from the Muslim conquest (about 640).",
+      "names": [
+        [
+          -200,
+          "Beth Gabra",
+          1
+        ],
+        [
+          200,
+          "Eleutheropolis"
+        ],
+        [
+          640,
+          "Bayt Jibrin",
+          1
+        ]
+      ]
+    },
+    "Dura-Europos": {
+      "from": -300,
+      "to": 257,
+      "lat": 34.747,
+      "lon": 40.73,
+      "links": 42,
+      "qid": "Q464266",
+      "wikipedia": "Dura-Europos",
+      "why": "Wikipedia 'Dura-Europos': 'founded around 300 BC by Seleucus I Nicator'; 'The Romans decisively captured Dura-Europos in 165 AD... until it was captured by the Sasanian Empire after a siege in 256–257 AD. Its population was deported, and the abandoned city eventually became covered by sand and mud.'"
+    },
+    "Apamea": {
+      "from": -300,
+      "to": 1152,
+      "lat": 35.418,
+      "lon": 36.398,
+      "links": 39,
+      "qid": "Q617550",
+      "wikipedia": "Apamea, Syria",
+      "why": "Wikipedia 'Apamea, Syria': 'established as a fortified city around 300 BC by Seleucus I Nicator'; the city 'passed to Crusader control under Tancred before being destroyed by an earthquake in 1152.'"
+    },
+    "Ebla": {
+      "from": -3400,
+      "to": -1600,
+      "lat": 35.798,
+      "lon": 36.798,
+      "links": 56,
+      "qid": "Q5743",
+      "wikipedia": "Ebla",
+      "why": "Wikipedia 'Ebla': 'Starting as a small settlement in the Early Bronze Age (c. 3500 BC)...'; the third kingdom lasted 'until its final destruction by the Hittite king Mursili I in c. 1600 BC.'"
+    },
+    "Mari": {
+      "from": -2900,
+      "to": -1759,
+      "lat": 34.549,
+      "lon": 40.89,
+      "links": 57,
+      "qid": "Q244762",
+      "wikipedia": "Mari, Syria",
+      "approx": true,
+      "why": "Wikipedia 'Mari, Syria': 'It flourished as a trade center and hegemonic state between 2900 BC and 1759 BC.' The Amorite city 'was destroyed by Babylonia in c. 1761 BC', surviving only as a small settlement before being abandoned."
+    },
+    "Carchemish": {
+      "from": -2500,
+      "to": 900,
+      "lat": 36.829,
+      "lon": 38.016,
+      "links": 43,
+      "qid": "Q283680",
+      "wikipedia": "Carchemish",
+      "approx": true,
+      "why": "Wikipedia 'Carchemish': the city 'became one of the most important centres in the Hittite Empire... and reached its apogee around the 13th century BC', survived as a Neo-Hittite capital, was 'conquered by Sargon II in 717 BC' and was the site of the Battle of Carchemish in 605 BC; excavation found 'a monumental phase from the Late Roman period, an Early Byzantine and three Abbasid phases before the final abandonment of the site until the early 1900s.'"
+    },
+    "Resafa": {
+      "from": -800,
+      "to": 1260,
+      "lat": 35.628,
+      "lon": 38.756,
+      "links": 23,
+      "qid": "Q631407",
+      "wikipedia": "Resafa",
+      "approx": true,
+      "why": "Wikipedia 'Resafa': 'The site dates to the 9th century BC, when a military camp was built by the Assyrians'; it grew into the Byzantine pilgrimage city of Sergiopolis and an Umayyad royal residence; 'The city was finally abandoned in the 13th century when the Mongols invaded the area.'"
+    },
+    "Serjilla": {
+      "from": 473,
+      "to": 650,
+      "lat": 35.693,
+      "lon": 36.485,
+      "links": 13,
+      "qid": "Q1132299",
+      "wikipedia": "Serjilla",
+      "approx": true,
+      "why": "Wikipedia 'Serjilla': 'Serjilla, a Byzantine settlement, was built in 473'; 'Like most other of the Dead Cities, Serjilla was abandoned in the seventh century when the Arabs conquered the region and discontinued merchant routes between Antioch and Apamea.'"
+    },
+    "Al-Bara": {
+      "from": 350,
+      "to": 1150,
+      "lat": 35.683,
+      "lon": 36.533,
+      "links": 21,
+      "qid": "Q310049",
+      "wikipedia": "Bara, Syria",
+      "approx": true,
+      "why": "Wikipedia 'Bara, Syria': 'The settlement was established in the fourth century'; 'the mainly Christian population of Al-Bara was subsequently expelled [by Nur ad-Din in 1148]. Later in the 12th century, after a severe earthquake, the town was abandoned.' A modern village of the same name only grew up nearby from the early 20th century."
+    },
+    "Anjar": {
+      "from": 710,
+      "to": 750,
+      "lat": 33.726,
+      "lon": 35.93,
+      "links": 52,
+      "qid": "Q60977",
+      "wikipedia": "Anjar, Lebanon",
+      "approx": true,
+      "why": "Wikipedia 'Anjar, Lebanon': 'The town's foundation is generally attributed to the Umayyad caliph al-Walid I, at the beginning of the 8th century, as a palace-city'; 'After being abandoned in later years, Anjar was resettled in 1939 with several thousand Armenian refugees' — the Umayyad ruins are distinct from the 20th-century Armenian town built alongside them."
+    },
+    "Wasit": {
+      "from": 702,
+      "to": 1500,
+      "lat": 32.188,
+      "lon": 46.298,
+      "links": 40,
+      "qid": "Q1462261",
+      "wikipedia": "Wasit",
+      "approx": true,
+      "why": "Wikipedia 'Wasit': 'The city was built by al-Hajjaj ibn Yusuf in c. 702 CE'; per UNESCO, quoted in the article, 'It was abandoned in the tenth Hijri century (16th century CE), after the change in the course of the river Tigris.'"
+    },
+    "Nuzi": {
+      "from": -1500,
+      "to": -1350,
+      "lat": 35.37,
+      "lon": 44.255,
+      "links": 27,
+      "qid": "Q584605",
+      "wikipedia": "Nuzi",
+      "approx": true,
+      "why": "Wikipedia 'Nuzi': it 'reached major importance... again in the Mitanni period when its name was Nuzi'; 'After the fall of the Hurrian kingdom of Mitanni Nuzi went into gradual decline', before a long abandonment and only slight Parthian-era reuse."
+    },
+    "Dur-Kurigalzu": {
+      "from": -1375,
+      "to": -1155,
+      "lat": 33.354,
+      "lon": 44.202,
+      "links": 28,
+      "qid": "Q622719",
+      "wikipedia": "Dur-Kurigalzu",
+      "why": "Wikipedia 'Dur-Kurigalzu': 'founded by a Kassite king of Babylon, Kurigalzu I (died c. 1375 BC) and was abandoned after the fall of the Kassite dynasty (c. 1155 BC).'"
+    },
+    "Tell Leilan": {
+      "from": -1800,
+      "to": -1700,
+      "lat": 36.957,
+      "lon": 41.505,
+      "links": 25,
+      "qid": "Q588192",
+      "wikipedia": "Tell Leilan",
+      "approx": true,
+      "why": "Wikipedia 'Tell Leilan': 'Around 1800 BC, the site was renamed \"Šubat-Enlil\" by the king Shamshi-Adad I, and it became his residential capital. Shubat-Enlil was abandoned around 1700 BC.'"
+    },
+    "Amorium": {
+      "from": -250,
+      "to": 838,
+      "lat": 39.023,
+      "lon": 31.295,
+      "links": 25,
+      "qid": "Q174270",
+      "wikipedia": "Amorium",
+      "approx": true,
+      "why": "Wikipedia 'Amorium': the city 'was founded in the Hellenistic period, flourished under the Byzantine Empire, and declined after the Arab sack of 838'; after the sack, '42 officers and notables of Amorium were taken as hostages to Samarra... executed there in 845' as the '42 Martyrs of Amorium'."
+    },
+    "Hasankeyf": {
+      "from": 300,
+      "to": 2020,
+      "lat": 37.715,
+      "lon": 41.413,
+      "links": 37,
+      "qid": "Q756957",
+      "wikipedia": "Hasankeyf",
+      "approx": true,
+      "why": "Wikipedia 'Hasankeyf': the fortified town was known in Latin as Cephe by Roman times, and as Ḩiṣn Kayfa from the Arab conquest of 640; 'Despite local and international objections, the city and its archaeological sites have been flooded as part of the Ilısu Dam project. By 1 April 2020, water levels reached an elevation of 498.2 meters, covering the whole town.'"
+    },
+    "Tigranocerta": {
+      "from": -77,
+      "to": -69,
+      "lat": 38.142,
+      "lon": 41.001,
+      "links": 37,
+      "qid": "Q720583",
+      "wikipedia": "Tigranocerta",
+      "why": "Wikipedia 'Tigranocerta': capital of the Armenian Kingdom 'between 77 and 69 BCE', founded by Tigranes the Great; 'On October 6, 69 BCE, Tigranocerta fell to Lucullus... Statues and temples were destroyed, and the city was set on fire... The great city would never recover from this devastating destruction.'"
+    },
+    "Zeugma": {
+      "from": -300,
+      "to": 650,
+      "lat": 37.059,
+      "lon": 37.866,
+      "links": 24,
+      "qid": "Q196987",
+      "wikipedia": "Zeugma (Commagene)",
+      "approx": true,
+      "why": "Wikipedia 'Zeugma (Commagene)': 'founded soon after 300 BC as the city of Seleucia by Seleucus I Nicator'; 'In 253 AD, it was destroyed by the Sassanids'; 'the place seems to have been abandoned in the 7th century due to Sassanid Persian and then Arab raids.'"
+    },
+    "Zubarah": {
+      "from": 1760,
+      "to": 1878,
+      "lat": 25.979,
+      "lon": 51.026,
+      "links": 39,
+      "qid": "Q2727469",
+      "wikipedia": "Zubarah",
+      "approx": true,
+      "why": "Wikipedia 'Zubarah': founded by the Bani Utbah 'who migrated from Kuwait in the mid-eighteenth century'; after decades as a major pearling and trade port, 'Jassim bin Mohammed's army, having sacked the town, surrounded Murair Fort... most of the Zubarah's residents were relocated to Doha' in 1878; the site dwindled further and was gradually abandoned over the 20th century."
+    },
+    "Marib": {
+      "from": -1000,
+      "to": 1950,
+      "lat": 15.425,
+      "lon": 45.325,
+      "links": 40,
+      "qid": "Q335478",
+      "wikipedia": "Marib",
+      "approx": true,
+      "why": "Wikipedia 'Marib': 'The Sabaean kings made their capital at Marib, and built great irrigation works such as the Marib Dam... [which] supported a flourishing culture for more than a thousand years'; 'The site of ancient Marib was largely abandoned during the 20th century... The modern town of Marib is about 3.5 kilometres north of the center of the ancient city.'"
+    },
+    "Istakhr": {
+      "from": -300,
+      "to": 1050,
+      "lat": 29.981,
+      "lon": 52.909,
+      "links": 34,
+      "qid": "Q862251",
+      "wikipedia": "Istakhr",
+      "approx": true,
+      "why": "Wikipedia 'Istakhr': it 'flourished as the capital of the Persian Frataraka governors and Kings of Persis from the third century BC', then as the first Sasanian capital; in the Buyid period, 'Abu Kalijar... sent an army to Istakhr under Qutulmish who destroyed and pillaged the city. Istakhr never recovered and became a village.'"
+    },
+    "Gundeshapur": {
+      "from": 260,
+      "to": 900,
+      "lat": 32.283,
+      "lon": 48.517,
+      "links": 29,
+      "qid": "Q1302971",
+      "wikipedia": "Gundeshapur",
+      "approx": true,
+      "why": "Wikipedia 'Gundeshapur': founded by Shapur I after his conquest of Antioch in 256; 'The city declined after the Muslim conquest of Persia; the city surrendered in 638', though it 'continued to remain an essential centre in the Islamic period' into the later 9th century before its eventual eclipse."
+    },
+    "Bishapur": {
+      "from": 266,
+      "to": 850,
+      "lat": 29.778,
+      "lon": 51.571,
+      "links": 26,
+      "qid": "Q477898",
+      "wikipedia": "Bishapur",
+      "approx": true,
+      "why": "Wikipedia 'Bishapur': 'Bishapur was founded in AD 266 by order of Shapur I to commemorate the Sasanian victory over the Roman Empire'; 'Bishapur gradually lost its prosperity in the 8th and 9th centuries of AD, and with the migration of its residents to Kazerun... it transferred its prosperity to this city.'"
+    },
+    "Ray": {
+      "from": -800,
+      "to": 1220,
+      "lat": 35.598,
+      "lon": 51.434,
+      "links": 51,
+      "qid": "Q636188",
+      "wikipedia": "Ray, Iran",
+      "approx": true,
+      "why": "Wikipedia 'Ray, Iran': the city 'belonged to Media, the political and cultural base of the Medes' and later was a Buyid and Seljuk capital; 'In the early 13th century, following the Mongol invasion of Iran, Ray was severely destructed. It was abandoned and eventually lost its importance in the presence of the nearby growing town of Tehran. Ray remained abandoned throughout the time of the Timurid Empire.' The medieval citadel and ruins are a distinct site from the present-day Tehran suburb."
+    },
+    "Siraf": {
+      "from": -250,
+      "to": 970,
+      "lat": 27.665,
+      "lon": 52.347,
+      "links": 40,
+      "qid": "Q168056",
+      "wikipedia": "Bandar Siraf",
+      "approx": true,
+      "why": "Wikipedia 'Bandar Siraf': 'Siraf dates back to the Parthian era' and grew into a major Sasanian and early Islamic trading port; 'Siraf was an ancient Sasanian port, destroyed around 970 CE'; earthquakes and tsunamis 'damaged and drowned much of the port city', whose remains lie partly on the Gulf sea floor."
+    },
+    "Dvin": {
+      "from": 335,
+      "to": 1236,
+      "lat": 40.004,
+      "lon": 44.578,
+      "links": 36,
+      "qid": "Q429059",
+      "wikipedia": "Dvin (ancient city)",
+      "why": "Wikipedia 'Dvin (ancient city)': 'The ancient city of Dvin was built by Khosrov III Kotak in 335'; it later 'became the residence of Sassanid appointed marzpans... Byzantine kouropalates and later Umayyad- and Abbasid-appointed ostikans'; 'In 1236, the city was conquered and completely destroyed by Mongols.'"
+    },
+    "Uplistsikhe": {
+      "from": -1000,
+      "to": 1350,
+      "lat": 41.968,
+      "lon": 44.204,
+      "links": 28,
+      "qid": "Q1351318",
+      "wikipedia": "Uplistsikhe",
+      "approx": true,
+      "why": "Wikipedia 'Uplistsikhe': 'Its earliest remaining structures are from the beginning of the 1st millennium AD', and it was a major political and religious centre of ancient Kartli/Iberia; 'The Mongol raids in the 14th century marked the ultimate eclipse of the town; it was virtually abandoned.'"
+    },
+    "Tanis": {
+      "from": -1069,
+      "to": 300,
+      "lat": 30.977,
+      "lon": 31.88,
+      "links": 48,
+      "qid": "Q210598",
+      "wikipedia": "Tanis",
+      "approx": true,
+      "why": "Wikipedia 'Tanis': after Pi-Ramesses was abandoned, 'Tanis became the seat of power of the pharaohs of the 21st Dynasty, and later of the 22nd Dynasty'; 'It remained populated until its abandonment in Roman times.'"
+    },
+    "Pi-Ramesses": {
+      "from": -1279,
+      "to": -1069,
+      "lat": 30.799,
+      "lon": 31.836,
+      "links": 36,
+      "qid": "Q937930",
+      "wikipedia": "Pi-Ramesses",
+      "approx": true,
+      "why": "Wikipedia 'Pi-Ramesses': 'the new capital built by the Nineteenth Dynasty Pharaoh Ramesses II (1279–1213 BC)'; per the linked 'Tanis' article, 'at the end of the New Kingdom the royal residence of Pi-Ramesses was abandoned because the Pelusiac branch of the Nile in the Delta became silted up and its harbour consequently became unusable', its population and monuments moving to the new capital Tanis."
+    },
+    "City of David": {
+      "drop": true,
+      "why": "Wikipedia 'City of David (archaeological site)': 'an archaeological site considered by most scholars to be the original settlement core of Jerusalem during the Bronze and Iron Ages.' It is not a separate city: it is the same settlement the atlas already shows as Jebus and then as Jerusalem, now the Wadi Hilweh/Silwan neighbourhood of a living city. Keeping it as its own extinct-city dot duplicates Jebus/Jerusalem rather than showing a distinct destroyed place. The modern name is itself a disputed 2015 renaming by the Jerusalem municipality, 'strongly opposed by East Jerusalem residents', which is a further reason not to give it independent standing on the map."
+    },
+    "Samaria": {
+      "from": -880,
+      "to": 636,
+      "why": "Currently -1000 to 600. Wikipedia 'Samaria (ancient city)': before Omri the hill was only 'a substantial agricultural estate', not a city — 'Samaria was established as the royal capital of Israel by Omri (884–873 BC), replacing Tirzah', so -1000 is too early. At the other end, the city (rebuilt as Sebaste by Herod) 'maintained its prominence until the Arab conquest of the Levant in 636 AD, after which Sebaste was reduced in size and importance, becoming a small village' — so 636 is a better end date than 600. Note the hill is also where the present-day Palestinian village of Sebastia stands, so the site was never fully abandoned; the fix keeps the existing convention of dating the end of the city's classical prominence, as the atlas already does at Beit She'an and similar sites."
+    },
+    "Arsuf": {
+      "from": -550,
+      "to": 1265,
+      "why": "Currently -30 to 640, which are both wrong. Wikipedia 'Apollonia–Arsuf': the city was 'Founded by the Phoenicians during the Persian period in the late sixth century BCE' (so roughly -550, not -30), and 'The fortified city and the castle fell to the Mamluks in 1265, when both were completely destroyed' — 640 was only the Muslim conquest, after which the city continued for another six centuries (as Arsuf, then Crusader Arsur) before the real, Mamluk destruction in 1265."
+    },
+    "Gath": {
+      "from": -2000,
+      "to": 1948,
+      "why": "Currently -2000 to -540, which stops at the Philistine city's destruction by Hazael of Aram-Damascus in the late 9th century BC. Wikipedia 'Gath (city)': the site 'was inhabited from Proto-Historic through Modern times... continuous occupation until the modern Palestinian village of Tell es-Safi, abandoned during the 1948 Arab-Israeli War.' The tell continued to be settled long after the Philistine/Israelite period, ending only with the depopulation of the Arab village of Tell es-Safi in 1948 — directly relevant to the bias concern, since the current dates hide a Palestinian chapter of the same site's history. Names from Wikipedia 'Tell es-Safi': 'The site appears on the 6th-century Madaba Map as Saphitha, while the Crusaders called it Blanche Garde'; Blanchegarde under Crusader lords to 1265, 'Shortly thereafter ... retaken by Muslim forces'; the village of Tell es-Safi 'existed until 1948' ('Gath (city)').",
+      "names": [
+        [
+          -2000,
+          "Gath"
+        ],
+        [
+          550,
+          "Saphitha",
+          1
+        ],
+        [
+          1142,
+          "Blanche Garde",
+          1
+        ],
+        [
+          1266,
+          "Tell es-Safi",
+          1
+        ]
+      ]
+    }
+  }
+}

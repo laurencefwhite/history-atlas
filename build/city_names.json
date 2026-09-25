@@ -1,0 +1,4334 @@
+{
+ "New York City|United States of America": {
+  "from": 1626,
+  "names": [
+   [
+    1626,
+    "New Amsterdam"
+   ],
+   [
+    1664,
+    "New York"
+   ],
+   [
+    1673,
+    "New Orange"
+   ],
+   [
+    1674,
+    "New York City"
+   ]
+  ]
+ },
+ "Mexico City|Mexico": {
+  "from": 1325,
+  "names": [
+   [
+    1325,
+    "Tenochtitlan"
+   ],
+   [
+    1521,
+    "Mexico City",
+    1
+   ]
+  ]
+ },
+ "Toronto|Canada": {
+  "from": 1793,
+  "names": [
+   [
+    1793,
+    "York"
+   ],
+   [
+    1834,
+    "Toronto"
+   ]
+  ]
+ },
+ "Atlanta|United States of America": {
+  "from": 1837,
+  "names": [
+   [
+    1837,
+    "Terminus"
+   ],
+   [
+    1843,
+    "Marthasville"
+   ],
+   [
+    1847,
+    "Atlanta"
+   ]
+  ]
+ },
+ "Boston|United States of America": {
+  "from": 1625,
+  "names": [
+   [
+    1625,
+    "Shawmut",
+    1
+   ],
+   [
+    1630,
+    "Boston"
+   ]
+  ]
+ },
+ "Melbourne|Australia": {
+  "from": 1835,
+  "names": [
+   [
+    1835,
+    "Bearbrass"
+   ],
+   [
+    1837,
+    "Melbourne"
+   ]
+  ]
+ },
+ "Detroit|United States of America": {
+  "from": 1701,
+  "names": [
+   [
+    1701,
+    "Fort Pontchartrain"
+   ],
+   [
+    1760,
+    "Detroit",
+    1
+   ]
+  ]
+ },
+ "Porto Alegre|Brazil": {
+  "from": 1772,
+  "names": [
+   [
+    1772,
+    "Porto dos Casais"
+   ],
+   [
+    1773,
+    "Porto Alegre"
+   ]
+  ]
+ },
+ "Montreal|Canada": {
+  "from": 1642,
+  "names": [
+   [
+    1642,
+    "Ville-Marie"
+   ],
+   [
+    1705,
+    "Montreal",
+    1
+   ]
+  ]
+ },
+ "San Francisco|United States of America": {
+  "from": 1835,
+  "names": [
+   [
+    1835,
+    "Yerba Buena"
+   ],
+   [
+    1847,
+    "San Francisco"
+   ]
+  ]
+ },
+ "Vancouver|Canada": {
+  "from": 1867,
+  "names": [
+   [
+    1867,
+    "Gastown"
+   ],
+   [
+    1870,
+    "Granville"
+   ],
+   [
+    1886,
+    "Vancouver"
+   ]
+  ]
+ },
+ "Santo Domingo|Dominican Republic": {
+  "from": 1496,
+  "names": [
+   [
+    1496,
+    "Santo Domingo"
+   ],
+   [
+    1936,
+    "Ciudad Trujillo"
+   ],
+   [
+    1961,
+    "Santo Domingo"
+   ]
+  ]
+ },
+ "Cleveland|United States of America": {
+  "from": 1796,
+  "names": [
+   [
+    1796,
+    "Cleaveland"
+   ],
+   [
+    1816,
+    "Cleveland"
+   ]
+  ]
+ },
+ "Pittsburgh|United States of America": {
+  "from": 1754,
+  "names": [
+   [
+    1754,
+    "Fort Duquesne"
+   ],
+   [
+    1758,
+    "Pittsburgh"
+   ],
+   [
+    1891,
+    "Pittsburg"
+   ],
+   [
+    1911,
+    "Pittsburgh"
+   ]
+  ]
+ },
+ "Manaus|Brazil": {
+  "from": 1669,
+  "names": [
+   [
+    1669,
+    "São José do Rio Negro"
+   ],
+   [
+    1832,
+    "Manaus"
+   ],
+   [
+    1848,
+    "Barra do Rio Negro"
+   ],
+   [
+    1856,
+    "Manaus"
+   ]
+  ]
+ },
+ "San Jose|United States of America": {
+  "from": 1777,
+  "names": [
+   [
+    1777,
+    "San José de Guadalupe"
+   ],
+   [
+    1850,
+    "San Jose",
+    1
+   ]
+  ]
+ },
+ "Cincinnati|United States of America": {
+  "from": 1788,
+  "names": [
+   [
+    1788,
+    "Losantiville"
+   ],
+   [
+    1790,
+    "Cincinnati"
+   ]
+  ]
+ },
+ "Vila Velha|Brazil": {
+  "from": 1535,
+  "names": [
+   [
+    1535,
+    "Vila do Espírito Santo"
+   ],
+   [
+    1549,
+    "Vila Velha",
+    1
+   ]
+  ]
+ },
+ "Ottawa|Canada": {
+  "from": 1826,
+  "names": [
+   [
+    1826,
+    "Bytown"
+   ],
+   [
+    1855,
+    "Ottawa"
+   ]
+  ]
+ },
+ "Edmonton|Canada": {
+  "from": 1795,
+  "names": [
+   [
+    1795,
+    "Fort Edmonton"
+   ],
+   [
+    1892,
+    "Edmonton"
+   ]
+  ]
+ },
+ "Florianópolis|Brazil": {
+  "from": 1726,
+  "names": [
+   [
+    1726,
+    "Nossa Senhora do Desterro"
+   ],
+   [
+    1893,
+    "Florianópolis"
+   ]
+  ]
+ },
+ "Salt Lake City|United States of America": {
+  "from": 1847,
+  "names": [
+   [
+    1847,
+    "Great Salt Lake City"
+   ],
+   [
+    1868,
+    "Salt Lake City"
+   ]
+  ]
+ },
+ "Hartford|United States of America": {
+  "from": 1635,
+  "names": [
+   [
+    1635,
+    "Newtown"
+   ],
+   [
+    1637,
+    "Hartford"
+   ]
+  ]
+ },
+ "Nashville|United States of America": {
+  "from": 1779,
+  "names": [
+   [
+    1779,
+    "Fort Nashborough"
+   ],
+   [
+    1784,
+    "Nashville"
+   ]
+  ]
+ },
+ "Albany|United States of America": {
+  "from": 1624,
+  "names": [
+   [
+    1624,
+    "Fort Orange"
+   ],
+   [
+    1652,
+    "Beverwijck"
+   ],
+   [
+    1664,
+    "Albany"
+   ],
+   [
+    1673,
+    "Willemstadt"
+   ],
+   [
+    1674,
+    "Albany"
+   ]
+  ]
+ },
+ "Saint Paul|United States of America": {
+  "from": 1838,
+  "names": [
+   [
+    1838,
+    "Pig's Eye",
+    1
+   ],
+   [
+    1841,
+    "Saint Paul"
+   ]
+  ]
+ },
+ "Hermosillo|Mexico": {
+  "from": 1700,
+  "names": [
+   [
+    1700,
+    "Pitic"
+   ],
+   [
+    1828,
+    "Hermosillo"
+   ]
+  ]
+ },
+ "Oaxaca de Juárez|Mexico": {
+  "from": 1529,
+  "names": [
+   [
+    1529,
+    "Antequera"
+   ],
+   [
+    1821,
+    "Oaxaca de Juárez",
+    1
+   ]
+  ]
+ },
+ "Victoria|Canada": {
+  "from": 1843,
+  "names": [
+   [
+    1843,
+    "Fort Victoria"
+   ],
+   [
+    1862,
+    "Victoria"
+   ]
+  ]
+ },
+ "Lincoln|United States of America": {
+  "from": 1856,
+  "names": [
+   [
+    1856,
+    "Lancaster"
+   ],
+   [
+    1869,
+    "Lincoln"
+   ]
+  ]
+ },
+ "Nassau|The Bahamas": {
+  "from": 1670,
+  "names": [
+   [
+    1670,
+    "Charles Town"
+   ],
+   [
+    1695,
+    "Nassau"
+   ]
+  ]
+ },
+ "Sucre|Bolivia": {
+  "from": 1538,
+  "names": [
+   [
+    1538,
+    "La Plata"
+   ],
+   [
+    1839,
+    "Sucre"
+   ]
+  ]
+ },
+ "Springfield|United States of America": {
+  "from": 1821,
+  "names": [
+   [
+    1821,
+    "Calhoun"
+   ],
+   [
+    1832,
+    "Springfield"
+   ]
+  ]
+ },
+ "Darwin|Australia": {
+  "from": 1839,
+  "names": [
+   [
+    1839,
+    "Port Darwin"
+   ],
+   [
+    1869,
+    "Palmerston"
+   ],
+   [
+    1911,
+    "Darwin"
+   ]
+  ]
+ },
+ "Annapolis|United States of America": {
+  "from": 1649,
+  "names": [
+   [
+    1649,
+    "Providence"
+   ],
+   [
+    1694,
+    "Anne Arundel's Towne"
+   ],
+   [
+    1695,
+    "Annapolis"
+   ]
+  ]
+ },
+ "Hobart|Australia": {
+  "from": 1804,
+  "names": [
+   [
+    1804,
+    "Hobart Town"
+   ],
+   [
+    1881,
+    "Hobart"
+   ]
+  ]
+ },
+ "Fredericton|Canada": {
+  "from": 1713,
+  "names": [
+   [
+    1713,
+    "Pointe Ste-Anne"
+   ],
+   [
+    1785,
+    "Fredericton"
+   ]
+  ]
+ },
+ "Concord|United States of America": {
+  "from": 1725,
+  "names": [
+   [
+    1725,
+    "Penacook"
+   ],
+   [
+    1734,
+    "Rumford"
+   ],
+   [
+    1765,
+    "Concord"
+   ]
+  ]
+ },
+ "Charlottetown|Canada": {
+  "from": 1720,
+  "names": [
+   [
+    1720,
+    "Port La Joye"
+   ],
+   [
+    1765,
+    "Charlottetown",
+    1
+   ]
+  ]
+ },
+ "Juneau|United States of America": {
+  "from": 1880,
+  "names": [
+   [
+    1880,
+    "Rockwell"
+   ],
+   [
+    1881,
+    "Juneau"
+   ]
+  ]
+ },
+ "Augusta|United States of America": {
+  "from": 1628,
+  "names": [
+   [
+    1628,
+    "Cushnoc"
+   ],
+   [
+    1754,
+    "Fort Western"
+   ],
+   [
+    1797,
+    "Augusta"
+   ]
+  ]
+ },
+ "Iqaluit|Canada": {
+  "from": 1942,
+  "names": [
+   [
+    1942,
+    "Frobisher Bay"
+   ],
+   [
+    1987,
+    "Iqaluit"
+   ]
+  ]
+ },
+ "Winnipeg|Canada": {
+  "from": 1809,
+  "names": [
+   [
+    1809,
+    "Fort Gibraltar"
+   ],
+   [
+    1822,
+    "Fort Garry"
+   ],
+   [
+    1873,
+    "Winnipeg"
+   ]
+  ]
+ },
+ "Bogotá|Colombia": {
+  "from": 1538,
+  "names": [
+   [
+    1538,
+    "Our Lady of Hope"
+   ],
+   [
+    1540,
+    "Santa Fe"
+   ],
+   [
+    1819,
+    "Bogotá",
+    1
+   ]
+  ]
+ },
+ "Belo Horizonte|Brazil": {
+  "from": 1701,
+  "names": [
+   [
+    1701,
+    "Curral d'el Rey",
+    1
+   ],
+   [
+    1893,
+    "Cidade de Minas"
+   ],
+   [
+    1906,
+    "Belo Horizonte"
+   ]
+  ]
+ },
+ "Fortaleza|Brazil": {
+  "from": 1612,
+  "names": [
+   [
+    1612,
+    "São Sebastião"
+   ],
+   [
+    1654,
+    "Fortaleza"
+   ]
+  ]
+ },
+ "San Juan|Puerto Rico": {
+  "from": 1508,
+  "names": [
+   [
+    1508,
+    "Caparra"
+   ],
+   [
+    1521,
+    "Puerto Rico"
+   ],
+   [
+    1746,
+    "San Juan",
+    1
+   ]
+  ]
+ },
+ "Tampa|United States of America": {
+  "from": 1824,
+  "names": [
+   [
+    1824,
+    "Fort Brooke",
+    1
+   ],
+   [
+    1855,
+    "Tampa",
+    1
+   ]
+  ]
+ },
+ "Puebla City|Mexico": {
+  "from": 1531,
+  "names": [
+   [
+    1531,
+    "Puebla de los Ángeles"
+   ],
+   [
+    1862,
+    "Puebla City"
+   ]
+  ]
+ },
+ "Kansas City|United States of America": {
+  "from": 1850,
+  "names": [
+   [
+    1850,
+    "Town of Kansas"
+   ],
+   [
+    1853,
+    "City of Kansas"
+   ],
+   [
+    1889,
+    "Kansas City"
+   ]
+  ]
+ },
+ "Natal|Brazil": {
+  "from": 1599,
+  "names": [
+   [
+    1599,
+    "Natal"
+   ],
+   [
+    1633,
+    "New Amsterdam"
+   ],
+   [
+    1654,
+    "Natal"
+   ]
+  ]
+ },
+ "Jacksonville|United States of America": {
+  "from": 1763,
+  "names": [
+   [
+    1763,
+    "Cow Ford"
+   ],
+   [
+    1822,
+    "Jacksonville"
+   ]
+  ]
+ },
+ "Mérida|Mexico": {
+  "from": 1200,
+  "names": [
+   [
+    1200,
+    "Tiho",
+    1
+   ],
+   [
+    1542,
+    "Mérida"
+   ]
+  ]
+ },
+ "Honolulu|United States of America": {
+  "from": 1200,
+  "names": [
+   [
+    1200,
+    "Kou",
+    1
+   ],
+   [
+    1850,
+    "Honolulu",
+    1
+   ]
+  ]
+ },
+ "Newcastle|Australia": {
+  "from": 1801,
+  "names": [
+   [
+    1801,
+    "Coal River",
+    1
+   ],
+   [
+    1804,
+    "Newcastle"
+   ]
+  ]
+ },
+ "Port of Spain|Trinidad and Tobago": {
+  "from": 1757,
+  "names": [
+   [
+    1757,
+    "Puerto de España"
+   ],
+   [
+    1797,
+    "Port of Spain",
+    1
+   ]
+  ]
+ },
+ "Georgetown|Guyana": {
+  "from": 1781,
+  "names": [
+   [
+    1781,
+    "Longchamps"
+   ],
+   [
+    1784,
+    "Stabroek"
+   ],
+   [
+    1812,
+    "Georgetown"
+   ]
+  ]
+ },
+ "Jackson|United States of America": {
+  "from": 1792,
+  "names": [
+   [
+    1792,
+    "LeFleur's Bluff",
+    1
+   ],
+   [
+    1822,
+    "Jackson"
+   ]
+  ]
+ },
+ "Charleston|United States of America": {
+  "from": 1670,
+  "names": [
+   [
+    1670,
+    "Charles Town"
+   ],
+   [
+    1783,
+    "Charleston"
+   ]
+  ]
+ },
+ "Bismarck|United States of America": {
+  "from": 1872,
+  "names": [
+   [
+    1872,
+    "Edwinton"
+   ],
+   [
+    1873,
+    "Bismarck"
+   ]
+  ]
+ },
+ "Castries|Saint Lucia": {
+  "from": 1650,
+  "names": [
+   [
+    1650,
+    "Carénage"
+   ],
+   [
+    1785,
+    "Castries"
+   ]
+  ]
+ },
+ "Lima|Peru": {
+  "from": 1535,
+  "names": [
+   [
+    1535,
+    "Ciudad de los Reyes"
+   ],
+   [
+    1600,
+    "Lima",
+    1
+   ]
+  ]
+ },
+ "Tokyo|Japan": {
+  "from": 1457,
+  "names": [
+   [
+    1457,
+    "Edo",
+    1
+   ],
+   [
+    1868,
+    "Tokyo"
+   ]
+  ]
+ },
+ "Beijing|China": {
+  "from": -1046,
+  "names": [
+   [
+    -1046,
+    "Ji",
+    1
+   ],
+   [
+    -650,
+    "Yanjing",
+    1
+   ],
+   [
+    1150,
+    "Zhongdu",
+    1
+   ],
+   [
+    1272,
+    "Khanbaliq"
+   ],
+   [
+    1368,
+    "Beiping"
+   ],
+   [
+    1403,
+    "Beijing"
+   ],
+   [
+    1655,
+    "Peking"
+   ],
+   [
+    1979,
+    "Beijing"
+   ]
+  ]
+ },
+ "Xi'an|China": {
+  "from": -202,
+  "names": [
+   [
+    -202,
+    "Chang'an"
+   ],
+   [
+    1369,
+    "Xi'an",
+    1
+   ],
+   [
+    1892,
+    "Sian",
+    1
+   ],
+   [
+    1979,
+    "Xi'an"
+   ]
+  ]
+ },
+ "Nanjing|China": {
+  "from": 229,
+  "names": [
+   [
+    229,
+    "Jianye"
+   ],
+   [
+    313,
+    "Jiankang",
+    1
+   ],
+   [
+    1368,
+    "Nanjing"
+   ],
+   [
+    1842,
+    "Nanking"
+   ],
+   [
+    1979,
+    "Nanjing"
+   ]
+  ]
+ },
+ "Guangzhou|China": {
+  "from": -214,
+  "names": [
+   [
+    -214,
+    "Panyu",
+    1
+   ],
+   [
+    226,
+    "Guangzhou",
+    1
+   ],
+   [
+    1757,
+    "Canton"
+   ],
+   [
+    1979,
+    "Guangzhou"
+   ]
+  ]
+ },
+ "Hangzhou|China": {
+  "from": 589,
+  "names": [
+   [
+    589,
+    "Hangzhou",
+    1
+   ],
+   [
+    1138,
+    "Lin'an"
+   ],
+   [
+    1276,
+    "Hangzhou"
+   ],
+   [
+    1892,
+    "Hangchow",
+    1
+   ],
+   [
+    1979,
+    "Hangzhou"
+   ]
+  ]
+ },
+ "Tianjin|China": {
+  "from": 1404,
+  "names": [
+   [
+    1404,
+    "Tianjin"
+   ],
+   [
+    1860,
+    "Tientsin"
+   ],
+   [
+    1979,
+    "Tianjin"
+   ]
+  ]
+ },
+ "Qingdao|China": {
+  "from": 1898,
+  "names": [
+   [
+    1898,
+    "Tsingtao"
+   ],
+   [
+    1979,
+    "Qingdao"
+   ]
+  ]
+ },
+ "Chongqing|China": {
+  "from": -221,
+  "names": [
+   [
+    -221,
+    "Jiangzhou",
+    1
+   ],
+   [
+    1189,
+    "Chongqing",
+    1
+   ],
+   [
+    1892,
+    "Chungking",
+    1
+   ],
+   [
+    1979,
+    "Chongqing"
+   ]
+  ]
+ },
+ "Suzhou|China": {
+  "from": 589,
+  "names": [
+   [
+    589,
+    "Suzhou",
+    1
+   ],
+   [
+    1892,
+    "Soochow",
+    1
+   ],
+   [
+    1979,
+    "Suzhou"
+   ]
+  ]
+ },
+ "Jinan|China": {
+  "from": -154,
+  "names": [
+   [
+    -154,
+    "Jinan",
+    1
+   ],
+   [
+    1892,
+    "Tsinan",
+    1
+   ],
+   [
+    1979,
+    "Jinan"
+   ]
+  ]
+ },
+ "Guilin|China": {
+  "from": -214,
+  "names": [
+   [
+    -214,
+    "Guilin",
+    1
+   ],
+   [
+    1892,
+    "Kweilin",
+    1
+   ],
+   [
+    1979,
+    "Guilin"
+   ]
+  ]
+ },
+ "Jilin City|China": {
+  "from": 1673,
+  "names": [
+   [
+    1673,
+    "Jilin",
+    1
+   ],
+   [
+    1892,
+    "Kirin",
+    1
+   ],
+   [
+    1979,
+    "Jilin City"
+   ]
+  ]
+ },
+ "Fuzhou|China": {
+  "from": 725,
+  "names": [
+   [
+    725,
+    "Fuzhou",
+    1
+   ],
+   [
+    1842,
+    "Foochow",
+    1
+   ],
+   [
+    1979,
+    "Fuzhou"
+   ]
+  ]
+ },
+ "Xiamen|China": {
+  "from": 1387,
+  "names": [
+   [
+    1387,
+    "Xiamen",
+    1
+   ],
+   [
+    1842,
+    "Amoy"
+   ],
+   [
+    1979,
+    "Xiamen"
+   ]
+  ]
+ },
+ "Shantou|China": {
+  "from": 1860,
+  "names": [
+   [
+    1860,
+    "Swatow",
+    1
+   ],
+   [
+    1979,
+    "Shantou"
+   ]
+  ]
+ },
+ "Shenyang|China": {
+  "from": 1296,
+  "names": [
+   [
+    1296,
+    "Shenyang",
+    1
+   ],
+   [
+    1905,
+    "Mukden",
+    1
+   ],
+   [
+    1945,
+    "Shenyang"
+   ]
+  ]
+ },
+ "Changchun|China": {
+  "from": 1800,
+  "names": [
+   [
+    1800,
+    "Changchun",
+    1
+   ],
+   [
+    1932,
+    "Hsinking"
+   ],
+   [
+    1945,
+    "Changchun",
+    1
+   ]
+  ]
+ },
+ "Dalian|China": {
+  "from": 1898,
+  "names": [
+   [
+    1898,
+    "Dalny",
+    1
+   ],
+   [
+    1905,
+    "Dairen",
+    1
+   ],
+   [
+    1950,
+    "Lüda",
+    1
+   ],
+   [
+    1981,
+    "Dalian",
+    1
+   ]
+  ]
+ },
+ "Ürümqi|China": {
+  "from": 1763,
+  "names": [
+   [
+    1763,
+    "Dihua",
+    1
+   ],
+   [
+    1954,
+    "Ürümqi",
+    1
+   ]
+  ]
+ },
+ "Hohhot|China": {
+  "from": 1581,
+  "names": [
+   [
+    1581,
+    "Guihua",
+    1
+   ],
+   [
+    1913,
+    "Guisui",
+    1
+   ],
+   [
+    1954,
+    "Hohhot",
+    1
+   ]
+  ]
+ },
+ "Shijiazhuang|China": {
+  "from": 1902,
+  "names": [
+   [
+    1902,
+    "Shijiazhuang",
+    1
+   ],
+   [
+    1925,
+    "Shimen",
+    1
+   ],
+   [
+    1947,
+    "Shijiazhuang",
+    1
+   ]
+  ]
+ },
+ "Huai'an|China": {
+  "from": 1983,
+  "names": [
+   [
+    1983,
+    "Huaiyin",
+    1
+   ],
+   [
+    2001,
+    "Huai'an",
+    1
+   ]
+  ]
+ },
+ "Seoul|South Korea": {
+  "from": -18,
+  "names": [
+   [
+    -18,
+    "Wiryeseong"
+   ],
+   [
+    1394,
+    "Hanseong",
+    1
+   ],
+   [
+    1910,
+    "Keijō"
+   ],
+   [
+    1945,
+    "Seoul"
+   ]
+  ]
+ },
+ "Busan|South Korea": {
+  "from": 1876,
+  "names": [
+   [
+    1876,
+    "Busan",
+    1
+   ],
+   [
+    1914,
+    "Fusan",
+    1
+   ],
+   [
+    1945,
+    "Pusan",
+    1
+   ],
+   [
+    2000,
+    "Busan"
+   ]
+  ]
+ },
+ "Incheon|South Korea": {
+  "from": -18,
+  "names": [
+   [
+    -18,
+    "Michuhol",
+    1
+   ],
+   [
+    1413,
+    "Incheon",
+    1
+   ],
+   [
+    1883,
+    "Chemulpo",
+    1
+   ],
+   [
+    1910,
+    "Jinsen",
+    1
+   ],
+   [
+    1945,
+    "Incheon",
+    1
+   ]
+  ]
+ },
+ "Pyongyang|North Korea": {
+  "from": -194,
+  "names": [
+   [
+    -194,
+    "Wanggeomseong"
+   ],
+   [
+    427,
+    "Pyongyang",
+    1
+   ],
+   [
+    1910,
+    "Heijō"
+   ],
+   [
+    1945,
+    "Pyongyang",
+    1
+   ]
+  ]
+ },
+ "Daejeon|South Korea": {
+  "from": 1905,
+  "names": [
+   [
+    1905,
+    "Taejŏn",
+    1
+   ],
+   [
+    2000,
+    "Daejeon"
+   ]
+  ]
+ },
+ "Gwangju|South Korea": {
+  "from": 685,
+  "names": [
+   [
+    685,
+    "Muju",
+    1
+   ],
+   [
+    940,
+    "Gwangju",
+    1
+   ],
+   [
+    1945,
+    "Kwangju",
+    1
+   ],
+   [
+    2000,
+    "Gwangju"
+   ]
+  ]
+ },
+ "Taipei|Taiwan": {
+  "from": 1875,
+  "names": [
+   [
+    1875,
+    "Taipei"
+   ],
+   [
+    1895,
+    "Taihoku"
+   ],
+   [
+    1945,
+    "Taipei",
+    1
+   ]
+  ]
+ },
+ "Kaohsiung|Taiwan": {
+  "from": 1650,
+  "names": [
+   [
+    1650,
+    "Tancoia",
+    1
+   ],
+   [
+    1920,
+    "Takao",
+    1
+   ],
+   [
+    1945,
+    "Kaohsiung",
+    1
+   ]
+  ]
+ },
+ "Osaka|Japan": {
+  "from": 400,
+  "names": [
+   [
+    400,
+    "Naniwa",
+    1
+   ],
+   [
+    1496,
+    "Osaka",
+    1
+   ]
+  ]
+ },
+ "Kyoto|Japan": {
+  "from": 794,
+  "names": [
+   [
+    794,
+    "Heian-kyō"
+   ],
+   [
+    1220,
+    "Kyoto",
+    1
+   ]
+  ]
+ },
+ "Lhasa|China": {
+  "from": 633,
+  "names": [
+   [
+    633,
+    "Rasa",
+    1
+   ],
+   [
+    647,
+    "Lhasa",
+    1
+   ]
+  ]
+ },
+ "Istanbul|Turkey": {
+  "from": -667,
+  "names": [
+   [
+    -667,
+    "Byzantium"
+   ],
+   [
+    330,
+    "Constantinople"
+   ],
+   [
+    1930,
+    "Istanbul"
+   ]
+  ]
+ },
+ "Saint Petersburg|Russia": {
+  "from": 1703,
+  "names": [
+   [
+    1703,
+    "Saint Petersburg"
+   ],
+   [
+    1914,
+    "Petrograd"
+   ],
+   [
+    1924,
+    "Leningrad"
+   ],
+   [
+    1991,
+    "Saint Petersburg"
+   ]
+  ]
+ },
+ "Ankara|Turkey": {
+  "from": -300,
+  "names": [
+   [
+    -300,
+    "Ancyra",
+    1
+   ],
+   [
+    1073,
+    "Angora"
+   ],
+   [
+    1930,
+    "Ankara"
+   ]
+  ]
+ },
+ "Kyiv|Ukraine": {
+  "from": 482,
+  "names": [
+   [
+    482,
+    "Kiev",
+    1
+   ],
+   [
+    2019,
+    "Kyiv"
+   ]
+  ]
+ },
+ "İzmir|Turkey": {
+  "from": -3000,
+  "names": [
+   [
+    -1000,
+    "Smyrna",
+    1
+   ],
+   [
+    1930,
+    "İzmir"
+   ]
+  ]
+ },
+ "Tashkent|Uzbekistan": {
+  "from": -101,
+  "names": [
+   [
+    -101,
+    "Chach",
+    1
+   ],
+   [
+    1100,
+    "Tashkent",
+    1
+   ]
+  ]
+ },
+ "Bursa|Turkey": {
+  "from": -183,
+  "names": [
+   [
+    -183,
+    "Prusa",
+    1
+   ],
+   [
+    1326,
+    "Bursa"
+   ]
+  ]
+ },
+ "Kharkiv|Ukraine": {
+  "from": 1654,
+  "names": [
+   [
+    1654,
+    "Kharkov"
+   ],
+   [
+    2019,
+    "Kharkiv"
+   ]
+  ]
+ },
+ "Novosibirsk|Russia": {
+  "from": 1893,
+  "names": [
+   [
+    1893,
+    "Novonikolayevsk"
+   ],
+   [
+    1926,
+    "Novosibirsk"
+   ]
+  ]
+ },
+ "Yekaterinburg|Russia": {
+  "from": 1723,
+  "names": [
+   [
+    1723,
+    "Yekaterinburg"
+   ],
+   [
+    1924,
+    "Sverdlovsk"
+   ],
+   [
+    1991,
+    "Yekaterinburg"
+   ]
+  ]
+ },
+ "Nizhny Novgorod|Russia": {
+  "from": 1221,
+  "names": [
+   [
+    1221,
+    "Nizhny Novgorod"
+   ],
+   [
+    1932,
+    "Gorky"
+   ],
+   [
+    1990,
+    "Nizhny Novgorod"
+   ]
+  ]
+ },
+ "Almaty|Kazakhstan": {
+  "from": 1854,
+  "names": [
+   [
+    1854,
+    "Verny"
+   ],
+   [
+    1921,
+    "Alma-Ata"
+   ],
+   [
+    1993,
+    "Almaty"
+   ]
+  ]
+ },
+ "Sofia|Bulgaria": {
+  "from": -29,
+  "names": [
+   [
+    -29,
+    "Serdica"
+   ],
+   [
+    809,
+    "Sredets"
+   ],
+   [
+    1018,
+    "Triaditsa",
+    1
+   ],
+   [
+    1194,
+    "Sredets"
+   ],
+   [
+    1382,
+    "Sofia",
+    1
+   ]
+  ]
+ },
+ "Samara|Russia": {
+  "from": 1586,
+  "names": [
+   [
+    1586,
+    "Samara",
+    1
+   ],
+   [
+    1935,
+    "Kuybyshev"
+   ],
+   [
+    1991,
+    "Samara"
+   ]
+  ]
+ },
+ "Yerevan|Armenia": {
+  "from": -782,
+  "names": [
+   [
+    -782,
+    "Erebuni"
+   ],
+   [
+    1600,
+    "Erivan",
+    1
+   ],
+   [
+    1936,
+    "Yerevan"
+   ]
+  ]
+ },
+ "Tbilisi|Georgia": {
+  "from": 455,
+  "names": [
+   [
+    455,
+    "Tiflis"
+   ],
+   [
+    1936,
+    "Tbilisi",
+    1
+   ]
+  ]
+ },
+ "Belgrade|Serbia": {
+  "from": -279,
+  "names": [
+   [
+    -279,
+    "Singidunum"
+   ],
+   [
+    878,
+    "Belgrade"
+   ]
+  ]
+ },
+ "Dushanbe|Tajikistan": {
+  "from": 1700,
+  "names": [
+   [
+    1700,
+    "Dushanbe",
+    1
+   ],
+   [
+    1929,
+    "Stalinabad"
+   ],
+   [
+    1961,
+    "Dushanbe"
+   ]
+  ]
+ },
+ "Dnipro|Ukraine": {
+  "from": 1645,
+  "names": [
+   [
+    1645,
+    "Novyi Kodak"
+   ],
+   [
+    1784,
+    "Yekaterinoslav"
+   ],
+   [
+    1796,
+    "Novorossiysk"
+   ],
+   [
+    1802,
+    "Yekaterinoslav"
+   ],
+   [
+    1926,
+    "Dnipropetrovsk"
+   ],
+   [
+    2016,
+    "Dnipro"
+   ]
+  ]
+ },
+ "Perm|Russia": {
+  "from": 1723,
+  "names": [
+   [
+    1723,
+    "Yagoshikha"
+   ],
+   [
+    1781,
+    "Perm"
+   ],
+   [
+    1940,
+    "Molotov",
+    1
+   ],
+   [
+    1957,
+    "Perm",
+    1
+   ]
+  ]
+ },
+ "Odessa|Ukraine": {
+  "from": 1415,
+  "names": [
+   [
+    1415,
+    "Kotsiubijiv"
+   ],
+   [
+    1529,
+    "Hacibey"
+   ],
+   [
+    1795,
+    "Odessa"
+   ]
+  ]
+ },
+ "Donetsk|Ukraine": {
+  "from": 1779,
+  "names": [
+   [
+    1779,
+    "Aleksandrovka"
+   ],
+   [
+    1869,
+    "Yuzovka"
+   ],
+   [
+    1924,
+    "Stalin"
+   ],
+   [
+    1929,
+    "Stalino"
+   ],
+   [
+    1961,
+    "Donetsk"
+   ]
+  ]
+ },
+ "Volgograd|Russia": {
+  "from": 1589,
+  "names": [
+   [
+    1589,
+    "Tsaritsyn"
+   ],
+   [
+    1925,
+    "Stalingrad"
+   ],
+   [
+    1961,
+    "Volgograd"
+   ]
+  ]
+ },
+ "Konya|Turkey": {
+  "from": -699,
+  "names": [
+   [
+    -699,
+    "Iconium",
+    1
+   ],
+   [
+    1453,
+    "Konya",
+    1
+   ]
+  ]
+ },
+ "Ulaanbaatar|Mongolia": {
+  "from": 1639,
+  "names": [
+   [
+    1639,
+    "Örgöö"
+   ],
+   [
+    1911,
+    "Niislel Khüree",
+    1
+   ],
+   [
+    1924,
+    "Ulaanbaatar"
+   ]
+  ]
+ },
+ "Bishkek|Kyrgyzstan": {
+  "from": 1825,
+  "names": [
+   [
+    1825,
+    "Pishpek"
+   ],
+   [
+    1926,
+    "Frunze"
+   ],
+   [
+    1991,
+    "Bishkek"
+   ]
+  ]
+ },
+ "Thessaloniki|Greece": {
+  "from": -315,
+  "names": [
+   [
+    -315,
+    "Thessalonica"
+   ],
+   [
+    1430,
+    "Salonica",
+    1
+   ],
+   [
+    1912,
+    "Thessaloniki"
+   ]
+  ]
+ },
+ "Lviv|Ukraine": {
+  "from": 1256,
+  "names": [
+   [
+    1256,
+    "Lviv",
+    1
+   ],
+   [
+    1349,
+    "Lwów"
+   ],
+   [
+    1772,
+    "Lemberg"
+   ],
+   [
+    1918,
+    "Lwów"
+   ],
+   [
+    1939,
+    "Lvov"
+   ],
+   [
+    1941,
+    "Lemberg"
+   ],
+   [
+    1944,
+    "Lvov"
+   ],
+   [
+    1991,
+    "Lviv"
+   ]
+  ]
+ },
+ "Ashgabat|Turkmenistan": {
+  "from": 1881,
+  "names": [
+   [
+    1881,
+    "Ashgabat"
+   ],
+   [
+    1919,
+    "Poltoratsk"
+   ],
+   [
+    1927,
+    "Ashgabat"
+   ]
+  ]
+ },
+ "Samarkand|Uzbekistan": {
+  "from": -800,
+  "names": [
+   [
+    -800,
+    "Maracanda",
+    1
+   ],
+   [
+    710,
+    "Samarkand"
+   ]
+  ]
+ },
+ "Sarajevo|Bosnia and Herzegovina": {
+  "from": 1461,
+  "names": [
+   [
+    1461,
+    "Saraybosna"
+   ],
+   [
+    1878,
+    "Sarajevo",
+    1
+   ]
+  ]
+ },
+ "Chișinău|Moldova": {
+  "from": 1436,
+  "names": [
+   [
+    1436,
+    "Chișinău",
+    1
+   ],
+   [
+    1812,
+    "Kishinev"
+   ],
+   [
+    1918,
+    "Chișinău"
+   ],
+   [
+    1940,
+    "Kishinev"
+   ],
+   [
+    1991,
+    "Chișinău"
+   ]
+  ]
+ },
+ "Krasnodar|Russia": {
+  "from": 1793,
+  "names": [
+   [
+    1793,
+    "Yekaterinodar"
+   ],
+   [
+    1920,
+    "Krasnodar"
+   ]
+  ]
+ },
+ "Ulyanovsk|Russia": {
+  "from": 1648,
+  "names": [
+   [
+    1648,
+    "Simbirsk"
+   ],
+   [
+    1924,
+    "Ulyanovsk"
+   ]
+  ]
+ },
+ "Samsun|Turkey": {
+  "from": -750,
+  "names": [
+   [
+    -750,
+    "Amisos"
+   ],
+   [
+    1425,
+    "Samsun",
+    1
+   ]
+  ]
+ },
+ "Khabarovsk|Russia": {
+  "from": 1858,
+  "names": [
+   [
+    1858,
+    "Khabarovka"
+   ],
+   [
+    1893,
+    "Khabarovsk"
+   ]
+  ]
+ },
+ "Orenburg|Russia": {
+  "from": 1743,
+  "names": [
+   [
+    1743,
+    "Orenburg"
+   ],
+   [
+    1938,
+    "Chkalov"
+   ],
+   [
+    1957,
+    "Orenburg"
+   ]
+  ]
+ },
+ "Vilnius|Lithuania": {
+  "from": 1323,
+  "names": [
+   [
+    1323,
+    "Vilnius"
+   ],
+   [
+    1920,
+    "Wilno"
+   ],
+   [
+    1939,
+    "Vilnius"
+   ]
+  ]
+ },
+ "Novokuznetsk|Russia": {
+  "from": 1618,
+  "names": [
+   [
+    1618,
+    "Kuznetsk"
+   ],
+   [
+    1932,
+    "Stalinsk"
+   ],
+   [
+    1961,
+    "Novokuznetsk"
+   ]
+  ]
+ },
+ "Ryazan|Russia": {
+  "from": 1095,
+  "names": [
+   [
+    1095,
+    "Pereyaslavl-Ryazansky",
+    1
+   ],
+   [
+    1778,
+    "Ryazan"
+   ]
+  ]
+ },
+ "Skopje|North Macedonia": {
+  "from": 81,
+  "names": [
+   [
+    81,
+    "Scupi"
+   ],
+   [
+    830,
+    "Skopje",
+    1
+   ],
+   [
+    1392,
+    "Üsküp"
+   ],
+   [
+    1912,
+    "Skopje"
+   ]
+  ]
+ },
+ "Tallinn|Estonia": {
+  "from": 1050,
+  "names": [
+   [
+    1050,
+    "Lindanisa",
+    1
+   ],
+   [
+    1219,
+    "Reval"
+   ],
+   [
+    1918,
+    "Tallinn"
+   ]
+  ]
+ },
+ "Nur-Sultan|Kazakhstan": {
+  "from": 1830,
+  "names": [
+   [
+    1830,
+    "Akmoly"
+   ],
+   [
+    1832,
+    "Akmolinsk"
+   ],
+   [
+    1961,
+    "Tselinograd"
+   ],
+   [
+    1991,
+    "Akmola"
+   ],
+   [
+    1998,
+    "Astana"
+   ],
+   [
+    2019,
+    "Nur-Sultan"
+   ]
+  ]
+ },
+ "Nicosia|Cyprus": {
+  "from": -672,
+  "names": [
+   [
+    -672,
+    "Ledra"
+   ],
+   [
+    400,
+    "Leucosia",
+    1
+   ],
+   [
+    1192,
+    "Nicosia"
+   ]
+  ]
+ },
+ "Podgorica|Montenegro": {
+  "from": 426,
+  "names": [
+   [
+    426,
+    "Birziminium"
+   ],
+   [
+    600,
+    "Ribnica",
+    1
+   ],
+   [
+    1326,
+    "Podgorica"
+   ],
+   [
+    1946,
+    "Titograd"
+   ],
+   [
+    1992,
+    "Podgorica"
+   ]
+  ]
+ },
+ "Algiers|Algeria": {
+  "from": -250,
+  "names": [
+   [
+    -250,
+    "Icosium",
+    1
+   ],
+   [
+    972,
+    "Algiers"
+   ]
+  ]
+ },
+ "Amman|Jordan": {
+  "from": -1000,
+  "names": [
+   [
+    -1000,
+    "Rabbath Ammon",
+    1
+   ],
+   [
+    -250,
+    "Philadelphia",
+    1
+   ],
+   [
+    635,
+    "Amman",
+    1
+   ]
+  ]
+ },
+ "Aleppo|Syria": {
+  "from": -290,
+  "names": [
+   [
+    -290,
+    "Beroea",
+    1
+   ],
+   [
+    637,
+    "Aleppo"
+   ]
+  ]
+ },
+ "Annaba|Algeria": {
+  "from": -225,
+  "names": [
+   [
+    -225,
+    "Hippo Regius",
+    1
+   ],
+   [
+    699,
+    "Bône",
+    1
+   ],
+   [
+    1962,
+    "Annaba",
+    1
+   ]
+  ]
+ },
+ "Baghdad|Iraq": {
+  "from": 762,
+  "names": [
+   [
+    762,
+    "Madinat al-Salam"
+   ],
+   [
+    1000,
+    "Baghdad",
+    1
+   ]
+  ]
+ },
+ "Beirut|Lebanon": {
+  "from": -1350,
+  "names": [
+   [
+    -1350,
+    "Berytus",
+    1
+   ],
+   [
+    -140,
+    "Laodicea"
+   ],
+   [
+    -64,
+    "Berytus"
+   ],
+   [
+    635,
+    "Beirut"
+   ]
+  ]
+ },
+ "Benghazi|Libya": {
+  "from": -630,
+  "names": [
+   [
+    -630,
+    "Euesperides",
+    1
+   ],
+   [
+    -246,
+    "Berenice"
+   ],
+   [
+    1550,
+    "Marsa ibn Ghazi",
+    1
+   ],
+   [
+    1578,
+    "Benghazi",
+    1
+   ]
+  ]
+ },
+ "Casablanca|Morocco": {
+  "from": -650,
+  "names": [
+   [
+    -650,
+    "Anfa",
+    1
+   ],
+   [
+    1468,
+    "Casa Branca"
+   ],
+   [
+    1600,
+    "Casablanca",
+    1
+   ]
+  ]
+ },
+ "Constantine|Algeria": {
+  "from": -300,
+  "names": [
+   [
+    -300,
+    "Cirta",
+    1
+   ],
+   [
+    313,
+    "Constantine"
+   ]
+  ]
+ },
+ "Douala|Cameroon": {
+  "from": 1884,
+  "names": [
+   [
+    1884,
+    "Kamerunstadt"
+   ],
+   [
+    1907,
+    "Douala"
+   ]
+  ]
+ },
+ "Gaborone|Botswana": {
+  "from": 1965,
+  "names": [
+   [
+    1965,
+    "Gaberones",
+    1
+   ],
+   [
+    1969,
+    "Gaborone"
+   ]
+  ]
+ },
+ "Hamadan|Iran": {
+  "from": -700,
+  "names": [
+   [
+    -700,
+    "Ecbatana"
+   ],
+   [
+    642,
+    "Hamadan"
+   ]
+  ]
+ },
+ "Harare|Zimbabwe": {
+  "from": 1890,
+  "names": [
+   [
+    1890,
+    "Salisbury"
+   ],
+   [
+    1982,
+    "Harare"
+   ]
+  ]
+ },
+ "Jerusalem|Israel": {
+  "from": -3400,
+  "names": [
+   [
+    -3400,
+    "Jebus",
+    1
+   ],
+   [
+    -1000,
+    "Jerusalem",
+    1
+   ],
+   [
+    130,
+    "Aelia Capitolina"
+   ],
+   [
+    638,
+    "Jerusalem"
+   ]
+  ]
+ },
+ "Kananga|Congo (Kinshasa)": {
+  "from": 1884,
+  "names": [
+   [
+    1884,
+    "Luluabourg",
+    1
+   ],
+   [
+    1966,
+    "Kananga"
+   ]
+  ]
+ },
+ "Kandahar|Afghanistan": {
+  "from": -330,
+  "names": [
+   [
+    -330,
+    "Alexandria Arachosia"
+   ],
+   [
+    1200,
+    "Kandahar",
+    1
+   ]
+  ]
+ },
+ "Kinshasa|Congo (Kinshasa)": {
+  "from": 1881,
+  "names": [
+   [
+    1881,
+    "Léopoldville"
+   ],
+   [
+    1966,
+    "Kinshasa"
+   ]
+  ]
+ },
+ "Kirkuk|Iraq": {
+  "from": -2300,
+  "names": [
+   [
+    -2300,
+    "Arrapha",
+    1
+   ],
+   [
+    -300,
+    "Karka d-Beth Slokh",
+    1
+   ],
+   [
+    650,
+    "Kirkuk",
+    1
+   ]
+  ]
+ },
+ "Kisangani|Congo (Kinshasa)": {
+  "from": 1883,
+  "names": [
+   [
+    1883,
+    "Stanleyville"
+   ],
+   [
+    1966,
+    "Kisangani",
+    1
+   ]
+  ]
+ },
+ "Lubumbashi|Congo (Kinshasa)": {
+  "from": 1910,
+  "names": [
+   [
+    1910,
+    "Élisabethville",
+    1
+   ],
+   [
+    1966,
+    "Lubumbashi"
+   ]
+  ]
+ },
+ "Malabo|Equatorial Guinea": {
+  "from": 1827,
+  "names": [
+   [
+    1827,
+    "Port Clarence"
+   ],
+   [
+    1855,
+    "Santa Isabel"
+   ],
+   [
+    1973,
+    "Malabo"
+   ]
+  ]
+ },
+ "Maputo|Mozambique": {
+  "from": 1781,
+  "names": [
+   [
+    1781,
+    "Lourenço Marques"
+   ],
+   [
+    1976,
+    "Maputo"
+   ]
+  ]
+ },
+ "Mashhad|Iran": {
+  "from": 700,
+  "names": [
+   [
+    700,
+    "Sanabad",
+    1
+   ],
+   [
+    818,
+    "Mashhad",
+    1
+   ]
+  ]
+ },
+ "Mbuji-Mayi|Congo (Kinshasa)": {
+  "from": 1920,
+  "names": [
+   [
+    1920,
+    "Bakwanga",
+    1
+   ],
+   [
+    1962,
+    "Mbuji-Mayi"
+   ]
+  ]
+ },
+ "Riyadh|Saudi Arabia": {
+  "from": -500,
+  "names": [
+   [
+    -500,
+    "Hajr",
+    1
+   ],
+   [
+    1590,
+    "Riyadh"
+   ]
+  ]
+ },
+ "Tripoli|Libya": {
+  "from": -650,
+  "names": [
+   [
+    -650,
+    "Oea",
+    1
+   ],
+   [
+    643,
+    "Tripoli",
+    1
+   ]
+  ]
+ },
+ "Victoria|Seychelles": {
+  "from": 1778,
+  "names": [
+   [
+    1778,
+    "L'Établissement"
+   ],
+   [
+    1841,
+    "Victoria"
+   ]
+  ]
+ },
+ "Banjul|The Gambia": {
+  "from": 1816,
+  "names": [
+   [
+    1816,
+    "Bathurst",
+    1
+   ],
+   [
+    1973,
+    "Banjul"
+   ]
+  ]
+ },
+ "Antananarivo|Madagascar": {
+  "from": 1610,
+  "names": [
+   [
+    1610,
+    "Analamanga",
+    1
+   ],
+   [
+    1690,
+    "Antananarivo",
+    1
+   ],
+   [
+    1897,
+    "Tananarive",
+    1
+   ],
+   [
+    1975,
+    "Antananarivo",
+    1
+   ]
+  ]
+ },
+ "Lagos|Nigeria": {
+  "from": 1400,
+  "names": [
+   [
+    1400,
+    "Eko",
+    1
+   ],
+   [
+    1472,
+    "Lagos",
+    1
+   ]
+  ]
+ },
+ "Shiraz|Iran": {
+  "from": -2000,
+  "names": [
+   [
+    -2000,
+    "Tiraziš"
+   ],
+   [
+    693,
+    "Shiraz",
+    1
+   ]
+  ]
+ },
+ "Ahwaz|Iran": {
+  "from": -500,
+  "names": [
+   [
+    -500,
+    "Taryana",
+    1
+   ],
+   [
+    230,
+    "Hormizd-Ardashir"
+   ],
+   [
+    650,
+    "Ahwaz",
+    1
+   ],
+   [
+    1897,
+    "Naseri"
+   ],
+   [
+    1925,
+    "Ahwaz"
+   ]
+  ]
+ },
+ "Tabriz|Iran": {
+  "from": -714,
+  "names": [
+   [
+    -714,
+    "Tauris"
+   ],
+   [
+    650,
+    "Tabriz",
+    1
+   ]
+  ]
+ },
+ "Port Louis|Mauritius": {
+  "from": 1606,
+  "names": [
+   [
+    1606,
+    "Harbour of Tortoises"
+   ],
+   [
+    1736,
+    "Port Louis"
+   ]
+  ]
+ },
+ "Cape Town|South Africa": {
+  "from": 1652,
+  "names": [
+   [
+    1652,
+    "Kaapstad"
+   ],
+   [
+    1814,
+    "Cape Town"
+   ]
+  ]
+ },
+ "Tel Aviv|Israel": {
+  "from": 1909,
+  "names": [
+   [
+    1909,
+    "Ahuzat Bayit"
+   ],
+   [
+    1910,
+    "Tel Aviv"
+   ]
+  ]
+ },
+ "N'Djamena|Chad": {
+  "from": 1901,
+  "names": [
+   [
+    1901,
+    "Fort-Lamy"
+   ],
+   [
+    1973,
+    "N'Djamena"
+   ]
+  ]
+ },
+ "Brazzaville|Congo (Brazzaville)": {
+  "from": 1700,
+  "names": [
+   [
+    1700,
+    "Ncuna",
+    1
+   ],
+   [
+    1880,
+    "Brazzaville"
+   ]
+  ]
+ },
+ "Bujumbura|Burundi": {
+  "from": 1889,
+  "names": [
+   [
+    1889,
+    "Usumbura"
+   ],
+   [
+    1962,
+    "Bujumbura"
+   ]
+  ]
+ },
+ "Luxor|Egypt": {
+  "from": -3400,
+  "names": [
+   [
+    -3400,
+    "Thebes",
+    1
+   ],
+   [
+    641,
+    "Luxor",
+    1
+   ]
+  ]
+ },
+ "Benin City|Nigeria": {
+  "from": 1180,
+  "names": [
+   [
+    1180,
+    "Ubinu",
+    1
+   ],
+   [
+    1485,
+    "Benin City",
+    1
+   ]
+  ]
+ },
+ "Medina|Saudi Arabia": {
+  "from": -900,
+  "names": [
+   [
+    -900,
+    "Yathrib"
+   ],
+   [
+    622,
+    "Medina"
+   ]
+  ]
+ },
+ "Mumbai|India": {
+  "from": 1507,
+  "names": [
+   [
+    1507,
+    "Bombay",
+    1
+   ],
+   [
+    1995,
+    "Mumbai"
+   ]
+  ]
+ },
+ "Kolkata|India": {
+  "from": 1690,
+  "names": [
+   [
+    1690,
+    "Calcutta"
+   ],
+   [
+    2001,
+    "Kolkata"
+   ]
+  ]
+ },
+ "Chennai|India": {
+  "from": 1639,
+  "names": [
+   [
+    1639,
+    "Madras",
+    1
+   ],
+   [
+    1996,
+    "Chennai"
+   ]
+  ]
+ },
+ "Bengaluru|India": {
+  "from": 1537,
+  "names": [
+   [
+    1537,
+    "Bangalore"
+   ],
+   [
+    2014,
+    "Bengaluru"
+   ]
+  ]
+ },
+ "Vadodara|India": {
+  "from": 1500,
+  "names": [
+   [
+    1500,
+    "Baroda",
+    1
+   ],
+   [
+    1974,
+    "Vadodara"
+   ]
+  ]
+ },
+ "Ahmedabad|India": {
+  "from": 1000,
+  "names": [
+   [
+    1000,
+    "Ashaval",
+    1
+   ],
+   [
+    1411,
+    "Ahmedabad"
+   ]
+  ]
+ },
+ "Kochi|India": {
+  "from": 1341,
+  "names": [
+   [
+    1341,
+    "Kochi",
+    1
+   ],
+   [
+    1503,
+    "Cochin",
+    1
+   ],
+   [
+    1996,
+    "Kochi"
+   ]
+  ]
+ },
+ "Pune|India": {
+  "from": 1436,
+  "names": [
+   [
+    1436,
+    "Pune",
+    1
+   ],
+   [
+    1857,
+    "Poona"
+   ],
+   [
+    1978,
+    "Pune"
+   ]
+  ]
+ },
+ "Kanpur|India": {
+  "from": 1500,
+  "names": [
+   [
+    1500,
+    "Kanhapur",
+    1
+   ],
+   [
+    1765,
+    "Cawnpore",
+    1
+   ],
+   [
+    1947,
+    "Kanpur",
+    1
+   ]
+  ]
+ },
+ "Kozhikode|India": {
+  "from": 1300,
+  "names": [
+   [
+    1300,
+    "Calicut",
+    1
+   ],
+   [
+    1996,
+    "Kozhikode",
+    1
+   ]
+  ]
+ },
+ "Thiruvananthapuram|India": {
+  "from": 1795,
+  "names": [
+   [
+    1795,
+    "Trivandrum"
+   ],
+   [
+    1991,
+    "Thiruvananthapuram"
+   ]
+  ]
+ },
+ "Varanasi|India": {
+  "from": 1500,
+  "names": [
+   [
+    1500,
+    "Benares",
+    1
+   ],
+   [
+    1947,
+    "Varanasi",
+    1
+   ]
+  ]
+ },
+ "Patna|India": {
+  "from": -490,
+  "names": [
+   [
+    -490,
+    "Pataliputra"
+   ],
+   [
+    1704,
+    "Azimabad"
+   ],
+   [
+    1793,
+    "Patna",
+    1
+   ]
+  ]
+ },
+ "Peshawar|Pakistan": {
+  "from": 100,
+  "names": [
+   [
+    100,
+    "Purushapura"
+   ],
+   [
+    950,
+    "Parashawar"
+   ],
+   [
+    1580,
+    "Peshawar",
+    1
+   ]
+  ]
+ },
+ "Vijayawada|India": {
+  "from": 626,
+  "names": [
+   [
+    626,
+    "Bezawada",
+    1
+   ],
+   [
+    1949,
+    "Vijayawada",
+    1
+   ]
+  ]
+ },
+ "Allahabad|India": {
+  "from": -1100,
+  "names": [
+   [
+    -1100,
+    "Prayag",
+    1
+   ],
+   [
+    1583,
+    "Ilahabas"
+   ],
+   [
+    1630,
+    "Allahabad",
+    1
+   ]
+  ]
+ },
+ "Aurangabad|India": {
+  "from": 1610,
+  "names": [
+   [
+    1610,
+    "Khadki",
+    1
+   ],
+   [
+    1653,
+    "Aurangabad"
+   ]
+  ]
+ },
+ "Jamshedpur|India": {
+  "from": 1900,
+  "names": [
+   [
+    1900,
+    "Sakchi",
+    1
+   ],
+   [
+    1919,
+    "Jamshedpur"
+   ]
+  ]
+ },
+ "Hyderabad|Pakistan": {
+  "from": 711,
+  "names": [
+   [
+    711,
+    "Neroon Kot"
+   ],
+   [
+    1768,
+    "Hyderabad"
+   ]
+  ]
+ },
+ "Kathmandu|Nepal": {
+  "from": 1200,
+  "names": [
+   [
+    1200,
+    "Kantipur",
+    1
+   ],
+   [
+    1768,
+    "Kathmandu",
+    1
+   ]
+  ]
+ },
+ "Chattogram|Bangladesh": {
+  "from": -400,
+  "names": [
+   [
+    -400,
+    "Chittagong",
+    1
+   ],
+   [
+    1517,
+    "Fatehabad",
+    1
+   ],
+   [
+    1666,
+    "Islamabad"
+   ],
+   [
+    1760,
+    "Chittagong",
+    1
+   ],
+   [
+    2018,
+    "Chattogram"
+   ]
+  ]
+ },
+ "Dhaka|Bangladesh": {
+  "from": 1550,
+  "names": [
+   [
+    1550,
+    "Dhaka",
+    1
+   ],
+   [
+    1608,
+    "Jahangirnagar"
+   ],
+   [
+    1717,
+    "Dacca",
+    1
+   ],
+   [
+    1982,
+    "Dhaka"
+   ]
+  ]
+ },
+ "Yangon|Myanmar": {
+  "from": 1035,
+  "names": [
+   [
+    1035,
+    "Dagon",
+    1
+   ],
+   [
+    1755,
+    "Yangon"
+   ],
+   [
+    1852,
+    "Rangoon"
+   ],
+   [
+    1989,
+    "Yangon"
+   ]
+  ]
+ },
+ "Hanoi|Vietnam": {
+  "from": 450,
+  "names": [
+   [
+    450,
+    "Long Bien"
+   ],
+   [
+    455,
+    "Tong Binh"
+   ],
+   [
+    600,
+    "Long Do",
+    1
+   ],
+   [
+    866,
+    "Dai La"
+   ],
+   [
+    1010,
+    "Thang Long"
+   ],
+   [
+    1397,
+    "Dong Do"
+   ],
+   [
+    1408,
+    "Dong Quan"
+   ],
+   [
+    1428,
+    "Dong Kinh"
+   ],
+   [
+    1789,
+    "Thang Long"
+   ],
+   [
+    1831,
+    "Hanoi"
+   ]
+  ]
+ },
+ "Ho Chi Minh City|Vietnam": {
+  "from": 1698,
+  "names": [
+   [
+    1698,
+    "Saigon",
+    1
+   ],
+   [
+    1976,
+    "Ho Chi Minh City"
+   ]
+  ]
+ },
+ "Da Nang|Vietnam": {
+  "from": 1889,
+  "names": [
+   [
+    1889,
+    "Tourane"
+   ],
+   [
+    1945,
+    "Thai Phien"
+   ],
+   [
+    1954,
+    "Da Nang",
+    1
+   ]
+  ]
+ },
+ "Singapore|Singapore": {
+  "from": 1200,
+  "names": [
+   [
+    1200,
+    "Temasek",
+    1
+   ],
+   [
+    1299,
+    "Singapore"
+   ],
+   [
+    1942,
+    "Syonan-to"
+   ],
+   [
+    1945,
+    "Singapore"
+   ]
+  ]
+ },
+ "Jakarta|Indonesia": {
+  "from": 1300,
+  "names": [
+   [
+    1300,
+    "Sunda Kelapa",
+    1
+   ],
+   [
+    1527,
+    "Jayakarta"
+   ],
+   [
+    1619,
+    "Batavia"
+   ],
+   [
+    1949,
+    "Jakarta"
+   ]
+  ]
+ },
+ "Vientiane|Laos": {
+  "from": 1200,
+  "names": [
+   [
+    1200,
+    "Chanthaburi",
+    1
+   ],
+   [
+    1563,
+    "Vientiane"
+   ]
+  ]
+ },
+ "Davao City|Philippines": {
+  "from": 1848,
+  "names": [
+   [
+    1848,
+    "Nueva Vergara"
+   ],
+   [
+    1867,
+    "Davao"
+   ],
+   [
+    1937,
+    "Davao City"
+   ]
+  ]
+ },
+ "General Santos|Philippines": {
+  "from": 1947,
+  "names": [
+   [
+    1947,
+    "Buayan"
+   ],
+   [
+    1954,
+    "General Santos"
+   ]
+  ]
+ },
+ "Makassar|Indonesia": {
+  "from": 1607,
+  "names": [
+   [
+    1607,
+    "Makassar",
+    1
+   ],
+   [
+    1971,
+    "Ujung Pandang"
+   ],
+   [
+    1999,
+    "Makassar"
+   ]
+  ]
+ },
+ "Bandar Lampung|Indonesia": {
+  "from": 1912,
+  "names": [
+   [
+    1912,
+    "Tanjung Karang",
+    1
+   ],
+   [
+    1983,
+    "Bandar Lampung"
+   ]
+  ]
+ },
+ "Banda Aceh|Indonesia": {
+  "from": 1520,
+  "names": [
+   [
+    1520,
+    "Kutaraja"
+   ],
+   [
+    1963,
+    "Banda Aceh"
+   ]
+  ]
+ },
+ "Bandar Seri Begawan|Brunei": {
+  "from": 1400,
+  "names": [
+   [
+    1400,
+    "Brunei Town",
+    1
+   ],
+   [
+    1970,
+    "Bandar Seri Begawan"
+   ]
+  ]
+ },
+ "Surabaya|Indonesia": {
+  "from": 1293,
+  "names": [
+   [
+    1293,
+    "Soerabaija",
+    1
+   ],
+   [
+    1972,
+    "Surabaya",
+    1
+   ]
+  ]
+ },
+ "Bandung|Indonesia": {
+  "from": 1810,
+  "names": [
+   [
+    1810,
+    "Bandoeng",
+    1
+   ],
+   [
+    1947,
+    "Bandung",
+    1
+   ]
+  ]
+ },
+ "Surakarta|Indonesia": {
+  "from": 1745,
+  "names": [
+   [
+    1745,
+    "Soerakarta",
+    1
+   ],
+   [
+    1947,
+    "Surakarta",
+    1
+   ]
+  ]
+ },
+ "Banjarmasin|Indonesia": {
+  "from": 1526,
+  "names": [
+   [
+    1526,
+    "Bandjermasin",
+    1
+   ],
+   [
+    1972,
+    "Banjarmasin",
+    1
+   ]
+  ]
+ },
+ "Shimla|India": {
+  "from": 1819,
+  "names": [
+   [
+    1819,
+    "Simla"
+   ],
+   [
+    1972,
+    "Shimla"
+   ]
+  ]
+ },
+ "Agra|India": {
+  "from": 1504,
+  "names": [
+   [
+    1504,
+    "Agra"
+   ],
+   [
+    1628,
+    "Akbarabad",
+    1
+   ],
+   [
+    1803,
+    "Agra",
+    1
+   ]
+  ]
+ },
+ "Panaji|India": {
+  "from": 1759,
+  "names": [
+   [
+    1759,
+    "Nova Goa"
+   ],
+   [
+    1961,
+    "Panaji",
+    1
+   ]
+  ]
+ },
+ "Paris|France": {
+  "from": -250,
+  "names": [
+   [
+    -250,
+    "Lutetia",
+    1
+   ],
+   [
+    450,
+    "Paris",
+    1
+   ]
+  ]
+ },
+ "London|United Kingdom": {
+  "from": 47,
+  "names": [
+   [
+    47,
+    "Londinium"
+   ],
+   [
+    600,
+    "Lundenwic",
+    1
+   ],
+   [
+    886,
+    "Lundenburh",
+    1
+   ],
+   [
+    1066,
+    "London",
+    1
+   ]
+  ]
+ },
+ "Madrid|Spain": {
+  "from": 852,
+  "names": [
+   [
+    852,
+    "Mayrit"
+   ],
+   [
+    1085,
+    "Madrid",
+    1
+   ]
+  ]
+ },
+ "Barcelona|Spain": {
+  "from": -15,
+  "names": [
+   [
+    -15,
+    "Barcino"
+   ],
+   [
+    476,
+    "Barcelona",
+    1
+   ]
+  ]
+ },
+ "Milan|Italy": {
+  "from": -590,
+  "names": [
+   [
+    -590,
+    "Medhelanon"
+   ],
+   [
+    -222,
+    "Mediolanum"
+   ],
+   [
+    476,
+    "Milan",
+    1
+   ]
+  ]
+ },
+ "Lisbon|Portugal": {
+  "from": -45,
+  "names": [
+   [
+    -45,
+    "Olisipo",
+    1
+   ],
+   [
+    711,
+    "Al-Usbuna",
+    1
+   ],
+   [
+    1147,
+    "Lisbon"
+   ]
+  ]
+ },
+ "Vienna|Austria": {
+  "from": 50,
+  "names": [
+   [
+    50,
+    "Vindobona",
+    1
+   ],
+   [
+    476,
+    "Vienna",
+    1
+   ]
+  ]
+ },
+ "Naples|Italy": {
+  "from": -750,
+  "names": [
+   [
+    -750,
+    "Parthenope",
+    1
+   ],
+   [
+    -550,
+    "Neapolis",
+    1
+   ],
+   [
+    476,
+    "Naples",
+    1
+   ]
+  ]
+ },
+ "Manchester|United Kingdom": {
+  "from": 79,
+  "names": [
+   [
+    79,
+    "Mamucium"
+   ],
+   [
+    410,
+    "Manchester",
+    1
+   ]
+  ]
+ },
+ "Hamburg|Germany": {
+  "from": 808,
+  "names": [
+   [
+    808,
+    "Hammaburg"
+   ],
+   [
+    1200,
+    "Hamburg",
+    1
+   ]
+  ]
+ },
+ "Budapest|Hungary": {
+  "from": 89,
+  "names": [
+   [
+    89,
+    "Aquincum",
+    1
+   ],
+   [
+    1247,
+    "Buda"
+   ],
+   [
+    1873,
+    "Budapest"
+   ]
+  ]
+ },
+ "Turin|Italy": {
+  "from": -28,
+  "names": [
+   [
+    -28,
+    "Augusta Taurinorum"
+   ],
+   [
+    476,
+    "Turin",
+    1
+   ]
+  ]
+ },
+ "Florence|Italy": {
+  "from": -59,
+  "names": [
+   [
+    -59,
+    "Florentia"
+   ],
+   [
+    476,
+    "Florence",
+    1
+   ]
+  ]
+ },
+ "Lyon|France": {
+  "from": -43,
+  "names": [
+   [
+    -43,
+    "Lugdunum"
+   ],
+   [
+    476,
+    "Lyon",
+    1
+   ]
+  ]
+ },
+ "Marseille|France": {
+  "from": -600,
+  "names": [
+   [
+    -600,
+    "Massalia"
+   ],
+   [
+    -49,
+    "Massilia"
+   ],
+   [
+    476,
+    "Marseille",
+    1
+   ]
+  ]
+ },
+ "Seville|Spain": {
+  "from": -46,
+  "names": [
+   [
+    -46,
+    "Hispalis",
+    1
+   ],
+   [
+    711,
+    "Ishbiliyah"
+   ],
+   [
+    1248,
+    "Seville"
+   ]
+  ]
+ },
+ "Helsinki|Finland": {
+  "from": 1550,
+  "names": [
+   [
+    1550,
+    "Helsingfors"
+   ],
+   [
+    1930,
+    "Helsinki",
+    1
+   ]
+  ]
+ },
+ "Zürich|Switzerland": {
+  "from": 175,
+  "names": [
+   [
+    175,
+    "Turicum",
+    1
+   ],
+   [
+    857,
+    "Zürich"
+   ]
+  ]
+ },
+ "Dublin|Ireland": {
+  "from": 841,
+  "names": [
+   [
+    841,
+    "Dyflin"
+   ],
+   [
+    1170,
+    "Dublin",
+    1
+   ]
+  ]
+ },
+ "Palermo|Italy": {
+  "from": -734,
+  "names": [
+   [
+    -734,
+    "Sis"
+   ],
+   [
+    -450,
+    "Panormus",
+    1
+   ],
+   [
+    831,
+    "Balarm"
+   ],
+   [
+    1072,
+    "Palermo"
+   ]
+  ]
+ },
+ "Toulouse|France": {
+  "from": -150,
+  "names": [
+   [
+    -150,
+    "Tolosa",
+    1
+   ],
+   [
+    476,
+    "Toulouse",
+    1
+   ]
+  ]
+ },
+ "Oslo|Norway": {
+  "from": 1040,
+  "names": [
+   [
+    1040,
+    "Ánslo"
+   ],
+   [
+    1624,
+    "Christiania"
+   ],
+   [
+    1925,
+    "Oslo"
+   ]
+  ]
+ },
+ "Valencia|Spain": {
+  "from": -138,
+  "names": [
+   [
+    -138,
+    "Valentia Edetanorum"
+   ],
+   [
+    476,
+    "Valencia",
+    1
+   ]
+  ]
+ },
+ "Bordeaux|France": {
+  "from": -300,
+  "names": [
+   [
+    -300,
+    "Burdigala"
+   ],
+   [
+    498,
+    "Bordeaux",
+    1
+   ]
+  ]
+ },
+ "Gdańsk|Poland": {
+  "from": 997,
+  "names": [
+   [
+    997,
+    "Gdańsk",
+    1
+   ],
+   [
+    1793,
+    "Danzig"
+   ],
+   [
+    1945,
+    "Gdańsk"
+   ]
+  ]
+ },
+ "Zagreb|Croatia": {
+  "from": 1527,
+  "names": [
+   [
+    1527,
+    "Agram",
+    1
+   ],
+   [
+    1918,
+    "Zagreb",
+    1
+   ]
+  ]
+ },
+ "Genoa|Italy": {
+  "from": -450,
+  "names": [
+   [
+    -450,
+    "Genua",
+    1
+   ],
+   [
+    476,
+    "Genoa",
+    1
+   ]
+  ]
+ },
+ "Rouen|France": {
+  "from": -50,
+  "names": [
+   [
+    -50,
+    "Rotomagus",
+    1
+   ],
+   [
+    476,
+    "Rouen",
+    1
+   ]
+  ]
+ },
+ "Edinburgh|United Kingdom": {
+  "from": 601,
+  "names": [
+   [
+    601,
+    "Din Eidyn",
+    1
+   ],
+   [
+    954,
+    "Edinburgh"
+   ]
+  ]
+ },
+ "Bari|Italy": {
+  "from": -250,
+  "names": [
+   [
+    -250,
+    "Barium",
+    1
+   ],
+   [
+    476,
+    "Bari"
+   ]
+  ]
+ },
+ "Bratislava|Slovakia": {
+  "from": 1291,
+  "names": [
+   [
+    1291,
+    "Pressburg",
+    1
+   ],
+   [
+    1919,
+    "Bratislava"
+   ]
+  ]
+ },
+ "Ljubljana|Slovenia": {
+  "from": 476,
+  "names": [
+   [
+    476,
+    "Emona",
+    1
+   ],
+   [
+    1144,
+    "Laibach",
+    1
+   ],
+   [
+    1918,
+    "Ljubljana"
+   ]
+  ]
+ },
+ "Monaco|Monaco": {
+  "from": -500,
+  "names": [
+   [
+    -500,
+    "Monoecus",
+    1
+   ],
+   [
+    1215,
+    "Monaco",
+    1
+   ]
+  ]
+ },
+ "Luxembourg|Luxembourg": {
+  "from": 963,
+  "names": [
+   [
+    963,
+    "Lucilinburhuc"
+   ],
+   [
+    1244,
+    "Luxembourg",
+    1
+   ]
+  ]
+ }
+}

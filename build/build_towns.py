@@ -25,8 +25,10 @@ the city's earlier name only within the Greek and Roman world, where the Latin o
 (elsewhere Pleiades' names are mostly classical renderings of local ones, such as Ptolemy's Ozene for Ujjain),
 and only where it is not merely a spelling of the modern name; the switch is placed by the same conventions as
 the checked renames (Britain 410; the western provinces 476; the Arab conquests about 640; the Balkans about
-600; Anatolia about 1100), marked approximate. Other towns inside a modern city's footprint are listed for review in
-work/town_city_candidates.tsv and stay separate. A modern city already given names over time keeps them.
+600; Anatolia about 1100), marked approximate. Failing evidence, continuity is assumed unless a break is recorded: the nearest
+ancient town inside a modern city's footprint (capped at 6 km) that is not recorded as a ruin or as abandoned
+is taken as that city's predecessor, one per city (Caesaraugusta for Zaragoza). The rest, and every ruin,
+stay separate; they are listed in work/town_city_candidates.tsv. A modern city already given names over time keeps them.
 
 Rows: [name, country, lat, lon, weight, 0, state, from, to, names, wikidata, wikipedia, pleiades, approx, kind]
 (kind 'r': a ruin after its end; 'c': it continues or is lost from the record, not drawn after its end;
@@ -224,7 +226,7 @@ def join_modern(rows, have):
                     dd = km((la, lo), (r[2], r[3]))
                     if dd < dmax: out.append((dd, r))
         return sorted(out, key=lambda t: t[0])
-    joined, keep, cand = {}, [], []
+    joined, keep, cand, pending = {}, [], [], []
     for t in rows:
         m, how = None, ''
         for r in by_pl.get(str(t[12] or ''), []):
@@ -238,10 +240,27 @@ def join_modern(rows, have):
         if m:
             joined.setdefault(id(m), (m, []))[1].append((t, how))
             continue
+        near = None
         for dd, r in nearby(t[2], t[3], 20):
             if dd < footprint(r[4]):
-                cand.append('%s\t%s\t%s\t%.1f\t%s' % (t[0], r[0], r[1], dd, t[12] or t[10] or ''))
-                break
+                near = (dd, r); break
+        pending.append((t, near))
+    # ---- no evidence: assume continuity where no break is recorded, one predecessor per city, the nearest
+    best = {}
+    for t, near in pending:
+        if near and t[14] == 'c' and near[0] < min(6.0, footprint(near[1][4])) and id(near[1]) not in joined:
+            k = id(near[1])
+            if k not in best or near[0] < best[k][0]:
+                best[k] = (near[0], near[1], t)
+    taken = set(id(v[2]) for v in best.values())
+    for dd, m, t in best.values():
+        joined[id(m)] = (m, [(t, 'assumed')])
+    for t, near in pending:
+        if id(t) in taken:
+            continue
+        if near:
+            cand.append('%s\t%s\t%s\t%.1f\t%s\t%s' % (t[0], near[1][0], near[1][1], near[0], t[12] or t[10] or '',
+                                                     'ruin' if t[14] == 'r' else 'second in footprint' if id(near[1]) in joined else 'beyond 6 km'))
         keep.append(t)
     names_given = 0
     for m, ts in joined.values():
@@ -261,10 +280,11 @@ def join_modern(rows, have):
         if not m[12] and t[12]:
             m[12] = t[12]
     with open(os.path.join(HERE, 'work', 'town_city_candidates.tsv'), 'w', encoding='utf-8') as f:
-        f.write('ancient town\tmodern city\tcountry\tkm\tpleiades or wikidata id\n' + '\n'.join(cand) + '\n')
-    print('MODERN: %d places added from Natural Earth; %d ancient towns joined to %d modern cities (%d given '
-          'earlier names); %d candidates left for review' % (len(added), sum(len(v[1]) for v in joined.values()),
-          len(joined), names_given, len(cand)))
+        f.write('ancient town\tmodern city\tcountry\tkm\tpleiades or wikidata id\tkept separate because\n' + '\n'.join(cand) + '\n')
+    print('MODERN: %d places added from Natural Earth; %d ancient towns joined to %d modern cities (%d on evidence, '
+          '%d assumed continuous; %d given earlier names); %d near neighbours kept separate' % (
+          len(added), sum(len(v[1]) for v in joined.values()), len(joined), len(joined) - len(best), len(best),
+          names_given, len(cand)))
     return keep + added
 
 if __name__ == '__main__':

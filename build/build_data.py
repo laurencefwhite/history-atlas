@@ -47,7 +47,10 @@ def is_agg(name):
     return (name or '').startswith('(')
 
 log('reading Cliopatria')
-with open(os.path.join(RAW, 'cliopatria_polities_only.geojson'), 'r', encoding='utf-8') as f:
+# the shapes fitted to the coastline by fit_coast.py, where that has been run (see coast.py)
+SRC = 'cliopatria_coast.geojson' if os.path.exists(os.path.join(RAW, 'cliopatria_coast.geojson')) else 'cliopatria_polities_only.geojson'
+log('  from ' + SRC)
+with open(os.path.join(RAW, SRC), 'r', encoding='utf-8') as f:
     gj = json.load(f)
 
 # ------------------------------------------------------------------ 1a. corrections to the source

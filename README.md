@@ -3,7 +3,7 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.6)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.7)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
@@ -58,7 +58,14 @@ things a historical atlas should show are still to come; *What it does not do ye
   Arabia, and northern and eastern Europe (Tikal, Tiwanaku, Loulan, Mohenjo-daro, Great Zimbabwe, Kilwa,
   Hedeby, Sarai). They thin out by screen density, the larger first. A Pleiades town is shown for the
   periods it is attested, with dates marked "about"; it becomes a ruin only where Pleiades types it an
-  archaeological site with no later record, since Pleiades records evidence rather than fate.
+  archaeological site with no later record, since Pleiades records evidence rather than fate. Nor does a
+  town vanish when its record ends: Pleiades' Roman period closes in 300 and its coverage in about 640, so a
+  town recorded to 300 or later is held to 640, one whose record ends earlier is held to its last record, and
+  either then fades out, the larger towns (cities, ports, places on many roads) held longer and fading more
+  slowly, into the high Middle Ages.
+- **Continuity by default.** An ancient town inside a modern city's footprint (within 6 km) that is not
+  recorded as ruined or abandoned is taken as that city's predecessor, one per city, so a city such as
+  Zaragoza runs on from Caesaraugusta rather than vanishing in late antiquity and reappearing in 1500.
 - **Smaller modern places.** Natural Earth's 3,500 further places of 50,000 people or more join the modern
   cities, thinned by screen density like the towns, so the present is drawn at the same depth as the past.
   An ancient town becomes the earlier name of the modern city on its site only on evidence (the city's
@@ -163,6 +170,15 @@ over it, and the hit test takes the smallest polygon containing the point.
 
 Cliopatria counts years as plain integers and does use 0. Historians do not, so year 0 is shown as 1 BCE.
 
+## Coastlines
+
+Cliopatria's boundaries are drawn by hand at a coarse scale, so along a coast a shape often stops short of the
+shore or runs out over the sea, and a coastal city could fall outside every polity (Barcelona in 1300).
+`build\fit_coast.py` (see `coast.py`) fits every shape to the coastline the page draws: where a shape reaches
+within 13 km of the sea it is extended over that coastal strip and trimmed to the land, so the coast becomes
+its border. Land borders between polities are untouched. A city card also looks up to about 15 km around a
+city whose point misses every shape.
+
 ## Corrections to Cliopatria
 
 Cliopatria is a large hand-built dataset and has errors, most of them of one kind: a colonial power or a
@@ -229,7 +245,8 @@ python merge_city_names.py      # the checked tables of names to city_names.json
 python build_cities.py          # writes data/cities.js; caches raw/wd_ancient.json and Pleiades periods
 python build_towns.py           # writes data/towns.js from Pleiades and towns_research.json
 python verify_dates.py          # optional: the Wikipedia sentences behind the correction dates
-python build_data.py            # about 4 minutes, needs roughly 4 GB of memory
+python fit_coast.py             # about 3 minutes on 8 processes; writes raw/cliopatria_coast.geojson
+python build_data.py            # about 6 minutes, needs roughly 4 GB of memory
 ```
 
 The corrections in `data_overrides.json` and `lineage_overrides.json` are applied as the build reads the

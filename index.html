@@ -341,7 +341,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
       City dates: Wikidata; ancient places: <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.6
+      &copy; 2026 Laurence F. White &middot; v0.7
     </div>
   </div>
 
@@ -403,7 +403,29 @@ function toCity(c) {
            faded: faded, wd: c[10] || null, wp: c[11] || null, pl: c[12] || null, approx: !!c[13] };
 }
 var cities = (D.cities2 || D.cities).map(toCity);
-function cityLive(c, y) { return (c.from === null ? y >= UNDATED : y >= c.from) && (c.to === null || y <= c.to); }
+/* A town known only from Pleiades is not gone when its record ends. Pleiades' Roman period closes in 300 and
+   its coverage in about 640, so a town whose record runs to 300 or later is held to 640; one whose record
+   ends earlier, within that coverage, is held to its last record. Either way it then fades out rather than
+   vanishing, since the evidence thins rather than stops; the larger the town (a city, a port, a place on
+   many roads), the longer it is held and the slower it fades, since a large town is less likely to have
+   gone unrecorded than to have gone on. */
+function citySize(c) { return c.pop >= 100000 ? 2 : c.pop >= 50000 ? 1 : 0; }
+function cityHold(c) {
+  if (c.to < 300) return c.to;
+  return Math.max(c.to, 640) + [0, 160, 360][citySize(c)];
+}
+function cityFadeEnd(c) { return cityHold(c) + (c.to < 300 ? 200 : [250, 300, 400][citySize(c)]); }
+function fading(c) { return c.faded && c.pl && c.to !== null; }
+function cityLive(c, y) {
+  if (c.from === null ? y < UNDATED : y < c.from) return false;
+  if (c.to === null) return true;
+  return y <= (fading(c) ? cityFadeEnd(c) : c.to);
+}
+function cityFade(c, y) {
+  if (!fading(c)) return 1;
+  var h = cityHold(c);
+  return y <= h ? 1 : Math.max(0, 1 - (y - h) / (cityFadeEnd(c) - h));
+}
 function cityName(c, y) {
   var n = c.names.length ? c.names[0][1] : c.name;
   for (var i = 0; i < c.names.length; i++) if (y >= c.names[i][0]) n = c.names[i][1];
@@ -1205,6 +1227,8 @@ function drawCities() {
     p = [CX + FX[0] * u[0] + FX[1] * u[1], CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2]];
     if (p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
     dist = Math.acos(Math.min(1, dp));
+    var fd = cityFade(c, year);
+    if (fd < 0.08) continue;
     if (c.pop < 1e6 && !c.rank) {
       var cell = Math.floor(p[0] / CELL) * 4096 + Math.floor(p[1] / CELL);
       if (taken[cell] && !(hoverCity && hoverCity.c === c)) continue;
@@ -1215,13 +1239,14 @@ function drawCities() {
     if (ruin) rad *= 0.85;
     cityPts.push({ c: c, x: p[0], y: p[1], n: null, ruin: ruin });
     var st = ruin ? 'r' : c.gone ? 'g' : c.faded ? 't' : 'w';
-    var k = st + Math.round(4 * (0.30 + 0.70 * Math.min(1, edge * 3.2)));
+    var fa = (0.30 + 0.70 * Math.min(1, edge * 3.2)) * fd;
+    var k = st + Math.round(8 * fa);
     (batches[k] || (batches[k] = [])).push(p[0], p[1], rad);
   }
   var FILL = { w: 'rgba(255,255,255,.92)', g: 'rgba(236,214,170,.95)', t: 'rgba(218,226,240,.85)', r: 'rgba(58,48,38,.95)' };
   Object.keys(batches).forEach(function (k) {
     var a = batches[k], j;
-    ctx.globalAlpha = +k.slice(1) / 4;
+    ctx.globalAlpha = +k.slice(1) / 8;
     ctx.beginPath();
     for (j = 0; j < a.length; j += 3) { ctx.moveTo(a[j] + a[j + 2] + 1.2, a[j + 1]); ctx.arc(a[j], a[j + 1], a[j + 2] + 1.2, 0, 2 * Math.PI); }
     ctx.fillStyle = 'rgba(6,12,26,.70)'; ctx.fill();
@@ -1277,6 +1302,19 @@ function unitAt(lonlat) {
     var e = live[i];
     if (!inBox(e.box, lonlat[0], lonlat[1])) continue;
     if (d3.geoContains(e.g, lonlat)) return e;
+  }
+  return null;
+}
+/* A city on the coast can fall just outside a polity's simplified outline; look a little way round it. */
+function unitAtNear(lon, lat) {
+  var e = unitAt([lon, lat]);
+  if (e) return e;
+  var k = Math.cos(lat * DEG) || 1;
+  for (var r = 0.04; r <= 0.14; r += 0.05) {
+    for (var a = 0; a < 8; a++) {
+      e = unitAt([lon + r * Math.cos(a * Math.PI / 4) / k, lat + r * Math.sin(a * Math.PI / 4)]);
+      if (e) return e;
+    }
   }
   return null;
 }
@@ -1478,7 +1516,7 @@ function showCityTip(cp, mx, my, pinned) {
   var c = cp.c, key = 'c' + c.name + c.country + year + (cp.ruin ? 'r' : '') + (pinned ? 'p' : '');
   if (key === tipKey) { placeTip(mx, my); return; }
   tipKey = key;
-  var e = unitAt([c.lon, c.lat]);
+  var e = unitAtNear(c.lon, c.lat);
   var where = e ? '<div class="tt"><small>In ' + yearLabel(year) + (cp.ruin ? ' lay in' : ' stood in') + '</small>' + esc(e.e.name) + '</div>' +
                   '<div class="path" style="margin-top:2px">' + pathHtml(e.e.i) + '</div>'
                 : '<div class="tt"><small>In ' + yearLabel(year) + '</small>No polity recorded here</div>';
@@ -1490,7 +1528,7 @@ function showCityTip(cp, mx, my, pinned) {
                            : c.faded ? 'NO RECORD AFTER ' + (c.approx ? 'ABOUT ' : '') + yearLabel(c.to).toUpperCase()
                            : 'NOT SHOWN BEFORE ' + yearLabel(UNDATED).toUpperCase())
     : c.gone ? 'ABANDONED OR DESTROYED &middot; A RUIN TODAY'
-    : c.faded ? (c.to === null ? 'TOWN' : 'ANCIENT TOWN')
+    : c.faded ? (c.to === null ? 'TOWN' : year > c.to ? 'ANCIENT TOWN &middot; NO RECORD AFTER ' + (c.approx ? 'ABOUT ' : '') + yearLabel(c.to).toUpperCase() : 'ANCIENT TOWN')
     : (now !== c.name ? 'TODAY ' + esc(c.name).toUpperCase() + ', ' : '') + (c.state ? esc(c.state).toUpperCase() + ', ' : '') +
       esc(c.country).toUpperCase() + (c.rank === 2 ? ' &middot; CAPITAL' : '');
   var ab = c.approx ? 'about ' : '';

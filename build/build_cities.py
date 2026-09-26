@@ -204,11 +204,13 @@ def main():
             hit[0]['name'] = name
             if o.get('wikipedia'): hit[0]['wp'] = o['wikipedia']
             if o.get('names'): hit[0]['names'] = o['names']
+            if o.get('approx'): hit[0]['approx'] = True
             hit[0]['why'] = 'override: ' + o.get('why', '')
         elif 'lat' in o:
             ancient.append({'name': name, 'lat': o['lat'], 'lon': o['lon'], 'links': o.get('links', 60), 'from': o['from'],
                             'to': o.get('to'), 'q': o.get('qid') or 'added:' + name, 'ruin': True, 'wp': o.get('wikipedia'),
-                            'pleiades': o.get('pleiades'), 'names': o.get('names', []), 'why': 'added: ' + o.get('why', '')})
+                            'pleiades': o.get('pleiades'), 'names': o.get('names', []), 'approx': o.get('approx', False),
+                            'why': 'added: ' + o.get('why', '')})
         else:
             print('  ! extinct override for %s: not in the data and no position given' % name)
     used = set(x['q'] for x in ancient for n, la, lo in absorbed
@@ -247,7 +249,7 @@ def main():
     for a in extinct:
         q = a['q'] if a['q'].startswith('Q') else None
         rows.append([a['name'], '', round(a['lat'], 3), round(a['lon'], 3), a['links'] * 20000, 0, None, a['from'], a['to'], a.get('names') or [],
-                     q, a.get('wp') or titles.get(q), a.get('pleiades')])
+                     q, a.get('wp') or titles.get(q), a.get('pleiades'), 1 if a.get('approx') else 0, 'r'])
     with open(os.path.join(DATA, 'cities.js'), 'w', encoding='utf-8') as f:
         f.write('window.HA_DATA=window.HA_DATA||{};window.HA_DATA.cities2=')
         json.dump(rows, f, ensure_ascii=False, separators=(',', ':'))

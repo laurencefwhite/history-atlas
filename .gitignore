@@ -5,3 +5,5 @@ build/raw/
 build/work/
 build/node_modules/
 notes/
+build/__pycache__/
+build/*.log

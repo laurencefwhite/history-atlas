@@ -306,7 +306,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       <label class="tog"><input type="checkbox" id="L-co"><span class="sw"></span><span class="tl">Modern borders</span></label>
       <label class="tog"><input type="checkbox" id="L-cities" checked><span class="sw"></span><span class="tl">Cities</span></label>
       <label class="tog"><input type="checkbox" id="L-cnames"><span class="sw"></span><span class="tl">City names</span></label>
-      <label class="tog"><input type="checkbox" id="L-ruins" checked><span class="sw"></span><span class="tl">Ruins</span></label>
+      <label class="tog"><input type="checkbox" id="L-ruins" checked><span class="sw"></span><span class="tl">Ruined cities</span></label>
       <label class="tog"><input type="checkbox" id="L-oceans" checked><span class="sw"></span><span class="tl">Ocean names</span></label>
       <label class="tog"><input type="checkbox" id="L-grat" checked><span class="sw"></span><span class="tl">Graticule</span></label>
       <label class="tog"><input type="checkbox" id="L-spin"><span class="sw"></span><span class="tl" id="spinlabel">Slow spin</span></label>
@@ -341,7 +341,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
       City dates: Wikidata; ancient places: <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.5
+      &copy; 2026 Laurence F. White &middot; v0.6
     </div>
   </div>
 
@@ -393,12 +393,16 @@ var POLAR_N = parallel(66.5632), POLAR_S = parallel(-66.5632);
 /* Cities with their dates: from and to are years (null where unknown, shown in every year); names over time
    are [year, name] pairs. A city with no country is an extinct one, a ruin today. A modern city with no date
    is shown from UNDATED on, rather than in every year: most were founded or grew late. */
-var UNDATED = 1500;
-var cities = (D.cities2 || D.cities).map(function (c) {
+var UNDATED = 1500, townsLoaded = false;
+/* A town known only from its record (kind 'c': it continues, or the record simply ends) is shown for the
+   years it is attested and not drawn as a ruin after; approx marks dates estimated from periods. */
+function toCity(c) {
+  var faded = c[14] === 'c';
   return { name: c[0], country: c[1], lat: c[2], lon: c[3], pop: c[4], rank: c[5] || 0, state: c[6] || null,
-           from: c[7] == null ? null : c[7], to: c[8] == null ? null : c[8], names: c[9] || [], gone: !c[1],
-           wd: c[10] || null, wp: c[11] || null, pl: c[12] || null };
-});
+           from: c[7] == null ? null : c[7], to: c[8] == null ? null : c[8], names: c[9] || [], gone: !c[1] && !faded,
+           faded: faded, wd: c[10] || null, wp: c[11] || null, pl: c[12] || null, approx: !!c[13] };
+}
+var cities = (D.cities2 || D.cities).map(toCity);
 function cityLive(c, y) { return (c.from === null ? y >= UNDATED : y >= c.from) && (c.to === null || y <= c.to); }
 function cityName(c, y) {
   var n = c.names.length ? c.names[0][1] : c.name;
@@ -1180,33 +1184,53 @@ function drawCities() {
   var minPop = (W < 700 ? 5e6 : 4e6) / Math.pow(zoom, 1.6);
   if (year < 1800) { minPop /= 3; labelMin /= 3; }
   var adminZoom = W < 700 ? 2.6 : 2.1;
+  /* Dots are gathered by style and fade step and drawn a batch at a time: at close zoom there are
+     thousands of towns. A small place takes a screen cell of its own, so towns thin out rather than
+     pile up; the larger places come first in the list and win their cells. */
+  var CELL = zoom < 6 ? 26 : zoom < 10 ? 16 : 10, taken = {}, batches = {}, fz = 0.85 + 0.35 * Math.min(1, zoom / 3);
+  var TOWNZ = W < 700 ? 4.5 : 3.6;                    /* from here in, towns are thinned by screen cell, not by size */
   for (i = 0; i < cities.length; i++) {
     c = cities[i];
     var ruin = c.gone && c.to !== null && year > c.to;
     if (ruin ? !opt.ruins : !opt.cities || !cityLive(c, year)) continue;
-    if (c.rank < 2 && c.pop < minPop && !(c.rank === 1 && zoom >= adminZoom)) continue;
-    if (c.rank === 2 && c.pop < minPop / 4 && zoom < adminZoom * 1.5) continue;
-    dist = d3.geoDistance([c.lon, c.lat], centre);
-    if (dist > 1.5533) continue;
-    p = projection([c.lon, c.lat]);
-    if (!p) continue;
-    if (p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
-    var edge = 1 - Math.min(1, dist / 1.5533);
-    var rad = (c.pop >= 1e7 ? 2.4 : c.pop >= 4e6 ? 2.0 : c.pop >= 1e6 ? 1.8 : 1.5) * (0.85 + 0.35 * Math.min(1, zoom / 3));
-    if (ruin) rad *= 0.85;
-    cityPts.push({ c: c, x: p[0], y: p[1], n: cityName(c, ruin ? c.to : year), ruin: ruin });
-    ctx.globalAlpha = 0.30 + 0.70 * Math.min(1, edge * 3.2);
-    ctx.beginPath(); ctx.arc(p[0], p[1], rad + 1.2, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(6,12,26,.70)'; ctx.fill();
-    ctx.beginPath(); ctx.arc(p[0], p[1], rad, 0, 2 * Math.PI);
-    if (ruin) {
-      ctx.fillStyle = 'rgba(58,48,38,.95)'; ctx.fill();
-      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(214,190,150,.75)'; ctx.stroke();
-    } else {
-      ctx.fillStyle = c.gone ? 'rgba(236,214,170,.95)' : 'rgba(255,255,255,.92)'; ctx.fill();
+    var town = c.pop < 1e6 && !c.rank;                 /* ancient and modern alike */
+    if (!(town && zoom >= TOWNZ)) {
+      if (c.rank < 2 && c.pop < minPop && !(c.rank === 1 && zoom >= adminZoom)) continue;
+      if (c.rank === 2 && c.pop < minPop / 4 && zoom < adminZoom * 1.5) continue;
     }
-    ctx.globalAlpha = 1;
+    /* the near-side test and the orthographic projection done directly, as for the polity outlines */
+    var u = c.u || (c.u = unitv([c.lon, c.lat]));
+    var dp = u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2];
+    if (dp < 0.0175) continue;
+    p = [CX + FX[0] * u[0] + FX[1] * u[1], CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2]];
+    if (p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
+    dist = Math.acos(Math.min(1, dp));
+    if (c.pop < 1e6 && !c.rank) {
+      var cell = Math.floor(p[0] / CELL) * 4096 + Math.floor(p[1] / CELL);
+      if (taken[cell] && !(hoverCity && hoverCity.c === c)) continue;
+      taken[cell] = 1;
+    }
+    var edge = 1 - Math.min(1, dist / 1.5533);
+    var rad = (c.pop >= 1e7 ? 2.4 : c.pop >= 4e6 ? 2.0 : c.pop >= 1e6 ? 1.8 : c.pop >= 2e5 ? 1.5 : 1.2) * fz;
+    if (ruin) rad *= 0.85;
+    cityPts.push({ c: c, x: p[0], y: p[1], n: null, ruin: ruin });
+    var st = ruin ? 'r' : c.gone ? 'g' : c.faded ? 't' : 'w';
+    var k = st + Math.round(4 * (0.30 + 0.70 * Math.min(1, edge * 3.2)));
+    (batches[k] || (batches[k] = [])).push(p[0], p[1], rad);
   }
+  var FILL = { w: 'rgba(255,255,255,.92)', g: 'rgba(236,214,170,.95)', t: 'rgba(218,226,240,.85)', r: 'rgba(58,48,38,.95)' };
+  Object.keys(batches).forEach(function (k) {
+    var a = batches[k], j;
+    ctx.globalAlpha = +k.slice(1) / 4;
+    ctx.beginPath();
+    for (j = 0; j < a.length; j += 3) { ctx.moveTo(a[j] + a[j + 2] + 1.2, a[j + 1]); ctx.arc(a[j], a[j + 1], a[j + 2] + 1.2, 0, 2 * Math.PI); }
+    ctx.fillStyle = 'rgba(6,12,26,.70)'; ctx.fill();
+    ctx.beginPath();
+    for (j = 0; j < a.length; j += 3) { ctx.moveTo(a[j] + a[j + 2], a[j + 1]); ctx.arc(a[j], a[j + 1], a[j + 2], 0, 2 * Math.PI); }
+    ctx.fillStyle = FILL[k[0]]; ctx.fill();
+    if (k[0] === 'r') { ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(214,190,150,.75)'; ctx.stroke(); }
+  });
+  ctx.globalAlpha = 1;
   if (interacting) return;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   for (i = 0; i < cityPts.length; i++) {
@@ -1215,6 +1239,7 @@ function drawCities() {
     var isHover = hoverCity && hoverCity.c === cp.c;
     var ep = Math.max(cp.c.pop, cp.c.rank === 2 ? 1.4e6 : cp.c.rank === 1 ? 0.7e6 : 0);
     if (!(isHover || (opt.cnames && ep >= labelMin))) continue;
+    if (cp.n === null) cp.n = cityName(cp.c, cp.ruin ? cp.c.to : year);
     ctx.font = (cp.ruin ? 'italic 400 10.5px ' : '500 10.5px ') + FONT;
     var wpx = ctx.measureText(cp.n).width;
     var spots = [[cp.x + 7, cp.y - 0.5], [cp.x - 7 - wpx, cp.y - 0.5],
@@ -1461,13 +1486,18 @@ function showCityTip(cp, mx, my, pinned) {
   for (i = 0; i < c.names.length; i++) if (c.names[i][1] !== now || c.names[i][0] > year) later.push(c.names[i]);
   var sub = cp.ruin ? 'RUINS &middot; ABANDONED OR DESTROYED ' + yearLabel(c.to).toUpperCase()
     : !cityLive(c, year) && c.from !== null && year < c.from ? 'NOT YET FOUNDED IN ' + yearLabel(year).toUpperCase()
-    : !cityLive(c, year) ? (c.gone ? 'ABANDONED OR DESTROYED ' + yearLabel(c.to).toUpperCase() : 'NOT SHOWN BEFORE ' + yearLabel(UNDATED).toUpperCase())
+    : !cityLive(c, year) ? (c.gone ? 'ABANDONED OR DESTROYED ' + yearLabel(c.to).toUpperCase()
+                           : c.faded ? 'NO RECORD AFTER ' + (c.approx ? 'ABOUT ' : '') + yearLabel(c.to).toUpperCase()
+                           : 'NOT SHOWN BEFORE ' + yearLabel(UNDATED).toUpperCase())
     : c.gone ? 'ABANDONED OR DESTROYED &middot; A RUIN TODAY'
+    : c.faded ? (c.to === null ? 'TOWN' : 'ANCIENT TOWN')
     : (now !== c.name ? 'TODAY ' + esc(c.name).toUpperCase() + ', ' : '') + (c.state ? esc(c.state).toUpperCase() + ', ' : '') +
       esc(c.country).toUpperCase() + (c.rank === 2 ? ' &middot; CAPITAL' : '');
+  var ab = c.approx ? 'about ' : '';
   var dates = c.from === null && c.to === null ? '' : '<div class="td">' +
-    (c.from !== null ? 'Founded or first recorded <b>' + yearLabel(c.from) + '</b>' : '') +
-    (c.to !== null ? (c.from !== null ? '<br>' : '') + 'Abandoned or destroyed <b>' + yearLabel(c.to) + '</b>' : '') +
+    (c.from !== null ? (c.faded ? 'First recorded ' : 'Founded or first recorded ') + '<b>' + ab + yearLabel(c.from) + '</b>' : '') +
+    (c.to !== null ? (c.from !== null ? '<br>' : '') + (c.faded ? 'Last recorded ' : 'Abandoned or destroyed ') + '<b>' + ab + yearLabel(c.to) + '</b>' : '') +
+    (c.pl && !c.wd && c.approx ? '<br><small>Dates estimated from the periods the Pleiades gazetteer records for it</small>' : '') +
     (c.names.length > 1 ? '<br>' + c.names.map(function (n) {
       return (n[1] === now ? '<b>' + esc(n[1]) + '</b>' : esc(n[1])) + ' from ' + (n[2] ? 'about ' : '') + yearLabel(n[0]);
     }).join(', ') : '') + '</div>';
@@ -2100,8 +2130,9 @@ var searchList = ENT.map(function (e) {
   return { name: e.name, kind: span(e.first, e.last).replace(/&ndash;/g, '–').replace(/&nbsp;/g, ' '),
            ent: e, mid: Math.round((e.first + e.last) / 2), w: (e.last - e.first) };
 });
-cities.forEach(function (c) {
-  var kind = c.gone ? span(c.from, c.to).replace(/&ndash;/g, '–').replace(/&nbsp;/g, ' ') + ', ruin' : c.country;
+function searchCities(list) {
+ list.forEach(function (c) {
+  var kind = !c.country ? span(c.from, c.to).replace(/&ndash;/g, '–').replace(/&nbsp;/g, ' ') + (c.gone ? ', ruin' : ', town') : c.country;
   searchList.push({ name: c.name, kind: kind, city: c, w: -1e9 + c.pop / 1e4 });
   var seen = {}; seen[c.name] = 1;
   c.names.forEach(function (n, i) {
@@ -2110,8 +2141,10 @@ cities.forEach(function (c) {
     var end = i + 1 < c.names.length ? c.names[i + 1][0] - 1 : null;
     searchList.push({ name: n[1], kind: 'now ' + c.name, city: c, at: [n[0], end], w: -1e9 + c.pop / 1e4 });
   });
-});
-searchList.forEach(function (s) { s.f = fold(s.name); });
+ });
+ searchList.forEach(function (s) { if (!s.f) s.f = fold(s.name); });
+}
+searchCities(cities);
 
 function runSearch() {
   var v = fold(q.value.trim());
@@ -2265,6 +2298,17 @@ document.fonts && document.fonts.ready && document.fonts.ready.then(function () 
 resize();
 if (GL) setTimeout(buildLandMask, 400);
 askChunk(chunkFor(year), 'w');
+/* the ancient towns and the smaller modern places, some fourteen thousand, load once the page is up */
+window.HA_ONTOWNS = function () {
+  var more = (window.HA_TOWNS || []).map(toCity);
+  Array.prototype.push.apply(cities, more);
+  searchCities(more);
+  townsLoaded = true;
+  draw();
+};
+setTimeout(function () {
+  var sc = document.createElement('script'); sc.src = 'data/towns.js'; document.body.appendChild(sc);
+}, 600);
 setYear(year);
 updateStats();
 (function () {
@@ -2294,6 +2338,7 @@ window.HA = {
   live: function () { return liveRows.length; },
   tipOn: function () { return tip.classList.contains('on'); },
   tipHtml: function () { return tip.innerHTML; },
+  townsLoaded: function () { return townsLoaded; },
   pinnedCity: function () { return pinnedCity ? pinnedCity.name : null; },
   pinned: function () { return pinnedEnt ? { name: pinnedEnt.name, onMap: !!pinnedRow, lin: pinnedEnt.lin } : null; },
   pinByName: function (name) {
@@ -2303,7 +2348,7 @@ window.HA = {
   },
   unpin: function () { unpin(); },
   spinPaused: function () { return spinPaused; },
-  cityPts: function () { return cityPts.map(function (p) { return [p.n, Math.round(p.x), Math.round(p.y), p.c.gone, !!p.ruin]; }); },
+  cityPts: function () { return cityPts.map(function (p) { return [cityName(p.c, p.ruin ? p.c.to : year), Math.round(p.x), Math.round(p.y), p.c.gone, !!p.ruin]; }); },
   renderer: function () { return GL ? 'webgl: ' + GL.renderer() : '2d'; },
   profile: function (years, scrub) {
     var out = {}, acc = { _t: 0 }, total = 0, was = interacting;

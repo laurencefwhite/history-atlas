@@ -3,7 +3,7 @@ title: History Atlas
 subtitle: A globe of world history on a time scrubber
 ---
 
-**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.5)
+**Live:** https://laurencefwhite.github.io/history-atlas/ (v0.6)
 
 One globe, one timeline. Drag the ribbon along the bottom to choose a year and the globe shows who held
 what, from 3400 BCE to 2024 CE. Each political lineage has its own hue and each polity within it a shade,
@@ -50,8 +50,20 @@ things a historical atlas should show are still to come; *What it does not do ye
 - **Cities over time.** A city appears from its founding or first record and, if it was abandoned or
   destroyed, disappears at that date: Carthage to 698, Pompeii to 79, Teotihuacan about 100 BCE to 550 CE.
   Extinct cities are drawn in a warm tint while they stand; from the year they were abandoned or destroyed
-  they stay on as ruins, a darkened dot with an italic name ("Ruins of Carthage" on the card), under their
-  own layer. A click on a city pins its card, as for a polity, with links to Wikipedia, Wikidata and, for
+  they stay on as ruins, a darkened dot with an italic name ("Ruins of Carthage" on the card), under the
+  Ruined cities layer. Mere ruins that were never towns (a villa, a temple complex, a fortress) are left out.
+- **Ancient towns.** About 10,500 towns of the ancient and medieval world, down to small ones, appear as you
+  zoom in: some 9,800 from the Pleiades gazetteer for the Greek, Roman and Near Eastern world, and about 640
+  researched from Wikipedia for East and Central Asia, South and South-East Asia, the Americas, Africa and
+  Arabia, and northern and eastern Europe (Tikal, Tiwanaku, Loulan, Mohenjo-daro, Great Zimbabwe, Kilwa,
+  Hedeby, Sarai). They thin out by screen density, the larger first. A Pleiades town is shown for the
+  periods it is attested, with dates marked "about"; it becomes a ruin only where Pleiades types it an
+  archaeological site with no later record, since Pleiades records evidence rather than fate.
+- **Smaller modern places.** Natural Earth's 3,500 further places of 50,000 people or more join the modern
+  cities, thinned by screen density like the towns, so the present is drawn at the same depth as the past.
+  An ancient town becomes the earlier name of the modern city on its site only on evidence (the city's
+  Wikidata item carries the town's Pleiades id or says it replaces it, or the names match within 10 km):
+  Nemausus and Nîmes, Mogontiacum and Mainz, Durocortorum and Reims. Other near neighbours stay separate. A click on a city pins its card, as for a polity, with links to Wikipedia, Wikidata and, for
   ancient places, Pleiades; the card stays with the city as the year moves, and says so when the city is not
   yet founded or already gone. 259 cities carry the name or spelling widely used
   at the time (Londinium, Lugdunum, Byzantium and Constantinople, Chang'an, Edo, Batavia, Léopoldville,
@@ -61,7 +73,7 @@ things a historical atlas should show are still to come; *What it does not do ye
   Cities are searchable too, by any name they have borne; a city not standing in the year sets the scrubber
   into its time.
 - **Layers.** Polities, borders, minor-polity muting, polity names, modern borders (off by default, as a
-  faint reference), cities, city names, ruins, graticule, slow spin (off — a spinning globe fights the scrubber).
+  faint reference), cities, city names, ruined cities, graticule, slow spin (off — a spinning globe fights the scrubber).
 
 # What it does not do yet
 
@@ -215,6 +227,7 @@ python fetch_cities.py          # once; caches raw/wd_cities.json (needs raw/ne_
 python fetch_renames.py         # once; candidate earlier names, work/city_renames.tsv
 python merge_city_names.py      # the checked tables of names to city_names.json
 python build_cities.py          # writes data/cities.js; caches raw/wd_ancient.json and Pleiades periods
+python build_towns.py           # writes data/towns.js from Pleiades and towns_research.json
 python verify_dates.py          # optional: the Wikipedia sentences behind the correction dates
 python build_data.py            # about 4 minutes, needs roughly 4 GB of memory
 ```

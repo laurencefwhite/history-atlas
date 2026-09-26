@@ -719,6 +719,47 @@
           1
         ]
       ]
+    },
+    "Ancient Corinth": {
+      "from": -900,
+      "to": 1858,
+      "approx": true,
+      "names": [
+        [
+          -900,
+          "Corinth",
+          1
+        ],
+        [
+          1858,
+          "Ancient Corinth"
+        ]
+      ],
+      "why": "Wikipedia 'Ancient Corinth': 'The Romans demolished Corinth in 146 BC ... built a new city in its place in 44 BC'; Byzantine, Frankish, Venetian and Ottoman town; 'In 1858, the village surrounding the ruins of Ancient Corinth was destroyed by an earthquake, leading to the establishment' of modern Corinth. Start from Pleiades' archaic period (about 900 BCE on Wikidata). The ruins are labelled Ancient Corinth, as the site is named today."
+    },
+    "Villa Romana del Casale": {
+      "drop": true,
+      "why": "A Roman villa, not a town."
+    },
+    "Dendera Temple complex": {
+      "drop": true,
+      "why": "A temple complex, not a town."
+    },
+    "Erebuni Fortress": {
+      "drop": true,
+      "why": "A fortress, and a duplicate of Erebuni, the earlier name the atlas gives Yerevan."
+    },
+    "Citadel of Erbil": {
+      "drop": true,
+      "why": "The citadel of Erbil, a living city, not a town of its own."
+    },
+    "Hala Sultan Tekke": {
+      "drop": true,
+      "why": "A mosque and shrine, not a town."
+    },
+    "Sesklo": {
+      "qid": "Q38281192",
+      "why": "Named for the Neolithic settlement, not the archaeological site."
     }
   }
 }

@@ -345,7 +345,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
       City dates: Wikidata; ancient places: <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.8.1
+      &copy; 2026 Laurence F. White &middot; v0.8.2
     </div>
   </div>
 
@@ -840,9 +840,19 @@ function simplifyGeom(g, tol, minSpan) {
   });
   return out.length ? { type: 'MultiPolygon', coordinates: out } : null;
 }
+/* Simplifying can turn a small island's ring the wrong way round; on the sphere a polygon wound the wrong way
+   is everything but itself, and filled that way it paints the whole visible hemisphere the colour of land
+   (seen from Australia between zoom 2 and 3). Any part larger than half the globe is wound back. */
+function rewind(g) {
+  var polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+  polys.forEach(function (rings) {
+    if (d3.geoArea({ type: 'Polygon', coordinates: rings }) > 2 * Math.PI) rings.forEach(function (r) { r.reverse(); });
+  });
+  return g;
+}
 var landLo = landSet.map(function (l) {
   var g = simplifyGeom(l.g.geometry, 0.1, 0.3);
-  return g ? { g: { type: 'Feature', geometry: g }, cap: l.cap, box: l.box } : null;
+  return g ? { g: { type: 'Feature', geometry: rewind(g) }, cap: l.cap, box: l.box } : null;
 }).filter(Boolean);
 var landGL = GL ? GL.set(landSet.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;
 var landGLlo = GL ? GL.set(landLo.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;

@@ -304,6 +304,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       <label class="tog"><input type="checkbox" id="L-minor" checked><span class="sw"></span><span class="tl">Mute minor polities</span></label>
       <label class="tog"><input type="checkbox" id="L-names" checked><span class="sw"></span><span class="tl">Polity names</span></label>
       <label class="tog"><input type="checkbox" id="L-co"><span class="sw"></span><span class="tl">Modern borders</span></label>
+      <label class="tog"><input type="checkbox" id="L-soft" checked><span class="sw"></span><span class="tl">Soft borders where uncertain</span></label>
+      <label class="tog"><input type="checkbox" id="L-peoples" checked><span class="sw"></span><span class="tl">Peoples without states</span></label>
+      <label class="tog"><input type="checkbox" id="L-migr" checked><span class="sw"></span><span class="tl">Migrations</span></label>
+      <label class="tog"><input type="checkbox" id="L-battles" checked><span class="sw"></span><span class="tl">Battles</span></label>
       <label class="tog"><input type="checkbox" id="L-cities" checked><span class="sw"></span><span class="tl">Cities</span></label>
       <label class="tog"><input type="checkbox" id="L-cnames"><span class="sw"></span><span class="tl">City names</span></label>
       <label class="tog"><input type="checkbox" id="L-ruins" checked><span class="sw"></span><span class="tl">Ruined cities</span></label>
@@ -341,7 +345,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
       City dates: Wikidata; ancient places: <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.7.1
+      &copy; 2026 Laurence F. White &middot; v0.8
     </div>
   </div>
 
@@ -393,7 +397,7 @@ var POLAR_N = parallel(66.5632), POLAR_S = parallel(-66.5632);
 /* Cities with their dates: from and to are years (null where unknown, shown in every year); names over time
    are [year, name] pairs. A city with no country is an extinct one, a ruin today. A modern city with no date
    is shown from UNDATED on, rather than in every year: most were founded or grew late. */
-var UNDATED = 1500, townsLoaded = false;
+var UNDATED = 1500, townsLoaded = false, placesLoaded = false, townsStart = 1e9, placesStart = 1e9;
 /* A town known only from its record (kind 'c': it continues, or the record simply ends) is shown for the
    years it is attested and not drawn as a ruin after; approx marks dates estimated from periods. */
 function toCity(c) {
@@ -708,7 +712,7 @@ var projection = d3.geoOrthographic().clipAngle(90).precision(0.35);
 var path = d3.geoPath(projection, ctx);
 var sphere = { type: 'Sphere' };
 var opt = { polities: true, edges: true, minor: true, names: true, co: false,
-            cities: true, cnames: false, ruins: true, oceans: true, grat: true, spin: false };
+            cities: true, cnames: false, ruins: true, soft: true, battles: true, peoples: true, migr: true, oceans: true, grat: true, spin: false };
 
 function placePills() {
   var panel = document.getElementById('controls');
@@ -780,6 +784,19 @@ function drawSky() {
 }
 
 /* --------------------------------------------------------------- drawing */
+var softCv = null;
+function softCanvas() {
+  if (!softCv) softCv = document.createElement('canvas');
+  if (softCv.width !== Math.round(W * DPR) || softCv.height !== Math.round(H * DPR)) {
+    softCv.width = Math.round(W * DPR); softCv.height = Math.round(H * DPR);
+  }
+  return softCv;
+}
+/* trace a polity's outline on another canvas: the page's trace draws on the main one */
+function traceOn(c2, e) {
+  var keep = ctx; ctx = c2; path.context(c2);
+  try { trace(e, true); } finally { ctx = keep; path.context(keep); }
+}
 var FONT = "'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 var SERIF = "'Spectral',Georgia,'Times New Roman',serif";
 var pinnedCity = null, hoverCity = null, hoverRow = null, pinnedRow = null, pinnedEnt = null, pinAt = null, highlightLin = null;
@@ -939,11 +956,33 @@ function draw() {
     ctx.fill(); ctx.stroke();
   }
 
+  drawPeopleTint(false);
   if (opt.polities && live.length) {
     var tiny = MINOR_PX * 0.25, ew = fast ? 0.7 : 0.9;
+    /* the vague and the roughly known drawn on a layer of their own, blurred and kept to the land */
+    if (opt.soft) for (var g2 = 1; g2 <= 2; g2++) {
+      var sc = softCanvas(), sx = sc.getContext('2d'), had = false;
+      sx.setTransform(DPR, 0, 0, DPR, 0, 0); sx.clearRect(0, 0, W, H);
+      for (i = 0; i < live.length; i++) {
+        e = live[i];
+        if (!capVisible(e.cap) || gradeOf(e) !== g2) continue;
+        var px2 = screenPx(e.a);
+        sx.beginPath(); traceOn(sx, e);
+        sx.fillStyle = (opt.minor && px2 < MINOR_PX) ? e.e.tint : e.e.fill; sx.fill();
+        had = true; drawn++;
+      }
+      if (!had) continue;
+      ctx.save();
+      ctx.beginPath(); for (var k2 = 0; k2 < LS.length; k2++) if (capVisible(LS[k2].cap)) trace(LS[k2], true);
+      ctx.clip();
+      ctx.filter = 'blur(' + (softPx(g2) / 2).toFixed(1) + 'px)';
+      ctx.drawImage(sc, 0, 0, W, H);
+      ctx.filter = 'none';
+      ctx.restore();
+    }
     for (i = 0; i < live.length; i++) {
       e = live[i];
-      if (!capVisible(e.cap)) continue;
+      if (!capVisible(e.cap) || (opt.soft && gradeOf(e) < 3)) continue;
       var px = screenPx(e.a);
       var fill = (opt.minor && px < MINOR_PX) ? e.e.tint : e.e.fill;
       ctx.beginPath(); trace(e, true);
@@ -1025,8 +1064,12 @@ function draw() {
   labelBoxes = [];
   if (!fast && opt.oceans) drawOceanLabels();
   if (!fast && opt.polities && opt.names) drawPolityLabels(live);
+  if (!fast) drawPeopleLabels();
+  drawMigrations();
   tick('labels');
+  drawBattles();
   if (opt.cities || opt.ruins) drawCities(); else cityPts = [];
+  Array.prototype.push.apply(cityPts, battlePts);
   tick('cities');
 
   lastDrawMs = performance.now() - t0;
@@ -1043,6 +1086,30 @@ function draw() {
 var liveCount = 0, statsKey = null;
 
 /* ocean, land, polities, borders and the veil, on the graphics card; returns how many polities were drawn */
+/* How well a border is known, by the grade in the design sketch: 3, surveyed or set by treaty (from the
+   Congress of Vienna, 1815, on); 2, known roughly (most states before then); 1, vague (the earliest states,
+   before 1000 BCE, and the nomadic confederations of the steppe at any date, whose reach was a range rather
+   than a line). Grade 3 is drawn crisp with a border line; grade 2 with no line and an edge feathered over
+   some 25 km; grade 1 with no edge at all, its colour falling away over some 80 km. The widths are on the
+   ground, so a vague border grows vaguer as you zoom in, as it should. */
+var NOMADS = {};
+['Scythia', 'Yuezhi', 'Xiongnu', 'Wusun', 'Southern Xiongnu', 'Xianbei', 'Huns', 'Tuyuhun', 'Rouran Khaganate',
+ 'White Huns', 'Alans', 'Hunnic Empire', 'Yenisei Kyrgyz', 'Göktürk Khaganate', 'Avar Khaganate', 'Eastern Göktürks',
+ 'Western Göktürks', 'Old Great Bulgaria', 'Türgesh', 'Oghuz Turks', 'Uyghur Khaganate', 'Kimek-Kipchak confederation',
+ 'Magyars', 'Cuman-Kipchak Confederation', 'Kara-Khitans', 'Mongol Empire', 'Golden Horde', 'White Horde', 'Blue Horde',
+ 'Four Oirats', 'Nogai Horde', 'Kazakh Khanate', 'Mongol Khanate', 'Small Horde', 'Dzungar Khanate', 'Oirat Confederation',
+ 'Kalmyk Khanate'].forEach(function (n) { NOMADS[n] = 1; });
+function gradeOf(row) {
+  if (row.gr) return row.gr;
+  return (row.gr = NOMADS[row.e.name] ? 1 : row.f >= 1815 ? 3 : row.f >= -1000 ? 2 : 1);
+}
+var GRADE_KM = [0, 80, 25];
+var GRADE_TEXT = ['', 'Borders vague: a range, not a line', 'Borders known roughly', 'Borders surveyed or set by treaty'];
+function softPx(g) {
+  var px = GRADE_KM[g] * R0 * zoom / 6371;
+  return g === 1 ? clamp(px, 3, 60) : clamp(px, 1.5, 28);
+}
+
 function drawGL(live, lifted, fast, gr) {
   var r = R0 * zoom, i, e, n = 0;
   GL.frame(FX, FY, CX, CY, r, viewV);
@@ -1058,20 +1125,28 @@ function drawGL(live, lifted, fast, gr) {
   }
   GL.fillMany(LG, near, GLC.land); GL.linesMany(LG, near, GLC.land);
   tick('land');
+  drawPeopleTint(true);
   var S = currentSet();
   if (opt.polities && live.length && S && S.gl) {
     var tiny = MINOR_PX * 0.25, edged = [];
-    for (i = 0; i < live.length; i++) {
-      e = live[i];
-      if (!capVisible(e.cap)) continue;
-      var px = screenPx(e.a), minor = opt.minor && px < MINOR_PX;
-      var fill = minor ? e.e.tintV : e.e.fillV;
-      var dark = opt.edges && !(opt.minor && px < tiny);
-      if (nearSide(e) && S.set[e.gi] === e) {
-        GL.fill(S.gl, e.gi, fill);
-        if (dark) edged.push(e.gi); else GL.lines(S.gl, e.gi, fill);
-      } else GL.screen(clipped(e), fill, dark ? GLC.edge : fill);
-      n++;
+    /* the vague first, then the roughly known, each in a soft layer; the surveyed crisp over them */
+    for (var g = 1; g <= 3; g++) {
+      var any = false;
+      for (i = 0; i < live.length; i++) {
+        e = live[i];
+        if (!capVisible(e.cap) || (opt.soft ? gradeOf(e) : 3) !== g) continue;
+        if (!any && g < 3) GL.layerBegin();
+        any = true;
+        var px = screenPx(e.a), minor = opt.minor && px < MINOR_PX;
+        var fill = minor ? e.e.tintV : e.e.fillV;
+        var dark = g === 3 && opt.edges && !(opt.minor && px < tiny);
+        if (nearSide(e) && S.set[e.gi] === e) {
+          GL.fill(S.gl, e.gi, fill);
+          if (dark) edged.push(e.gi); else if (g === 3) GL.lines(S.gl, e.gi, fill);
+        } else GL.screen(clipped(e), fill, dark ? GLC.edge : g === 3 ? fill : null);
+        n++;
+      }
+      if (any && g < 3) GL.layerEnd(softPx(g), 1);
     }
     /* the dark borders all at once, over every fill: the same look as each stroked in turn, near enough */
     GL.linesMany(S.gl, edged, GLC.edge);
@@ -1197,6 +1272,233 @@ function drawPolityLabels(live) {
   ctx.lineJoin = 'miter';
 }
 
+/* Battles as fire: each flares in its year and fades over the four after, sized by how many Wikipedia editions
+   describe it, which also sets the zoom at which it appears. A war's battles of the last two years that lie
+   within 600 km of one another are joined by a glow, the theatre of the fighting: drawn from the battles
+   themselves, not a claim about where a front line ran. */
+var BATTLES = [], WARS = [], battlesLoaded = false, battlePts = [];
+function loadEvents() {
+  var E = window.HA_EVENTS || { battles: [], wars: [] };
+  WARS = E.wars;
+  BATTLES = E.battles.map(function (b) {
+    return { isBattle: true, name: b[0], lon: b[1], lat: b[2], year: b[3], links: b[4], war: b[5], wd: b[6],
+             u: unitv([b[1], b[2]]) };
+  }).sort(function (a, b) { return a.year - b.year; });
+  battlesLoaded = true;
+}
+function firstBattle(y) {
+  var lo = 0, hi = BATTLES.length;
+  while (lo < hi) { var m = (lo + hi) >> 1; if (BATTLES[m].year < y) lo = m + 1; else hi = m; }
+  return lo;
+}
+function drawBattles() {
+  battlePts = [];
+  if (!opt.battles || !BATTLES.length) return;
+  var minL = zoom < 1.5 ? 25 : zoom < 3 ? 12 : zoom < 6 ? 5 : 2, fz = 0.8 + 0.45 * Math.sqrt(zoom);
+  var byWar = {};
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (var i = firstBattle(year - 4); i < BATTLES.length && BATTLES[i].year <= year; i++) {
+    var b = BATTLES[i];
+    if (b.links < minL) continue;
+    var u = b.u, dp = u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2];
+    if (dp < 0.05) continue;
+    var x = CX + FX[0] * u[0] + FX[1] * u[1], y = CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2];
+    if (x < -40 || x > W + 40 || y < -40 || y > H + 40) continue;
+    var age = year - b.year, a = age === 0 ? 1 : 1 - age / 5;
+    var r = (3 + 2.2 * Math.log2(b.links)) * fz;
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,236,170,' + (0.95 * a).toFixed(3) + ')');
+    g.addColorStop(0.35, 'rgba(255,150,50,' + (0.55 * a).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(255,70,20,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill();
+    battlePts.push({ c: b, x: x, y: y, battle: true });
+    if (b.war >= 0 && age <= 2) (byWar[b.war] || (byWar[b.war] = [])).push({ x: x, y: y, b: b, a: a });
+  }
+  /* the theatre: a minimum spanning tree over each war's recent battles, edges under 600 km */
+  Object.keys(byWar).forEach(function (w) {
+    var P = byWar[w];
+    if (P.length < 2) return;
+    var inT = [0], rest = P.slice(1).map(function (_, k) { return k + 1; });
+    while (rest.length) {
+      var best = null, bd = Infinity;
+      for (var m = 0; m < inT.length; m++) for (var n = 0; n < rest.length; n++) {
+        var A = P[inT[m]].b.u, B = P[rest[n]].b.u;
+        var d = Math.acos(Math.min(1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2])) * 6371;
+        if (d < bd) { bd = d; best = [inT[m], rest[n], n]; }
+      }
+      if (!best) break;
+      inT.push(best[1]); rest.splice(best[2], 1);
+      if (bd > 600) continue;
+      var p0 = P[best[0]], p1 = P[best[1]], aa = Math.min(p0.a, p1.a);
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(255,110,40,' + (0.18 * aa).toFixed(3) + ')'; ctx.lineWidth = 10 * fz;
+      ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,190,110,' + (0.30 * aa).toFixed(3) + ')'; ctx.lineWidth = 2.2 * fz; ctx.stroke();
+    }
+  });
+  ctx.restore();
+}
+
+/* Peoples without states: an approximate extent drawn as a soft warm tint under the states, never as a line,
+   and the name in spaced italic capitals as a printed atlas sets it, fainter where the extent is vaguer. A people
+   can lie under a state that claimed its land; the name still shows. Migrations advance along their routes with
+   the year as a broad pale trail with a head, and fade over forty years once they are over. */
+var PEOPLES = [], MIGRATIONS = [], peoplesLoaded = false;
+var PEOPLE_TINT = window.GlobeGL ? GlobeGL.rgba('rgba(226,204,160,.26)') : null;
+function loadPeoples() {
+  var P = window.HA_PEOPLES || { peoples: [], migrations: [] };
+  PEOPLES = P.peoples.map(function (r) {
+    var ring = r[6].slice();
+    if (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1]) ring.push(ring[0].slice());
+    var g = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] } };
+    if (d3.geoArea(g) > 2 * Math.PI) { ring.reverse(); g.geometry.coordinates = [ring]; }
+    return { isPeople: true, name: r[0], kind: r[1], from: r[2], to: r[3], approx: !!r[4], grade: r[5], g: g,
+             cap: capOf(g.geometry), centre: d3.geoCentroid(g), wd: r[7] || null, wp: r[8] || null };
+  });
+  MIGRATIONS = P.migrations.map(function (r) {
+    return { name: r[0], from: r[1], to: r[2], approx: !!r[3], path: r[4], width: r[5], people: r[6], kind: r[7],
+             wd: r[8] || null, wp: r[9] || null };
+  });
+  peoplesLoaded = true;
+}
+function peopleLive(p) { return year >= p.from && year <= p.to; }
+function peopleAt(ll) {
+  if (!opt.peoples) return null;
+  var best = null;
+  for (var i = 0; i < PEOPLES.length; i++) {
+    var p = PEOPLES[i];
+    if (!peopleLive(p) || !capVisible(p.cap)) continue;
+    if (d3.geoContains(p.g, ll) && (!best || d3.geoArea(p.g) < d3.geoArea(best.g))) best = p;
+  }
+  return best;
+}
+function drawPeopleTint(gl) {
+  if (!opt.peoples || !PEOPLES.length) return;
+  var any = false, blur = clamp(90 * R0 * zoom / 6371, 4, 70);
+  if (gl) {
+    for (var i = 0; i < PEOPLES.length; i++) {
+      var p = PEOPLES[i];
+      if (!peopleLive(p) || !capVisible(p.cap)) continue;
+      if (!any) GL.layerBegin();
+      any = true;
+      GL.screen(clipped(p), PEOPLE_TINT, null);
+    }
+    if (any) GL.layerEnd(blur, 1);
+    return;
+  }
+  var sc = softCanvas(), sx = sc.getContext('2d');
+  sx.setTransform(DPR, 0, 0, DPR, 0, 0); sx.clearRect(0, 0, W, H);
+  sx.fillStyle = 'rgba(226,204,160,.26)';
+  for (var k = 0; k < PEOPLES.length; k++) {
+    var q = PEOPLES[k];
+    if (!peopleLive(q) || !capVisible(q.cap)) continue;
+    sx.beginPath(); path.context(sx); path(q.g); path.context(ctx); sx.fill(); any = true;
+  }
+  if (!any) return;
+  ctx.save(); ctx.filter = 'blur(' + (blur / 2).toFixed(1) + 'px)'; ctx.drawImage(sc, 0, 0, W, H); ctx.filter = 'none'; ctx.restore();
+}
+function drawPeopleLabels() {
+  if (!opt.peoples || !PEOPLES.length) return;
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  var boxes = labelBoxes;
+  var list = PEOPLES.filter(function (p) { return peopleLive(p) && capVisible(p.cap); });
+  list.sort(function (a, b) { return d3.geoArea(b.g) - d3.geoArea(a.g); });
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i];
+    var c = projection(p.centre);
+    if (!c || d3.geoDistance(p.centre, [-rotation[0], -rotation[1]]) > 1.45) continue;
+    var b = boundsPath.bounds(p.g), bw = b[1][0] - b[0][0];
+    if (!isFinite(bw) || bw < 70) continue;
+    var t = p.name.toUpperCase().split('').join('\u2009');
+    var size = clamp(bw / (p.name.length * 1.9), 9, 15);
+    ctx.font = 'italic 400 ' + size.toFixed(1) + 'px ' + SERIF;
+    var tw = ctx.measureText(t).width;
+    var box = [c[0] - tw / 2 - 3, c[1] - size * 0.7, tw + 6, size * 1.4];
+    if (hits(boxes, box)) continue;
+    boxes.push(box);
+    var a = p.grade >= 2 ? 0.82 : 0.62;
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(3,8,18,' + (a * 0.6).toFixed(2) + ')'; ctx.strokeText(t, c[0], c[1]);
+    ctx.fillStyle = 'rgba(244,230,204,' + a + ')'; ctx.fillText(t, c[0], c[1]);
+  }
+  ctx.restore();
+}
+function migrationHead(m) {
+  var P = m.path, y = Math.min(year, m.to);
+  if (y <= P[0][0]) return { pts: [[P[0][1], P[0][2]]], done: false };
+  var pts = [[P[0][1], P[0][2]]];
+  for (var i = 1; i < P.length; i++) {
+    if (y >= P[i][0]) { pts.push([P[i][1], P[i][2]]); continue; }
+    var t = (y - P[i - 1][0]) / Math.max(1, P[i][0] - P[i - 1][0]);
+    pts.push(d3.geoInterpolate([P[i - 1][1], P[i - 1][2]], [P[i][1], P[i][2]])(t));
+    return { pts: pts, done: false };
+  }
+  return { pts: pts, done: true };
+}
+function drawMigrations() {
+  if (!opt.migr || !MIGRATIONS.length) return;
+  var pxkm = R0 * zoom / 6371, centre = [-rotation[0], -rotation[1]];
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (var i = 0; i < MIGRATIONS.length; i++) {
+    var m = MIGRATIONS[i];
+    if (year < m.from || year > m.to + 40) continue;
+    var fade = year > m.to ? 1 - (year - m.to) / 40 : 1;
+    var h = migrationHead(m), pts = h.pts;
+    if (pts.length < 2) continue;
+    /* follow the great circles between waypoints, dropping what lies behind the globe */
+    var line = [], seg = [];
+    for (var k = 1; k < pts.length; k++) {
+      var ip = d3.geoInterpolate(pts[k - 1], pts[k]), n = Math.max(2, Math.ceil(d3.geoDistance(pts[k - 1], pts[k]) / 0.03));
+      for (var j = (k === 1 ? 0 : 1); j <= n; j++) {
+        var ll = ip(j / n);
+        if (d3.geoDistance(ll, centre) > 1.55) { if (seg.length > 1) line.push(seg); seg = []; continue; }
+        var q = projection(ll); if (q) seg.push(q);
+      }
+    }
+    if (seg.length > 1) line.push(seg);
+    if (!line.length) continue;
+    var forced = m.kind === 'forced';
+    var col = forced ? '255,176,160' : '236,232,220';
+    var wpx = clamp(m.width * pxkm, 5, 70);
+    for (var L = 0; L < line.length; L++) {
+      var sg = line[L];
+      ctx.beginPath(); ctx.moveTo(sg[0][0], sg[0][1]);
+      for (var z = 1; z < sg.length; z++) ctx.lineTo(sg[z][0], sg[z][1]);
+      ctx.strokeStyle = 'rgba(' + col + ',' + (0.13 * fade).toFixed(3) + ')'; ctx.lineWidth = wpx; ctx.stroke();
+      ctx.strokeStyle = 'rgba(' + col + ',' + (0.55 * fade).toFixed(3) + ')'; ctx.lineWidth = 1.4; ctx.setLineDash([5, 4]); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    /* the head: an arrow along the last step, while the movement is under way */
+    var last = line[line.length - 1];
+    if (!h.done && last.length > 1) {
+      var A = last[last.length - 2], B = last[last.length - 1], ang = Math.atan2(B[1] - A[1], B[0] - A[0]), hs = 9;
+      ctx.beginPath();
+      ctx.moveTo(B[0] + Math.cos(ang) * hs, B[1] + Math.sin(ang) * hs);
+      ctx.lineTo(B[0] + Math.cos(ang + 2.5) * hs, B[1] + Math.sin(ang + 2.5) * hs);
+      ctx.lineTo(B[0] + Math.cos(ang - 2.5) * hs, B[1] + Math.sin(ang - 2.5) * hs);
+      ctx.closePath(); ctx.fillStyle = 'rgba(' + col + ',' + (0.85 * fade).toFixed(3) + ')'; ctx.fill();
+    }
+    var at = last[last.length - 1];
+    if (!interacting && zoom > 1.2 && at[1] < document.getElementById('scrub').getBoundingClientRect().top - 12) {
+      ctx.font = 'italic 400 11px ' + SERIF; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(3,8,18,.6)'; ctx.strokeText(m.name, at[0] + 12, at[1]);
+      ctx.fillStyle = 'rgba(' + col + ',' + (0.9 * fade).toFixed(3) + ')'; ctx.fillText(m.name, at[0] + 12, at[1]);
+    }
+  }
+  ctx.restore();
+}
+function peopleTipHtml(p, pinned) {
+  var span2 = (p.approx ? 'c.&nbsp;' : '') + yearLabel(p.from) + ' &ndash; ' + (p.to >= 2025 ? 'today' : (p.approx ? 'c.&nbsp;' : '') + yearLabel(p.to));
+  var e = unitAtNear(p.centre[0], p.centre[1]);
+  return '<div class="tn">' + esc(p.name) + '</div>' +
+    '<div class="tc">' + (p.kind === 'culture' ? 'ARCHAEOLOGICAL CULTURE' : 'PEOPLE WITHOUT A STATE ON THIS MAP') + '</div>' +
+    '<div class="td">' + span2 + '<br>Extent ' + (p.grade >= 2 ? 'known roughly' : 'approximate') + ', drawn with no border</div>' +
+    (e ? '<div class="tt"><small>In ' + yearLabel(year) + ' the states around</small>' + esc(e.e.name) + '</div>' : '') +
+    (pinned ? cityLinks(p) + pinHint('') : '');
+}
+
 function drawCities() {
   var centre = [-rotation[0], -rotation[1]];
   cityPts = [];
@@ -1212,6 +1514,11 @@ function drawCities() {
   var CELL = zoom < 6 ? 26 : zoom < 10 ? 16 : 10, taken = {}, batches = {}, fz = 0.85 + 0.35 * Math.min(1, zoom / 3);
   var TOWNZ = W < 700 ? 4.5 : 3.6;                    /* from here in, towns are thinned by screen cell, not by size */
   for (i = 0; i < cities.length; i++) {
+    /* the towns and the smaller places are each sorted largest first: zoomed out, stop at the first too small */
+    if (zoom < TOWNZ && i >= townsStart && cities[i].pop < minPop) {
+      if (i < placesStart) { i = placesStart - 1; continue; }
+      break;
+    }
     c = cities[i];
     var ruin = c.gone && c.to !== null && year > c.to;
     if (ruin ? !opt.ruins : !opt.cities || !cityLive(c, year)) continue;
@@ -1482,6 +1789,7 @@ function rowTipHtml(e) {
   rows.push('Held this shape <b>' + span(e.f, e.t) + '</b>');
   rows.push(esc(E.name) + ' <b>' + span(E.first, E.last) + '</b>');
   rows.push('This shape <b>' + km2(e.a) + '</b>');
+  rows.push(GRADE_TEXT[gradeOf(e)]);
   if (E.aggs.length) rows.push('Within ' + E.aggs.map(function (a) { return esc(a.replace(/^\(|\)$/g, '')); }).join(', '));
   var wl = linksHtml(E, e);
   return '<div class="tn"><i style="background:' + E.fill + '"></i>' + esc(E.name) + '</div>' +
@@ -1506,13 +1814,47 @@ function cityLinks(c) {
   var ls = [];
   if (c.wp) ls.push('<a class="wl" href="https://en.wikipedia.org/wiki/' + encodeURIComponent(c.wp.replace(/ /g, '_')) +
                     '" target="_blank" rel="noopener">Wikipedia &rarr;</a>');
+  /* a smaller place carries only its Wikidata id; Wikidata sends the link on to the English article */
+  else if (c.wd) ls.push('<a class="wl" href="https://www.wikidata.org/wiki/Special:GoToLinkedPage/enwiki/' + encodeURIComponent(c.wd) +
+                    '" target="_blank" rel="noopener">Wikipedia &rarr;</a>');
   if (c.wd) ls.push('<a class="wl" href="https://www.wikidata.org/wiki/' + encodeURIComponent(c.wd) +
                     '" target="_blank" rel="noopener">Wikidata &rarr;</a>');
   if (c.pl) ls.push('<a class="wl" href="https://pleiades.stoa.org/places/' + encodeURIComponent(c.pl) +
                     '" target="_blank" rel="noopener" title="Pleiades gazetteer of ancient places">Pleiades &rarr;</a>');
   return ls.length ? '<div class="tgo">' + ls.join('<span class="dot">&middot;</span>') + '</div>' : '';
 }
+function battleTipHtml(b, pinned) {
+  var e = unitAtNearYear(b.lon, b.lat);
+  var war = b.war >= 0 && WARS[b.war] ? WARS[b.war][0] : '';
+  var age = year - b.year;
+  return '<div class="tn">' + esc(b.name) + '</div>' +
+    '<div class="tc">BATTLE &middot; ' + yearLabel(b.year).toUpperCase() + (age > 0 ? ' &middot; ' + age + (age === 1 ? ' YEAR' : ' YEARS') + ' AGO' : '') + '</div>' +
+    (war ? '<div class="td">Part of <b>' + esc(war) + '</b></div>' : '') +
+    (e ? '<div class="tt"><small>In ' + yearLabel(year) + ' the ground lay in</small>' + esc(e.e.name) + '</div>' : '') +
+    (pinned ? cityLinks({ wd: b.wd }) + pinHint('') : '');
+}
+function unitAtNearYear(lon, lat) { return unitAtNear(lon, lat); }
 function showCityTip(cp, mx, my, pinned) {
+  if (cp.c.isPeople) {
+    var pk = 'p' + cp.c.name + year + (pinned ? 'p' : '');
+    if (pk !== tipKey) {
+      tipKey = pk; tip.innerHTML = peopleTipHtml(cp.c, pinned);
+      tip.classList.add('on');
+      if (pinned) tip.classList.add('pin'); else tip.classList.remove('pin');
+    }
+    placeTip(mx, my);
+    return;
+  }
+  if (cp.c.isBattle) {
+    var bk = 'b' + cp.c.wd + year + (pinned ? 'p' : '');
+    if (bk !== tipKey) {
+      tipKey = bk; tip.innerHTML = battleTipHtml(cp.c, pinned);
+      tip.classList.add('on');
+      if (pinned) tip.classList.add('pin'); else tip.classList.remove('pin');
+    }
+    placeTip(mx, my);
+    return;
+  }
   var c = cp.c, key = 'c' + c.name + c.country + year + (cp.ruin ? 'r' : '') + (pinned ? 'p' : '');
   if (key === tipKey) { placeTip(mx, my); return; }
   tipKey = key;
@@ -1596,7 +1938,7 @@ function refreshCityPin() {
   for (var i = 0; i < cityPts.length; i++) if (cityPts[i].c === pinnedCity) { cp = cityPts[i]; break; }
   if (cp) { pinAt = [cp.x, cp.y]; hoverCity = cp; }
   var c = pinnedCity;
-  showCityTip(cp || { c: c, ruin: c.gone && c.to !== null && year > c.to }, pinAt[0], pinAt[1], true);
+  showCityTip(cp || { c: c, ruin: !c.isBattle && !c.isPeople && c.gone && c.to !== null && year > c.to }, pinAt[0], pinAt[1], true);
 }
 function hideTip() { if (pinnedEnt || pinnedCity) return; tip.classList.remove('on'); tip.classList.remove('pin'); tipKey = null; }
 function unpin() {
@@ -1691,7 +2033,7 @@ cv.addEventListener('pointerup', function (e) {
   if (wasMoved) { if (stale) spinV = [0, 0]; else startMomentum(); return; }
   spinV = [0, 0];
   if (smallScreen() && document.querySelector('.panel:not(.min)')) { foldPanels(null); return; }
-  var cp = opt.cities || opt.ruins ? cityAt(e.clientX, e.clientY) : null;
+  var cp = opt.cities || opt.ruins || opt.battles ? cityAt(e.clientX, e.clientY) : null;
   if (e.pointerType === 'touch') {
     /* a touch screen has no hover, so one tap does the looking and a second releases */
     interacting = false;
@@ -1707,6 +2049,8 @@ cv.addEventListener('pointerup', function (e) {
   var hit = ll && Math.hypot(e.clientX - CX, e.clientY - CY) <= R0 * zoom && opt.polities ? unitAt(ll) : null;
   if (hit && (!pinnedEnt || pinnedEnt !== hit.e)) { unpin(); pinRow(hit, e.clientX, e.clientY); return; }
   if (hit) { unpin(); return; }
+  var pp = ll && !hit ? peopleAt(ll) : null;
+  if (pp && pinnedCity !== pp) { pinCity({ c: pp }, e.clientX, e.clientY); return; }
   if (pinnedEnt || pinnedCity) { unpin(); return; }
   if (opt.spin) setSpinPaused(!spinPaused);
 });
@@ -1766,7 +2110,7 @@ function passOver(mx, my) {
 }
 function doHover(mx, my) {
   if (pinnedEnt || pinnedCity) { cv.style.cursor = 'pointer'; return; }
-  var cp = opt.cities || opt.ruins ? cityAt(mx, my) : null;
+  var cp = opt.cities || opt.ruins || opt.battles ? cityAt(mx, my) : null;
   if (cp) {
     if (!hoverCity || hoverCity.c !== cp.c) { hoverCity = cp; hoverRow = null; showCityTip(cp, mx, my); draw(); }
     else showCityTip(cp, mx, my);
@@ -1779,6 +2123,9 @@ function doHover(mx, my) {
   var ll = d > R0 * zoom ? null : projection.invert([mx, my]);
   var e = ll && opt.polities ? unitAt(ll) : null;
   if (!e) {
+    /* land no state held: perhaps a people's */
+    var pp = ll ? peopleAt(ll) : null;
+    if (pp) { showCityTip({ c: pp }, mx, my); if (hoverRow || had) { hoverRow = null; draw(); } return; }
     hideTip();
     if (hoverRow || had) { hoverRow = null; draw(); }
     return;
@@ -2339,9 +2686,25 @@ askChunk(chunkFor(year), 'w');
 /* the ancient towns and the smaller modern places, some fourteen thousand, load once the page is up */
 window.HA_ONTOWNS = function () {
   var more = (window.HA_TOWNS || []).map(toCity);
+  townsStart = cities.length;
   Array.prototype.push.apply(cities, more);
+  placesStart = cities.length;
   searchCities(more);
   townsLoaded = true;
+  draw();
+  var se = document.createElement('script'); se.src = 'data/events.js'; document.body.appendChild(se);
+  var sq = document.createElement('script'); sq.src = 'data/peoples.js'; document.body.appendChild(sq);
+  /* then GeoNames' smaller places, some thirty thousand */
+  var sp = document.createElement('script'); sp.src = 'data/places.js'; document.body.appendChild(sp);
+};
+window.HA_ONEVENTS = function () { loadEvents(); draw(); };
+window.HA_ONPEOPLES = function () { loadPeoples(); draw(); };
+window.HA_ONPLACES = function () {
+  var more = (window.HA_PLACES || []).map(toCity);
+  placesStart = cities.length;
+  Array.prototype.push.apply(cities, more);
+  searchCities(more);
+  placesLoaded = true;
   draw();
 };
 setTimeout(function () {
@@ -2377,6 +2740,13 @@ window.HA = {
   tipOn: function () { return tip.classList.contains('on'); },
   tipHtml: function () { return tip.innerHTML; },
   townsLoaded: function () { return townsLoaded; },
+  battlesLoaded: function () { return battlesLoaded; },
+  peoplesLoaded: function () { return peoplesLoaded; },
+  project: function (lon, lat) { applyProjection(); var q = projection([lon, lat]); return q ? [Math.round(q[0]), Math.round(q[1])] : null; },
+  peopleAt: function (lon, lat) { var p = peopleAt([lon, lat]); return p ? p.name : null; },
+  migrationsLive: function () { return MIGRATIONS.filter(function (m) { return year >= m.from && year <= m.to + 40; }).map(function (m) { return m.name; }); },
+  battlePts: function () { return battlePts.map(function (p) { return [p.c.name, Math.round(p.x), Math.round(p.y), p.c.year]; }); },
+  placesLoaded: function () { return placesLoaded; },
   pinnedCity: function () { return pinnedCity ? pinnedCity.name : null; },
   pinned: function () { return pinnedEnt ? { name: pinnedEnt.name, onMap: !!pinnedRow, lin: pinnedEnt.lin } : null; },
   pinByName: function (name) {
@@ -2386,7 +2756,7 @@ window.HA = {
   },
   unpin: function () { unpin(); },
   spinPaused: function () { return spinPaused; },
-  cityPts: function () { return cityPts.map(function (p) { return [cityName(p.c, p.ruin ? p.c.to : year), Math.round(p.x), Math.round(p.y), p.c.gone, !!p.ruin]; }); },
+  cityPts: function () { return cityPts.map(function (p) { return [p.battle ? p.c.name : cityName(p.c, p.ruin ? p.c.to : year), Math.round(p.x), Math.round(p.y), !!p.c.gone, !!p.ruin, !!p.battle]; }); },
   renderer: function () { return GL ? 'webgl: ' + GL.renderer() : '2d'; },
   profile: function (years, scrub) {
     var out = {}, acc = { _t: 0 }, total = 0, was = interacting;

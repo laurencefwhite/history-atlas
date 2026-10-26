@@ -76,6 +76,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
 /* ---------- masthead, with the year where the clocks were ---------- */
 #masthead{top:18px;left:18px;padding:15px 18px 14px;width:268px}
+.shelf{display:inline-block;margin-bottom:5px;color:var(--ink-faint);font-size:10px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+.shelf:hover{color:var(--ink)}
 #masthead h1{
   margin:0;
   font-family:var(--serif);
@@ -276,6 +278,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
   <div class="panel" id="masthead">
     <button class="pmin" data-name="Title" title="Minimise"></button>
+    <a class="shelf" href="https://laurencefwhite.github.io/globe-shelf/" title="All the globes">&lsaquo; The Globe Shelf</a>
     <h1>History Atlas</h1>
     <div class="sub">Who held what, and when</div>
     <div class="yearbox">
@@ -345,7 +348,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       Succession: <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> P1365 / P1366<br>
       Coastlines, countries, cities: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a><br>
       City dates: Wikidata; ancient places: <a href="https://pleiades.stoa.org" target="_blank" rel="noopener">Pleiades</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a><br>
-      &copy; 2026 Laurence F. White &middot; v0.8.5
+      &copy; 2026 Laurence F. White &middot; v0.8.7
     </div>
   </div>
 
@@ -605,6 +608,36 @@ function chunkFor(y) {
 var sets = { w: {}, f: {} };      /* built sets, by chunk index */
 var asked = {}, pending = 0, clock = 0;
 
+/* For the card. It folds the far side of a shape onto the limb, so a shape crossing the limb needs no clipping on
+   the processor, provided its corners are close together and none lies near the point opposite the view, where
+   neighbouring corners land far apart on the limb and would cut across the disc. So each outline goes to the
+   card with corners every half degree, and only a shape reaching within a few degrees of that point (an empire
+   spanning most of a hemisphere, seen from the far side) is still clipped by d3. */
+var DENSE = Math.cos(0.5 * DEG);
+function dense(a) {
+  var n = a.length / 3, out = [], i, k;
+  for (i = 0; i < n; i++) {
+    var x0 = a[i * 3], y0 = a[i * 3 + 1], z0 = a[i * 3 + 2];
+    out.push(x0, y0, z0);
+    if (i === n - 1) break;
+    var x1 = a[i * 3 + 3], y1 = a[i * 3 + 4], z1 = a[i * 3 + 5], d = x0 * x1 + y0 * y1 + z0 * z1;
+    if (d >= DENSE) continue;
+    var m = Math.ceil(Math.acos(Math.max(-1, Math.min(1, d))) / (0.5 * DEG));
+    for (k = 1; k < m; k++) {
+      var t = k / m, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t, z = z0 + (z1 - z0) * t, l = Math.sqrt(x * x + y * y + z * z) || 1;
+      out.push(x / l, y / l, z / l);
+    }
+  }
+  return out.length === a.length ? a : new Float32Array(out);
+}
+function xyzOf(e) { return e.xyz || (e.xyz = toXYZ(e.g.geometry || e.g)); }
+function glSetOf(list) { return GL.set(list.map(function (e, k) { e.gi = k; return xyzOf(e).map(dense); })); }
+/* every corner more than five degrees from the point opposite the centre of the view */
+function foldable(e) {
+  var cap = e.cap, lim = Math.PI - 0.09 - cap.r;
+  return lim > 0 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.cos(lim);
+}
+
 function buildSet(ci, kind, topo) {
   var feats = topojson.feature(topo, topo.objects.u).features;
   var set = feats.map(function (f) {
@@ -616,7 +649,7 @@ function buildSet(ci, kind, topo) {
   var byFrom = set.slice().sort(function (a, b) { return a.f - b.f; });
   var S = { ci: ci, kind: kind, set: set, byFrom: byFrom, used: ++clock };
   if (GL) {
-    S.gl = GL.set(set.map(function (e, k) { e.gi = k; return e.xyz || (e.xyz = toXYZ(e.g.geometry)); }));
+    S.gl = glSetOf(set);
   }
   sets[kind][ci] = S;
   return S;
@@ -854,8 +887,7 @@ var landLo = landSet.map(function (l) {
   var g = simplifyGeom(l.g.geometry, 0.1, 0.3);
   return g ? { g: { type: 'Feature', geometry: rewind(g) }, cap: l.cap, box: l.box } : null;
 }).filter(Boolean);
-var landGL = GL ? GL.set(landSet.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;
-var landGLlo = GL ? GL.set(landLo.map(function (l) { return l.xyz || (l.xyz = toXYZ(l.g.geometry)); })) : null;
+var landGL = null, landGLlo = null;
 function landNow() { return zoom < 3 ? landLo : landSet; }
 /* Below zoom 2 the card looks the land up in a flat image of it instead of drawing outlines: exact at the
    limb, and no clipping at all, which had become the largest part of the frame. Drawn once, just after the
@@ -874,13 +906,8 @@ function buildLandMask() {
   GL.landMask(c);
   scheduleDraw();
 }
-/* wholly on the near side: the card places its corners itself; otherwise d3 clips it at the limb first */
-function nearSide(e) {
-  var cap = e.cap;
-  return cap.r < 1.5 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.sin(cap.r + 0.03);
-}
-/* Clipping for the card uses its own projection with d3's adaptive resampling off: the corners are close
-   enough together to need none, and resampling long simplified edges was most of the cost of clipping. */
+/* Clipping for the card, for the few shapes it cannot fold (see foldable), uses its own projection with d3's
+   adaptive resampling off: the corners are close enough together to need none. */
 var clipProj = d3.geoOrthographic().clipAngle(90).precision(0);
 function clipped(e) {
   if (!clipPath) clipPath = d3.geoPath(clipProj, clipRings);
@@ -1137,15 +1164,16 @@ function drawGL(live, lifted, fast, gr) {
   GL.frame(FX, FY, CX, CY, r, viewV);
   var masked = GL.hasMask() && zoom < MASK_ZOOM;
   GL.ocean(GLC.ocean0, GLC.ocean1, CX - gr * 0.28, CY - gr * 0.32, gr * 0.06, CX, CY, gr, masked ? GLC.land.slice(0, 3) : null);
-  var LS = masked ? [] : landNow(), LG = LS === landLo ? landGLlo : landGL;
+  var LS = masked ? [] : landNow();
+  if (LS.length && !landGL) { landGL = glSetOf(landSet); landGLlo = glSetOf(landLo); }
+  var LG = LS === landLo ? landGLlo : landGL;
   var near = [];
   for (i = 0; i < LS.length; i++) {
     e = LS[i];
     if (!capVisible(e.cap)) continue;
-    if (nearSide(e)) near.push(i);
-    else GL.screen(clipped(e), GLC.land, GLC.land);
+    if (foldable(e)) near.push(i); else GL.screen(clipped(e), GLC.land, GLC.land);
   }
-  GL.fillMany(LG, near, GLC.land); GL.linesMany(LG, near, GLC.land);
+  if (LG) { GL.fillMany(LG, near, GLC.land); GL.linesMany(LG, near, GLC.land); }
   tick('land');
   drawPeopleTint(true);
   var S = currentSet();
@@ -1162,7 +1190,7 @@ function drawGL(live, lifted, fast, gr) {
         var px = screenPx(e.a), minor = opt.minor && px < MINOR_PX;
         var fill = minor ? e.e.tintV : e.e.fillV;
         var dark = g === 3 && opt.edges && !(opt.minor && px < tiny);
-        if (nearSide(e) && S.set[e.gi] === e) {
+        if (S.set[e.gi] === e && foldable(e)) {
           GL.fill(S.gl, e.gi, fill);
           if (dark) edged.push(e.gi); else if (g === 3) GL.lines(S.gl, e.gi, fill);
         } else GL.screen(clipped(e), fill, dark ? GLC.edge : g === 3 ? fill : null);
@@ -1177,7 +1205,7 @@ function drawGL(live, lifted, fast, gr) {
       GL.veil(GLC.veil);
       for (i = 0; i < lifted.length; i++) {
         e = lifted[i];
-        if (nearSide(e) && S.set[e.gi] === e) GL.fill(S.gl, e.gi, e.e.fillV);
+        if (S.set[e.gi] === e && foldable(e)) GL.fill(S.gl, e.gi, e.e.fillV);
         else GL.screen(clipped(e), e.e.fillV, null);
       }
     }
@@ -2434,11 +2462,10 @@ function startPlay() {
   (function tick(t) {
     if (!playing) { playRaf = null; return; }
     var dt = Math.min(200, t - playLast); playLast = t;
-    var E = eraOf(year);
     playAcc += dt;
-    /* a steady rate across the ribbon rather than across the years: each era runs at its own step */
-    var per = 130;
-    while (playAcc >= per) { playAcc -= per; setYear(year + E.step); }
+    /* one year per second in every era */
+    var per = 1000;
+    while (playAcc >= per) { playAcc -= per; setYear(year + 1); }
     if (year >= YMAX) { stopPlay(); return; }
     playRaf = requestAnimationFrame(tick);
   })(performance.now());

@@ -101,7 +101,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .yearside .val{font-size:12px;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- controls ---------- */
-#controls{top:18px;right:18px;width:246px;padding:14px 16px 15px}
+#controls{top:18px;right:18px;width:246px;padding:14px 16px 15px;max-height:calc(100% - 18px - 118px);overflow-y:auto}
+#projrow .btn{padding:5px 8px;font-size:11px}
 .grp+.grp{margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.08)}
 .grp-t{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px}
 .tog{display:flex;align-items:center;gap:9px;padding:4px 0;cursor:pointer;user-select:none}
@@ -158,9 +159,19 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .rrow .ramp{flex:1;height:13px}
 .rrow .rl{width:64px;font-size:9.5px;color:var(--ink-dim);flex:none}
 .rticks{display:flex;justify-content:space-between;margin-top:5px;font-size:9.5px;color:var(--ink-faint)}
+#controls .seg{display:flex;gap:6px;flex-wrap:wrap}
+#controls .seg+.seg{margin-top:7px}
+.panel ::-webkit-scrollbar,.panel::-webkit-scrollbar{width:10px;height:10px}
+.panel ::-webkit-scrollbar-track,.panel::-webkit-scrollbar-track{background:transparent}
+.panel ::-webkit-scrollbar-thumb,.panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+.panel ::-webkit-scrollbar-thumb:hover,.panel::-webkit-scrollbar-thumb:hover{background-color:rgba(142,208,255,.45)}
+.panel ::-webkit-scrollbar-button,.panel::-webkit-scrollbar-button{display:none;height:0;width:0}
+.panel ::-webkit-scrollbar-corner,.panel::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){.panel,.panel *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}}
+#viewnote{margin-top:8px;font-size:10px;line-height:1.45;color:var(--ink-faint)}
 #legend .note{margin-top:9px;font-size:10px;line-height:1.45;color:var(--ink-faint)}
 #legend .lsec{margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08)}
-#biglist{margin-top:2px;max-height:124px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+#biglist{margin-top:2px;max-height:124px;overflow-y:auto}
 #biglist .b{display:flex;align-items:center;gap:8px;padding:3px 4px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--ink-dim)}
 #biglist .b:hover{background:rgba(142,208,255,.12);color:var(--ink)}
 #biglist .b span:not(.ar){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -249,7 +260,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   #masthead .yearbox{margin-top:9px;padding-top:9px}
   #yearval{font-size:27px}
 
-  #controls{top:auto;bottom:112px;right:10px;left:10px;width:auto;padding:26px 12px 10px}
+  #controls{top:auto;bottom:112px;right:10px;left:10px;width:auto;padding:26px 12px 10px;max-height:none;overflow:visible}
   #controls.min{padding:0 !important}
   .grp+.grp{border-top:0;padding-top:9px;margin-top:0}
   #controls .grp-t{display:none}
@@ -317,6 +328,12 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       <label class="tog"><input type="checkbox" id="L-oceans" checked><span class="sw"></span><span class="tl">Ocean names</span></label>
       <label class="tog"><input type="checkbox" id="L-grat" checked><span class="sw"></span><span class="tl">Graticule</span></label>
       <label class="tog"><input type="checkbox" id="L-spin"><span class="sw"></span><span class="tl" id="spinlabel">Slow spin</span></label>
+    </div>
+    <div class="grp">
+      <div class="grp-t">Map</div>
+      <div class="seg"><button class="btn on" id="v-globe">Globe</button><button class="btn" id="v-flat">Flat map</button></div>
+      <div class="seg" id="projrow" style="display:none"><button class="btn on" id="p-ee">Equal Earth</button><button class="btn" id="p-cea">Equal area</button><button class="btn" id="p-merc">Mercator</button></div>
+      <div id="viewnote" style="display:none">Mercator enlarges areas towards the poles.</div>
     </div>
     <div class="grp">
       <button class="btn" id="resetview" title="Recentre and fit the globe">Reset view</button>
@@ -464,7 +481,22 @@ function capOf(g) {
   return { c: c, r: Math.acos(Math.max(-1, Math.min(1, minDot))) + 0.03 };
 }
 var viewV = [1, 0, 0], viewAng = Math.PI / 2;
+/* flat views: a cap is on the screen if its centre, or the centre carried a map's width either way (the seam),
+   lies within its radius of the window. Radius in pixels: Equal Earth stretches at most 1.6 times; Mercator by
+   1 / cos(latitude) at the cap's far edge. */
+function flatCapVisible(cap) {
+  if (cap.r > 1.3) return true;
+  var ll = cap.ll || (cap.ll = [Math.atan2(cap.c[1], cap.c[0]) / DEG, Math.asin(Math.max(-1, Math.min(1, cap.c[2]))) / DEG]);
+  var p = projection(ll);
+  if (!p) return true;
+  var st = 1.6;
+  if (view === 'merc') st = 1 / Math.cos(Math.min(85 * DEG, Math.abs(ll[1]) * DEG + cap.r));
+  var pr = cap.r * R0 * zoom * st + 2, mw = mapWidthPx();
+  if (p[1] + pr < 0 || p[1] - pr > H) return false;
+  return (p[0] + pr > 0 && p[0] - pr < W) || (p[0] - mw + pr > 0 && p[0] - mw - pr < W) || (p[0] + mw + pr > 0 && p[0] + mw - pr < W);
+}
 function capVisible(cap) {
+  if (FLAT) return flatCapVisible(cap);
   var lim = viewAng + cap.r;
   if (lim >= Math.PI) return true;
   return cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.cos(lim);
@@ -493,7 +525,7 @@ function setFastProjection(r) {
 }
 function trace(e, closed) {
   var cap = e.cap;
-  if (cap.r < 1.5 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.sin(cap.r + 0.03)) {
+  if (!FLAT && cap.r < 1.5 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.sin(cap.r + 0.03)) {
     var rings = e.xyz || (e.xyz = toXYZ(e.g.geometry || e.g));
     for (var i = 0; i < rings.length; i++) {
       var a = rings[i], n = a.length;
@@ -634,6 +666,7 @@ function xyzOf(e) { return e.xyz || (e.xyz = toXYZ(e.g.geometry || e.g)); }
 function glSetOf(list) { return GL.set(list.map(function (e, k) { e.gi = k; return xyzOf(e).map(dense); })); }
 /* every corner more than five degrees from the point opposite the centre of the view */
 function foldable(e) {
+  if (FLAT) return false;
   var cap = e.cap, lim = Math.PI - 0.09 - cap.r;
   return lim > 0 && cap.c[0] * viewV[0] + cap.c[1] * viewV[1] + cap.c[2] * viewV[2] > Math.cos(lim);
 }
@@ -741,8 +774,33 @@ var W = 0, H = 0, DPR = 1, R0 = 1, CX = 0, CY = 0;
 var rotation = [-12, -18, 0];
 var zoom = 1;
 var ZMAX = 64;
-var projection = d3.geoOrthographic().clipAngle(90).precision(0.35);
+var projGlobe = d3.geoOrthographic().clipAngle(90).precision(0.35);
+/* The flat views: one whole world, drawn once; dragging changes the central meridian, so longitude wraps endlessly.
+   Equal Earth and the rectangular equal-area map (Behrmann, standard parallel 30) reach the poles; Mercator is
+   drawn to 80 degrees north and south. */
+var MAXLAT = 80, PARALLEL = 30;
+var MERC_MAX = MAXLAT * DEG;
+function mercRaw(l, p) { p = p > MERC_MAX ? MERC_MAX : p < -MERC_MAX ? -MERC_MAX : p; return [l, Math.log(Math.tan(Math.PI / 4 + p / 2))]; }
+mercRaw.invert = function (x, y) { return [x, 2 * Math.atan(Math.exp(y)) - Math.PI / 2]; };
+var projEE = d3.geoEqualEarth().precision(0.35);
+var projCEA = GlobeGL.d3CylindricalEqualArea(PARALLEL).precision(0.35);
+var projMerc = d3.geoProjection(mercRaw).precision(0.35);
+var PROJS = { ee: projEE, cea: projCEA, merc: projMerc };
+var FLATKIND = { ee: 'equalEarth', cea: 'cylindricalEqualArea', merc: 'mercator' };
+/* map size in units of the scale, measured on fresh projections at scale 1 */
+var MAPSIZE = {};
+['ee', 'cea', 'merc'].forEach(function (k) {
+  var p = k === 'ee' ? d3.geoEqualEarth() : k === 'cea' ? GlobeGL.d3CylindricalEqualArea(PARALLEL) : d3.geoProjection(mercRaw), lm = k === 'merc' ? MAXLAT : 90;
+  p.scale(1).translate([0, 0]).rotate([0, 0]).clipExtent(null);
+  MAPSIZE[k] = [p([179.9999, 0])[0] - p([-179.9999, 0])[0], Math.abs(p([0, -lm])[1] - p([0, lm])[1])];
+});
+var flatBad = false, baseT = [0, 0];
+var view = 'globe';             /* 'globe' | 'ee' | 'cea' | 'merc' */
+var FLAT = false;
+var projection = projGlobe;
 var path = d3.geoPath(projection, ctx);
+function GLon() { return !!GL && (!FLAT || (!flatBad && GL.canFlat())); }
+function normLon(l) { return ((l + 540) % 360) - 180; }
 var sphere = { type: 'Sphere' };
 var opt = { polities: true, edges: true, minor: true, names: true, co: false,
             cities: true, cnames: false, ruins: true, soft: true, battles: true, peoples: true, migr: true, oceans: true, grat: true, spin: false };
@@ -769,6 +827,7 @@ function placePills() {
 function pillList() { return [document.getElementById('resetfloat')].filter(Boolean); }
 
 function resize() {
+  syncFold();
   placePills();
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   W = window.innerWidth; H = window.innerHeight;
@@ -779,18 +838,87 @@ function resize() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   skyCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (GL) GL.resize(W, H, DPR);
-  var narrow = W < 700;
-  R0 = Math.min(W, H) * (narrow ? 0.44 : 0.455);
-  CX = W / 2;
-  CY = narrow ? H * 0.42 : H / 2 - 24;
+  layout();
   drawSky();
   sizeRibbon();
   draw();
 }
 
-function applyProjection() {
-  projection.rotate(rotation).scale(R0 * zoom).translate([CX, CY]);
+/* The free space for the globe or the map is what the open panels and the timeline actually leave, measured; the
+   view is centred in it, with a short ease when a panel opens or closes. Panels that span the width (the phone
+   layout) take the strip above or below them instead. */
+var AVW = 1, AVH = 1, LT = null, layAnim = null, GAP = 12;
+function rectOf(id) { var e = document.getElementById(id); if (!e || !e.getClientRects().length) return null; var r = e.getBoundingClientRect(); return r.width && r.height ? r : null; }
+function layoutTarget() {
+  var L = 8, R = W - 8, T = 8, B = H - 8, sc = rectOf('scrub'), topPill = false;
+  if (sc) B = sc.top - GAP;
+  ['masthead', 'controls', 'legend'].forEach(function (id) {
+    var p = document.getElementById(id), r = rectOf(id);
+    if (!p || !r) return;
+    if (p.classList.contains('min')) {
+      if (id !== 'legend') topPill = true;
+      if (W <= 860) { if (r.top + r.height / 2 < H / 2) T = Math.max(T, r.bottom + 6); else B = Math.min(B, r.top - 6); }
+      return;
+    }
+    if (r.width > W * 0.7) { if (r.top + r.height / 2 < H / 2) T = Math.max(T, r.bottom + GAP); else B = Math.min(B, r.top - GAP); }
+    else if (r.left + r.width / 2 < W / 2) L = Math.max(L, r.right + GAP);
+    else R = Math.min(R, r.left - GAP);
+  });
+  var narrow = W <= 860;
+  if (FLAT && topPill && !narrow) {
+    var ms0 = MAPSIZE[view], mh = Math.min((R - L) * 0.97 / ms0[0] * ms0[1], (B - T) * 0.97);
+    if ((B - T - mh) / 2 < 48) T = Math.max(T, 54);
+  }
+  var aw = Math.max(R - L, 160), ah = Math.max(B - T, 160), r0;
+  if (FLAT) { var ms = MAPSIZE[view]; r0 = Math.min(aw * 0.97 / ms[0], ah * 0.97 / ms[1]); }
+  else r0 = Math.min(aw, ah) * (narrow ? 0.44 : 0.45);
+  return { CX: (L + R) / 2, CY: (T + B) / 2, AVW: aw, AVH: ah, R0: Math.max(60, r0) };
 }
+function sameLayout(a, b) { return ['CX', 'CY', 'AVW', 'AVH', 'R0'].every(function (k) { return Math.abs(a[k] - b[k]) < 1; }); }
+function applyLayout(t) { CX = t.CX; CY = t.CY; AVW = t.AVW; AVH = t.AVH; R0 = t.R0; }
+function layout(animate) {
+  var t = layoutTarget();
+  if (animate && LT && !sameLayout(LT, t)) {
+    layAnim = { from: { CX: CX, CY: CY, AVW: AVW, AVH: AVH, R0: R0 }, to: t, t0: 0 }; LT = t;
+    requestAnimationFrame(stepLayout);
+    return;
+  }
+  LT = t; layAnim = null; applyLayout(t);
+}
+function stepLayout(now) {
+  if (!layAnim) return;
+  if (!layAnim.t0) layAnim.t0 = now;
+  var u = Math.min(1, (now - layAnim.t0) / 240), e = 1 - Math.pow(1 - u, 3), a = layAnim.from, b = layAnim.to, o = {};
+  ['CX', 'CY', 'AVW', 'AVH', 'R0'].forEach(function (k) { o[k] = a[k] + (b[k] - a[k]) * e; });
+  applyLayout(o);
+  if (u >= 1) layAnim = null;
+  hideTip(); draw();
+  if (u < 1) requestAnimationFrame(stepLayout);
+}
+/* the map window: in flat mode nothing of the map is drawn or answers the pointer outside the free space */
+function winRect() {
+  if (!FLAT) return null;
+  return { x0: CX - AVW / 2, x1: CX + AVW / 2, y0: CY - AVH / 2, y1: CY + AVH / 2 };
+}
+function inWin(x, y) { var w = winRect(); return !w || (x >= w.x0 && x <= w.x1 && y >= w.y0 && y <= w.y1); }
+/* zoom that fills the height with the whole map: for a portrait phone */
+function fillHeightZoom() { var ms = MAPSIZE[view]; return Math.max(1, AVH / (ms[1] * R0)); }
+function zoomMin() { return FLAT ? 1 : 0.82; }
+function applyProjection() {
+  if (!FLAT) { projection.rotate(rotation).scale(R0 * zoom).translate([CX, CY]); return; }
+  var s = R0 * zoom, p = projection, ms = MAPSIZE[view], lm = view === 'merc' ? MAXLAT : 90;
+  p.clipExtent(null).rotate([rotation[0], 0]).scale(s).translate([0, 0]);
+  var hm = s * ms[1] / 2;
+  var lat = clamp(-rotation[1], -lm, lm);
+  var yc = p([-rotation[0], lat])[1];
+  var lim = Math.max(0, hm - AVH / 2);
+  var yc2 = clamp(yc, -lim, lim);
+  if (yc2 !== yc) { var back = p.invert([0, yc2]); if (back) rotation[1] = -back[1]; }
+  baseT = [CX, CY - yc2];
+  p.translate(baseT).clipExtent([[-60, -60], [W + 60, H + 60]]);
+}
+/* the width of the whole map on the screen, for spotting a segment that runs across the seam */
+function mapWidthPx() { return R0 * zoom * MAPSIZE[view][0]; }
 
 /* ------------------------------------------------------------------- sky */
 var stars = null;
@@ -928,7 +1056,11 @@ function strokeLines(list, width, colour) {
 
 /* a row is minor when it stands on the screen too small to carry a full colour or a name */
 var MINOR_PX = 1400;
-function screenPx(a) { var s = a / 40589641; return s * (R0 * zoom) * (R0 * zoom); }
+function screenPx(a, cap) {
+  var s = a / 40589641 * (R0 * zoom) * (R0 * zoom);
+  if (view === 'merc' && cap) { var z = cap.c[2], q = 1 - z * z; s /= q > 0.0076 ? q : 0.0076; }
+  return s;
+}
 
 var prof = null;
 function tick(k) {
@@ -944,7 +1076,7 @@ function draw() {
   var fast = interacting;
   viewV = unitv([-rotation[0], -rotation[1]]);
   setFastProjection(r);
-  viewAng = Math.asin(Math.min(1, Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) / r));
+  viewAng = FLAT ? Math.PI : Math.asin(Math.min(1, Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) / r));
   projection.precision(fast ? 1.4 : 0.35);
 
   wantChunks(!fast);
@@ -953,6 +1085,9 @@ function draw() {
   tick('data');
 
   ctx.clearRect(0, 0, W, H);
+  var win = winRect();
+  glCv.style.clipPath = win ? 'inset(' + win.y0.toFixed(1) + 'px ' + (W - win.x1).toFixed(1) + 'px ' + (H - win.y1).toFixed(1) + 'px ' + win.x0.toFixed(1) + 'px)' : '';
+  if (win) { ctx.save(); ctx.beginPath(); ctx.rect(win.x0, win.y0, win.x1 - win.x0, win.y1 - win.y0); ctx.clip(); }
 
   /* hover lifts the whole lineage: everything else goes quiet behind a veil */
   var i, e;
@@ -963,6 +1098,7 @@ function draw() {
   if (hl !== null && opt.polities && (!fast || pinnedEnt || highlightLin !== null))
     for (i = 0; i < live.length; i++) if (live[i].e.lin === hl && capVisible(live[i].cap)) lifted.push(live[i]);
 
+  if (!FLAT) {
   var ag = ctx.createRadialGradient(cx, cy, r * 0.985, cx, cy, r * 1.19);
   ag.addColorStop(0, 'rgba(112,176,255,.30)');
   ag.addColorStop(0.35, 'rgba(90,150,235,.11)');
@@ -971,17 +1107,29 @@ function draw() {
   /* a ring, not a disc: a radial gradient carries its first colour inwards, and over the WebGL globe
      that would wash the whole disc a third of the way to blue */
   ctx.beginPath(); ctx.arc(cx, cy, r * 1.19, 0, 2 * Math.PI); ctx.arc(cx, cy, r * 0.985, 0, 2 * Math.PI, true); ctx.fill();
+  }
 
   /* the lit-sphere gradient is built on the globe's radius, which at a deep zoom runs far past
      the window and leaves the whole sea in its darkest stop; so it is capped to the screen */
-  var gr = Math.min(r * 1.05, Math.hypot(W, H) * 0.7);
+  var gr = FLAT ? Math.hypot(W, H) * 0.7 : Math.min(r * 1.05, Math.hypot(W, H) * 0.7);
   var drawn = 0;
   tick('atmosphere');
-  if (GL) drawn = drawGL(live, lifted, fast, gr);
-  else {
+  var offs = [0], oi;
+  if (GL) glCv.style.display = GLon() ? '' : 'none';
+  if (GLon()) {
+    drawn = drawGL(live, lifted, fast, gr);
+    if (drawn < 0) { flatBad = true; glCv.style.display = 'none'; if (win) ctx.restore(); draw(); return; }
+  } else for (oi = 0; oi < offs.length; oi++) {
+  var dBefore = drawn;
   ctx.beginPath(); path(sphere);
-  var og = ctx.createRadialGradient(cx - gr * 0.28, cy - gr * 0.32, gr * 0.06, cx, cy, gr);
-  og.addColorStop(0, PALETTE.ocean0); og.addColorStop(1, PALETTE.ocean1);
+  var og;
+  if (FLAT && GLC) {
+    /* one colour, as the engine draws a flat map's sea: the first stop 35% of the way to the second */
+    og = 'rgb(' + [0, 1, 2].map(function (j) { return Math.round(255 * (GLC.ocean0[j] + 0.35 * (GLC.ocean1[j] - GLC.ocean0[j]))); }).join(',') + ')';
+  } else {
+    og = ctx.createRadialGradient(cx - gr * 0.28, cy - gr * 0.32, gr * 0.06, cx, cy, gr);
+    og.addColorStop(0, PALETTE.ocean0); og.addColorStop(1, PALETTE.ocean1);
+  }
   ctx.fillStyle = og; ctx.fill();
 
   /* the land nobody is recorded as holding this year lies under everything, in the base grey */
@@ -1004,7 +1152,7 @@ function draw() {
       for (i = 0; i < live.length; i++) {
         e = live[i];
         if (!capVisible(e.cap) || gradeOf(e) !== g2) continue;
-        var px2 = screenPx(e.a);
+        var px2 = screenPx(e.a, e.cap);
         sx.beginPath(); traceOn(sx, e);
         sx.fillStyle = (opt.minor && px2 < MINOR_PX) ? e.e.tint : e.e.fill; sx.fill();
         had = true; drawn++;
@@ -1021,7 +1169,7 @@ function draw() {
     for (i = 0; i < live.length; i++) {
       e = live[i];
       if (!capVisible(e.cap) || (opt.soft && gradeOf(e) < 3)) continue;
-      var px = screenPx(e.a);
+      var px = screenPx(e.a, e.cap);
       var fill = (opt.minor && px < MINOR_PX) ? e.e.tint : e.e.fill;
       ctx.beginPath(); trace(e, true);
       ctx.fillStyle = fill; ctx.fill();
@@ -1035,14 +1183,19 @@ function draw() {
     }
   }
 
+  if (oi > 0) drawn = dBefore;
   }                                     /* end of the 2D-only layers */
   tick('ocean, land, polities');
 
+  /* the 2D layers over the map, once for each copy of the world in view */
+  labelBoxes = [];
+  var allCity = [], allBattle = [];
+  for (oi = 0; oi < offs.length; oi++) {
   /* with nothing of the lineage on the map this year, a veil would only dim the map for nothing */
   if (lifted.length) {
     ctx.save();
     ctx.beginPath(); path(sphere); ctx.clip();
-    if (!GL) {
+    if (!GLon()) {
       ctx.fillStyle = 'rgba(4,8,18,.52)'; ctx.fillRect(0, 0, W, H);
       for (i = 0; i < lifted.length; i++) {
         e = lifted[i];
@@ -1086,6 +1239,7 @@ function draw() {
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(198,226,255,.32)'; ctx.stroke();
   }
 
+  if (!FLAT) {
   ctx.save();
   ctx.beginPath(); path(sphere); ctx.clip();
   var shade = ctx.createRadialGradient(cx - gr * 0.34, cy - gr * 0.38, gr * 0.12, cx, cy, gr * 0.98);
@@ -1094,21 +1248,28 @@ function draw() {
   shade.addColorStop(1, 'rgba(0,0,0,.50)');
   ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
   ctx.restore();
+  }
 
   ctx.beginPath(); path(sphere);
   ctx.lineWidth = 1; ctx.strokeStyle = PALETTE.rim; ctx.stroke();
 
   tick('graticule, shading, rim');
-  labelBoxes = [];
-  if (!fast && opt.oceans) drawOceanLabels();
+  if (!fast && opt.oceans) { if (FLAT) drawOceanLabelsFlat(); else drawOceanLabels(); }
   if (!fast && opt.polities && opt.names) drawPolityLabels(live);
   if (!fast) drawPeopleLabels();
   drawMigrations();
   tick('labels');
   drawBattles();
   if (opt.cities || opt.ruins) drawCities(); else cityPts = [];
+  allCity = allCity.concat(cityPts); allBattle = allBattle.concat(battlePts);
+  }
+  cityPts = allCity; battlePts = allBattle;
   Array.prototype.push.apply(cityPts, battlePts);
   tick('cities');
+  if (win) {
+    ctx.restore();
+    if (zoom > 1.02) { ctx.strokeStyle = 'rgba(150,205,255,.16)'; ctx.lineWidth = 1; ctx.strokeRect(win.x0 + 0.5, win.y0 + 0.5, win.x1 - win.x0 - 1, win.y1 - win.y0 - 1); }
+  }
 
   lastDrawMs = performance.now() - t0;
   liveCount = drawn;
@@ -1161,7 +1322,10 @@ function softPx(g) {
 
 function drawGL(live, lifted, fast, gr) {
   var r = R0 * zoom, i, e, n = 0;
-  GL.frame(FX, FY, CX, CY, r, viewV);
+  if (FLAT) {
+    if (!GL.frameFlat({ kind: FLATKIND[view], centreLon: normLon(-rotation[0]), scale: r,
+                        tx: baseT[0], ty: baseT[1], latClamp: MAXLAT, parallel: PARALLEL })) return -1;
+  } else GL.frame(FX, FY, CX, CY, r, viewV);
   var masked = GL.hasMask() && zoom < MASK_ZOOM;
   GL.ocean(GLC.ocean0, GLC.ocean1, CX - gr * 0.28, CY - gr * 0.32, gr * 0.06, CX, CY, gr, masked ? GLC.land.slice(0, 3) : null);
   var LS = masked ? [] : landNow();
@@ -1171,7 +1335,7 @@ function drawGL(live, lifted, fast, gr) {
   for (i = 0; i < LS.length; i++) {
     e = LS[i];
     if (!capVisible(e.cap)) continue;
-    if (foldable(e)) near.push(i); else GL.screen(clipped(e), GLC.land, GLC.land);
+    if (FLAT || foldable(e)) near.push(i); else GL.screen(clipped(e), GLC.land, GLC.land);
   }
   if (LG) { GL.fillMany(LG, near, GLC.land); GL.linesMany(LG, near, GLC.land); }
   tick('land');
@@ -1187,10 +1351,10 @@ function drawGL(live, lifted, fast, gr) {
         if (!capVisible(e.cap) || (opt.soft ? gradeOf(e) : 3) !== g) continue;
         if (!any && g < 3) GL.layerBegin();
         any = true;
-        var px = screenPx(e.a), minor = opt.minor && px < MINOR_PX;
+        var px = screenPx(e.a, e.cap), minor = opt.minor && px < MINOR_PX;
         var fill = minor ? e.e.tintV : e.e.fillV;
         var dark = g === 3 && opt.edges && !(opt.minor && px < tiny);
-        if (S.set[e.gi] === e && foldable(e)) {
+        if (S.set[e.gi] === e && (FLAT || foldable(e))) {
           GL.fill(S.gl, e.gi, fill);
           if (dark) edged.push(e.gi); else if (g === 3) GL.lines(S.gl, e.gi, fill);
         } else GL.screen(clipped(e), fill, dark ? GLC.edge : g === 3 ? fill : null);
@@ -1205,7 +1369,7 @@ function drawGL(live, lifted, fast, gr) {
       GL.veil(GLC.veil);
       for (i = 0; i < lifted.length; i++) {
         e = lifted[i];
-        if (S.set[e.gi] === e && foldable(e)) GL.fill(S.gl, e.gi, e.e.fillV);
+        if (S.set[e.gi] === e && (FLAT || foldable(e))) GL.fill(S.gl, e.gi, e.e.fillV);
         else GL.screen(clipped(e), e.e.fillV, null);
       }
     }
@@ -1294,19 +1458,49 @@ function drawOceanLabels() {
   ctx.globalAlpha = 1;
 }
 
+/* On a flat map every parallel is a straight horizontal line, so an ocean's name is set along it in plain
+   letter-spaced type, in the same size and colour as on the globe. */
+function drawOceanLabelsFlat() {
+  var bottom = document.getElementById('scrub').getBoundingClientRect().top - 16;
+  var wn = winRect() || { x0: 0, x1: W, y0: 0, y1: H }, wx0 = wn.x0, wx1 = wn.x1, wy0 = wn.y0, wy1 = wn.y1;
+  var size = clamp(10.5 + zoom * 1.1, 10.5, 15);
+  ctx.font = 'italic 400 ' + size.toFixed(1) + 'px ' + SERIF;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  var track = size * 0.42, wordGap = size * 0.9;
+  ctx.fillStyle = 'rgba(150,192,235,.85)'; ctx.globalAlpha = 0.9;
+  for (var i = 0; i < OCEANS.length; i++) {
+    var o = OCEANS[i], p = projection(o.ll);
+    if (!p) continue;
+    var chars = [], total = 0, c;
+    for (c = 0; c < o.t.length; c++) {
+      var ch = o.t.charAt(c), adv = ch === ' ' ? wordGap : ctx.measureText(ch).width + track;
+      chars.push([ch, total + adv / 2]); total += adv;
+    }
+    total -= track;
+    if (total > mapWidthPx() * 0.4) continue;
+    var x0 = p[0] - total / 2, x1 = p[0] + total / 2;
+    if (x0 < wx0 + 24 || x1 > wx1 - 24 || p[1] < wy0 + 24 || p[1] > Math.min(bottom, wy1 - 8)) continue;
+    var box = [x0 - size * 0.6, p[1] - size * 0.7, total + size * 1.2, size * 1.4];
+    if (hits(labelBoxes, box)) continue;
+    labelBoxes.push(box);
+    for (c = 0; c < chars.length; c++) if (chars[c][0] !== ' ') ctx.fillText(chars[c][0], x0 + chars[c][1], p[1]);
+  }
+  ctx.globalAlpha = 1;
+}
+
 function drawPolityLabels(live) {
   var centre = [-rotation[0], -rotation[1]];
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   var seen = {};
   for (var i = 0; i < live.length; i++) {
     var e = live[i];
-    if (!e.k || screenPx(e.a) < MINOR_PX * 1.6) continue;
+    if (!e.k || screenPx(e.a, e.cap) < MINOR_PX * 1.6) continue;
     if (seen[e.ei]) continue;
     if (!capVisible(e.cap)) continue;
-    if (d3.geoDistance(e.k, centre) > 1.2) continue;
+    if (!FLAT && d3.geoDistance(e.k, centre) > 1.2) continue;
     var p = projection(e.k);
     if (!p || p[0] < 34 || p[0] > W - 34 || p[1] < 20 || p[1] > H - 100) continue;
-    var px = Math.sqrt(screenPx(e.a));
+    var px = Math.sqrt(screenPx(e.a, e.cap));
     var size = Math.max(10.5, Math.min(18, 7.5 + px * 0.055));
     var font = 'italic 500 ' + size.toFixed(1) + 'px ' + SERIF;
     ctx.font = font;
@@ -1351,9 +1545,12 @@ function drawBattles() {
   for (var i = firstBattle(year - 4); i < BATTLES.length && BATTLES[i].year <= year; i++) {
     var b = BATTLES[i];
     if (b.links < minL) continue;
-    var u = b.u, dp = u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2];
-    if (dp < 0.05) continue;
-    var x = CX + FX[0] * u[0] + FX[1] * u[1], y = CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2];
+    var u = b.u, x, y;
+    if (FLAT) { var bp = projection([b.lon, b.lat]); if (!bp) continue; x = bp[0]; y = bp[1]; }
+    else {
+      if (u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2] < 0.05) continue;
+      x = CX + FX[0] * u[0] + FX[1] * u[1]; y = CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2];
+    }
     if (x < -40 || x > W + 40 || y < -40 || y > H + 40) continue;
     var age = year - b.year, a = age === 0 ? 1 : 1 - age / 5;
     var r = (3 + 2.2 * Math.log2(b.links)) * fz;
@@ -1382,6 +1579,7 @@ function drawBattles() {
       inT.push(best[1]); rest.splice(best[2], 1);
       if (bd > 600) continue;
       var p0 = P[best[0]], p1 = P[best[1]], aa = Math.min(p0.a, p1.a);
+      if (FLAT && Math.abs(p0.x - p1.x) > mapWidthPx() * 0.5) continue;
       ctx.lineCap = 'round';
       ctx.strokeStyle = 'rgba(255,110,40,' + (0.18 * aa).toFixed(3) + ')'; ctx.lineWidth = 10 * fz;
       ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
@@ -1424,16 +1622,18 @@ function peopleAt(ll) {
   }
   return best;
 }
+var peopleGL = null;
 function drawPeopleTint(gl) {
   if (!opt.peoples || !PEOPLES.length) return;
   var any = false, blur = clamp(90 * R0 * zoom / 6371, 4, 70);
   if (gl) {
+    if (FLAT && !peopleGL) peopleGL = glSetOf(PEOPLES.map(function (q) { return { g: q.g, xyz: null, set: q }; }));
     for (var i = 0; i < PEOPLES.length; i++) {
       var p = PEOPLES[i];
       if (!peopleLive(p) || !capVisible(p.cap)) continue;
       if (!any) GL.layerBegin();
       any = true;
-      GL.screen(clipped(p), PEOPLE_TINT, null);
+      if (FLAT) GL.fill(peopleGL, i, PEOPLE_TINT); else GL.screen(clipped(p), PEOPLE_TINT, null);
     }
     if (any) GL.layerEnd(blur, 1);
     return;
@@ -1459,9 +1659,9 @@ function drawPeopleLabels() {
   for (var i = 0; i < list.length; i++) {
     var p = list[i];
     var c = projection(p.centre);
-    if (!c || d3.geoDistance(p.centre, [-rotation[0], -rotation[1]]) > 1.45) continue;
+    if (!c || (!FLAT && d3.geoDistance(p.centre, [-rotation[0], -rotation[1]]) > 1.45)) continue;
     var b = boundsPath.bounds(p.g), bw = b[1][0] - b[0][0];
-    if (!isFinite(bw) || bw < 70) continue;
+    if (!isFinite(bw) || bw < 70 || (FLAT && bw > mapWidthPx() * 0.5)) continue;
     var t = p.name.toUpperCase().split('').join('\u2009');
     var size = clamp(bw / (p.name.length * 1.9), 9, 15);
     ctx.font = 'italic 400 ' + size.toFixed(1) + 'px ' + SERIF;
@@ -1503,8 +1703,10 @@ function drawMigrations() {
       var ip = d3.geoInterpolate(pts[k - 1], pts[k]), n = Math.max(2, Math.ceil(d3.geoDistance(pts[k - 1], pts[k]) / 0.03));
       for (var j = (k === 1 ? 0 : 1); j <= n; j++) {
         var ll = ip(j / n);
-        if (d3.geoDistance(ll, centre) > 1.55) { if (seg.length > 1) line.push(seg); seg = []; continue; }
-        var q = projection(ll); if (q) seg.push(q);
+        if (!FLAT && d3.geoDistance(ll, centre) > 1.55) { if (seg.length > 1) line.push(seg); seg = []; continue; }
+        var q = projection(ll);
+        if (q && FLAT && seg.length && Math.abs(q[0] - seg[seg.length - 1][0]) > mapWidthPx() * 0.5) { if (seg.length > 1) line.push(seg); seg = []; }
+        if (q) seg.push(q);
       }
     }
     if (seg.length > 1) line.push(seg);
@@ -1579,11 +1781,14 @@ function drawCities() {
     }
     /* the near-side test and the orthographic projection done directly, as for the polity outlines */
     var u = c.u || (c.u = unitv([c.lon, c.lat]));
-    var dp = u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2];
-    if (dp < 0.0175) continue;
-    p = [CX + FX[0] * u[0] + FX[1] * u[1], CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2]];
-    if (p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
-    dist = Math.acos(Math.min(1, dp));
+    if (FLAT) { p = projection([c.lon, c.lat]); dist = 0; }
+    else {
+      var dp = u[0] * viewV[0] + u[1] * viewV[1] + u[2] * viewV[2];
+      if (dp < 0.0175) continue;
+      p = [CX + FX[0] * u[0] + FX[1] * u[1], CY + FY[0] * u[0] + FY[1] * u[1] + FY[2] * u[2]];
+      dist = Math.acos(Math.min(1, dp));
+    }
+    if (!p || p[0] < -30 || p[0] > W + 30 || p[1] < -30 || p[1] > H + 30) continue;
     var fd = cityFade(c, year);
     if (fd < 0.08) continue;
     if (c.pop < 1e6 && !c.rank) {
@@ -1694,7 +1899,7 @@ var tipKey = null;
    since a hover asks many times without the globe moving. */
 var boundsPath = d3.geoPath(projection), boxCache = { row: null, key: '', b: null };
 function screenBox(e) {
-  var key = rotation[0].toFixed(3) + ',' + rotation[1].toFixed(3) + ',' + zoom.toFixed(4) + ',' + W + ',' + H;
+  var key = view + rotation[0].toFixed(3) + ',' + rotation[1].toFixed(3) + ',' + zoom.toFixed(4) + ',' + W + ',' + H;
   if (boxCache.row === e && boxCache.key === key) return boxCache.b;
   applyProjection();
   var b = boundsPath.bounds(e.g);
@@ -1704,7 +1909,7 @@ function screenBox(e) {
 }
 /* a point to hang a pinned card from once the view has moved: the label anchor, or the middle of the shape */
 function refPoint(e) {
-  if (e.k && d3.geoDistance(e.k, [-rotation[0], -rotation[1]]) < 1.5) { var p = projection(e.k); if (p) return p; }
+  if (e.k && (FLAT || d3.geoDistance(e.k, [-rotation[0], -rotation[1]]) < 1.5)) { var p = projection(e.k); if (p) return p; }
   var b = screenBox(e);
   return b ? [(b[0][0] + b[1][0]) / 2, (b[0][1] + b[1][1]) / 2] : [CX, CY];
 }
@@ -2026,16 +2231,18 @@ function markInteract() {
 
 cv.addEventListener('pointerdown', function (e) {
   clearTimeout(dwellTimer); dwellTimer = null;
+  if (FLAT && !inWin(e.clientX, e.clientY)) return;
   cv.setPointerCapture(e.pointerId);
   pointers[e.pointerId] = [e.clientX, e.clientY];
   var ids = Object.keys(pointers);
   moved = false;
   stopMomentum();
   if (ids.length === 1) {
-    dragStart = { x: e.clientX, y: e.clientY, rot: rotation.slice(), lastT: 0, lastRot: rotation.slice() };
+    dragStart = { x: e.clientX, y: e.clientY, rot: rotation.slice(), lastT: 0, lastRot: rotation.slice(), kx: flatKx(e.clientY) };
     cv.classList.add('dragging');
   } else if (ids.length === 2) {
     pinch = { d: dist2(pointers[ids[0]], pointers[ids[1]]), zoom: zoom };
+    if (FLAT) { var pm = [(pointers[ids[0]][0] + pointers[ids[1]][0]) / 2, (pointers[ids[0]][1] + pointers[ids[1]][1]) / 2]; pinch.at = pm; pinch.ll = llAt(pm[0], pm[1]); }
     dragStart = null;
   }
   fadeHint();
@@ -2047,7 +2254,8 @@ cv.addEventListener('pointermove', function (e) {
   var ids = Object.keys(pointers);
   if (ids.length === 2 && pinch) {
     var nd = dist2(pointers[ids[0]], pointers[ids[1]]);
-    zoom = clamp(pinch.zoom * (nd / pinch.d), 0.82, ZMAX);
+    zoom = clamp(pinch.zoom * (nd / pinch.d), zoomMin(), ZMAX);
+    if (FLAT && pinch.ll) anchorZoom(pinch.ll, pinch.at[0], pinch.at[1]);
     markInteract(); draw();
     return;
   }
@@ -2056,7 +2264,8 @@ cv.addEventListener('pointermove', function (e) {
     var dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
     if (!moved && Math.abs(dx) + Math.abs(dy) <= 3) return;
     moved = true;
-    rotation = [dragStart.rot[0] + dx * k * 1.35, clamp(dragStart.rot[1] - dy * k * 1.35, -90, 90), 0];
+    if (FLAT) rotation = flatDrag(dragStart, dx, dy);
+    else rotation = [dragStart.rot[0] + dx * k * 1.35, clamp(dragStart.rot[1] - dy * k * 1.35, -90, 90), 0];
     var tnow = performance.now();
     if (dragStart.lastT) {
       var sp = Math.max(8, tnow - dragStart.lastT);
@@ -2083,6 +2292,7 @@ cv.addEventListener('pointerup', function (e) {
   if (wasMoved) { if (stale) spinV = [0, 0]; else startMomentum(); return; }
   spinV = [0, 0];
   if (smallScreen() && document.querySelector('.panel:not(.min)')) { foldPanels(null); return; }
+  if (FLAT && !inWin(e.clientX, e.clientY)) { if (pinnedEnt || pinnedCity) unpin(); return; }
   var cp = opt.cities || opt.ruins || opt.battles ? cityAt(e.clientX, e.clientY) : null;
   if (e.pointerType === 'touch') {
     /* a touch screen has no hover, so one tap does the looking and a second releases */
@@ -2095,8 +2305,8 @@ cv.addEventListener('pointerup', function (e) {
   }
   /* click pins the card so its Wikipedia link can be used; click elsewhere releases it */
   if (cp) { if (pinnedCity === cp.c) unpin(); else pinCity(cp, e.clientX, e.clientY); return; }
-  var ll = projection.invert([e.clientX, e.clientY]);
-  var hit = ll && Math.hypot(e.clientX - CX, e.clientY - CY) <= R0 * zoom && opt.polities ? unitAt(ll) : null;
+  var ll = llAt(e.clientX, e.clientY);
+  var hit = ll && opt.polities ? unitAt(ll) : null;
   if (hit && (!pinnedEnt || pinnedEnt !== hit.e)) { unpin(); pinRow(hit, e.clientX, e.clientY); return; }
   if (hit) { unpin(); return; }
   var pp = ll && !hit ? peopleAt(ll) : null;
@@ -2115,17 +2325,59 @@ cv.addEventListener('pointerleave', function (e) {
 
 cv.addEventListener('wheel', function (e) {
   e.preventDefault();
+  if (FLAT && !inWin(e.clientX, e.clientY)) return;
   var f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.10 : 0.0034));
-  zoom = clamp(zoom * f, 0.82, ZMAX);
+  var wll = FLAT ? llAt(e.clientX, e.clientY) : null;
+  zoom = clamp(zoom * f, zoomMin(), ZMAX);
+  if (wll) anchorZoom(wll, e.clientX, e.clientY);
   markInteract(); draw(); fadeHint();
 }, { passive: false });
 
 cv.addEventListener('dblclick', function (e) {
-  var ll = projection.invert([e.clientX, e.clientY]);
+  var ll = llAt(e.clientX, e.clientY);
   if (ll) flyTo(ll[0], ll[1], Math.min(ZMAX, zoom * 2.4));
 });
 
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+/* The place under a screen point, or null off the map. On the globe that is inside the disc; on a flat map
+   the point must survive a round trip, which turns away what lies beyond the edge (Equal Earth's curved
+   outline, Mercator's clamp, or the far side of the seam). */
+function llAt(mx, my) {
+  applyProjection();
+  if (!FLAT) return Math.hypot(mx - CX, my - CY) > R0 * zoom ? null : projection.invert([mx, my]);
+  if (!inWin(mx, my)) return null;
+  var ll = projection.invert([mx, my]);
+  if (!ll || !isFinite(ll[0]) || !isFinite(ll[1])) return null;
+  var q = projection(ll);
+  if (!q || Math.abs(q[0] - mx) > 2 || Math.abs(q[1] - my) > 2) return null;
+  return [normLon(ll[0]), ll[1]];
+}
+/* pixels per degree of longitude at the latitude of a screen row */
+function flatKx(y, latGiven) {
+  if (!FLAT) return 1;
+  applyProjection();
+  var c = latGiven === undefined ? projection.invert([CX, y]) : null, lat = latGiven !== undefined ? latGiven : c ? c[1] : 0, lon = -rotation[0];
+  var a = projection([lon - 0.5, lat]), b = projection([lon + 0.5, lat]);
+  return a && b ? Math.max(0.01, Math.abs(b[0] - a[0])) : R0 * zoom * DEG;
+}
+/* a drag carries the map with the pointer: longitude by the local scale, latitude through the projection */
+function flatDrag(ds, dx, dy) {
+  var keep = rotation;
+  rotation = [ds.rot[0], ds.rot[1], 0];
+  applyProjection();
+  var c = projection.invert([CX, CY - dy]);
+  rotation = keep;
+  return [ds.rot[0] + dx / ds.kx, c && isFinite(c[1]) ? -c[1] : ds.rot[1], 0];
+}
+/* after the zoom has changed, bring the place that was under the pointer back under it */
+function anchorZoom(ll, mx, my) {
+  applyProjection();
+  var p = projection(ll);
+  if (!p) return;
+  var kx = flatKx(0, ll[1]), c = projection.invert([CX, CY - (my - p[1])]);
+  rotation = [rotation[0] - (p[0] - mx) / kx, c && isFinite(c[1]) ? -c[1] : rotation[1], 0];
+}
 
 var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 /* A card that flashes up for every country the pointer crosses is a distraction, so the card and the
@@ -2135,6 +2387,11 @@ var hoverRaf = null, lastHover = [0, 0], dwellTimer = null;
 var moveAt = { x: 0, y: 0, t: 0 }, moveV = 0;
 var SLOW = 0.12, DWELL = 260;          /* pixels per millisecond; milliseconds */
 function hover(mx, my) {
+  if (FLAT && !inWin(mx, my)) {
+    clearTimeout(dwellTimer); dwellTimer = null; cv.style.cursor = '';
+    if (!pinnedEnt && !pinnedCity) { hideTip(); if (hoverRow || hoverCity) { hoverRow = null; hoverCity = null; draw(); } }
+    return;
+  }
   var t = performance.now(), dt = Math.max(1, t - moveAt.t);
   var v = dt > 250 ? 0 : Math.hypot(mx - moveAt.x, my - moveAt.y) / dt;
   moveV = moveV * 0.5 + v * 0.5;
@@ -2153,7 +2410,7 @@ function hover(mx, my) {
 function passOver(mx, my) {
   if (hoverCity) { hoverCity = null; tip.classList.remove('on'); tipKey = null; draw(); }
   if (!hoverRow) return;
-  var ll = Math.hypot(mx - CX, my - CY) > R0 * zoom ? null : projection.invert([mx, my]);
+  var ll = llAt(mx, my);
   var e = ll && opt.polities ? unitAt(ll) : null;
   if (e === hoverRow) { placeTip(mx, my, e); return; }
   hoverRow = null; hideTip(); draw();
@@ -2169,8 +2426,7 @@ function doHover(mx, my) {
   }
   cv.style.cursor = '';
   var had = hoverCity; hoverCity = null;
-  var d = Math.hypot(mx - CX, my - CY);
-  var ll = d > R0 * zoom ? null : projection.invert([mx, my]);
+  var ll = llAt(mx, my);
   var e = ll && opt.polities ? unitAt(ll) : null;
   if (!e) {
     /* land no state held: perhaps a people's */
@@ -2207,7 +2463,7 @@ function flyTo(lon, lat, targetZoom) {
   })(performance.now());
 }
 function zoomForArea(a) { return clamp(1.15 / Math.max(0.09, Math.sqrt(a) / 6371 * 1.5), 1, 8); }
-function resetView() { flyTo(20, 22, 1); }
+function resetView() { flyTo(FLAT ? 15 : 20, FLAT ? 20 : 22, FLAT && W < 700 && H > W ? fillHeightZoom() : 1); }
 
 /* ------------------------------------------------------------ the scrubber */
 var ribwrap = document.getElementById('ribwrap');
@@ -2504,6 +2760,54 @@ function startSpin() {
     spinRaf = requestAnimationFrame(tick);
   })(performance.now());
 }
+/* ------------------------------------------------------- globe or flat map */
+function setPanelMin(p, min) {
+  p.classList.toggle('min', min);
+  var b = p.querySelector('.pmin'); if (b) b.title = min ? 'Restore' : 'Minimise';
+}
+function syncViewUI() {
+  document.getElementById('v-globe').classList.toggle('on', !FLAT);
+  document.getElementById('v-flat').classList.toggle('on', FLAT);
+  document.getElementById('projrow').style.display = FLAT ? 'flex' : 'none';
+  document.getElementById('p-ee').classList.toggle('on', view === 'ee');
+  document.getElementById('p-cea').classList.toggle('on', view === 'cea');
+  document.getElementById('p-merc').classList.toggle('on', view === 'merc');
+  document.getElementById('viewnote').style.display = view === 'merc' ? 'block' : 'none';
+  var rv = document.getElementById('resetview'), rf = document.getElementById('resetfloat');
+  document.getElementById('hint').innerHTML = FLAT ? 'Drag the ribbon to move through history &middot; drag the map to pan, scroll to zoom &middot; hover a polity to see where it came from'
+    : 'Drag the ribbon to move through history &middot; drag the globe to spin &middot; hover a polity to see where it came from';
+  rv.title = rf.title = FLAT ? 'Recentre and fit the map' : 'Recentre and fit the globe';
+}
+function saveView() { try { localStorage.setItem('ha-view', JSON.stringify({ v: 2, m: view, p: lastFlat })); } catch (x) {} }
+function setViewMode(m, init) {
+  if (!PROJS[m]) m = 'globe';
+  var was = FLAT;
+  if (flying) { cancelAnimationFrame(flying); flying = null; }
+  stopMomentum();
+  view = m; FLAT = m !== 'globe';
+  if (FLAT) lastFlat = m;
+  projection = PROJS[m] || projGlobe;
+  path.projection(projection); boundsPath.projection(projection);
+  boxCache = { row: null, key: '', b: null };
+  saveView();
+  syncViewUI();
+  syncFold(true);
+  layout();
+  if (FLAT && !was) {
+    zoom = Math.max(1, zoom);
+    if (W < 700 && H > W && zoom <= 1.05) zoom = fillHeightZoom();
+  } else if (!FLAT && was) zoom = Math.max(0.82, zoom);
+  else if (FLAT && was) zoom = Math.max(1, zoom);
+  placePills();
+  hideTip(); hoverCity = null; hoverRow = null;
+  if (!init) { resize(); }
+}
+document.getElementById('v-globe').addEventListener('click', function () { setViewMode('globe'); });
+document.getElementById('v-flat').addEventListener('click', function () { if (!FLAT) setViewMode(lastFlat); });
+['ee', 'cea', 'merc'].forEach(function (k) {
+  document.getElementById('p-' + k).addEventListener('click', function () { lastFlat = k; setViewMode(k); });
+});
+var lastFlat = 'ee';
 document.getElementById('resetview').addEventListener('click', function () { resetView(); });
 document.getElementById('resetfloat').addEventListener('click', function (e) { e.stopPropagation(); resetView(); });
 
@@ -2670,8 +2974,8 @@ document.addEventListener('keydown', function (e) {
   else if (e.key === 'ArrowRight') { e.preventDefault(); stopPlay(); markInteract(); setYear(year + (e.shiftKey ? 10 : 1)); }
   else if (e.key === 'ArrowUp')   { rotation[1] = clamp(rotation[1] + 5 / Math.max(1, zoom * 0.6), -90, 90); draw(); }
   else if (e.key === 'ArrowDown') { rotation[1] = clamp(rotation[1] - 5 / Math.max(1, zoom * 0.6), -90, 90); draw(); }
-  else if (e.key === '+' || e.key === '=') { zoom = clamp(zoom * 1.4, 0.82, ZMAX); draw(); }
-  else if (e.key === '-' || e.key === '_') { zoom = clamp(zoom / 1.4, 0.82, ZMAX); draw(); }
+  else if (e.key === '+' || e.key === '=') { zoom = clamp(zoom * 1.4, zoomMin(), ZMAX); draw(); }
+  else if (e.key === '-' || e.key === '_') { zoom = clamp(zoom / 1.4, zoomMin(), ZMAX); draw(); }
   else if (e.key === ' ') {
     e.preventDefault();
     if (playing) stopPlay();
@@ -2696,30 +3000,48 @@ function smallScreen() {
   return window.innerWidth <= 860 || window.innerHeight <= 560 ||
          (coarsePointer && Math.min(window.innerWidth, window.innerHeight) <= 900);
 }
-function foldPanels(except) {
+/* Panels start open, except on small screens and where the flat map would have under FLATMIN px with them open
+   (PANELS_W); a choice is kept for each way of looking: wide globe (g), wide flat map (f), small screen (p). */
+var PANELS_W = 574, FLATMIN = 700, FOLDS = { g: {}, f: {}, p: {} }, foldKey = null;
+try {
+  var fsv = JSON.parse(localStorage.getItem('ha-fold') || 'null');
+  if (fsv && fsv.v === 1) ['g', 'f', 'p'].forEach(function (m) { if (fsv[m]) FOLDS[m] = fsv[m]; });
+} catch (x) {}
+function foldMode() { return smallScreen() ? 'p' : FLAT ? 'f' : 'g'; }
+function foldDefault(m) { return m === 'p' || (m === 'f' && window.innerWidth - PANELS_W < FLATMIN); }
+function saveFolds() { try { localStorage.setItem('ha-fold', JSON.stringify({ v: 1, g: FOLDS.g, f: FOLDS.f, p: FOLDS.p })); } catch (x) {} }
+function syncFold(force) {
+  var m = foldMode(), key = m + foldDefault(m);
+  if (!force && key === foldKey) return;
+  foldKey = key;
   document.querySelectorAll('.panel').forEach(function (p) {
-    if (p !== except && !p.classList.contains('min')) {
-      p.classList.add('min');
-      var b = p.querySelector('.pmin');
-      if (b) b.title = 'Restore';
-    }
+    var c = FOLDS[m][p.id];
+    setPanelMin(p, typeof c === 'boolean' ? c : foldDefault(m));
   });
   placePills();
 }
+function foldPanels(except) {
+  var m = foldMode();
+  document.querySelectorAll('.panel').forEach(function (p) {
+    if (p !== except && !p.classList.contains('min')) { setPanelMin(p, true); FOLDS[m][p.id] = true; }
+  });
+  saveFolds();
+  placePills(); layout(true);
+}
 (function panels() {
-  var small = smallScreen();
   var list = document.querySelectorAll('.panel');
   for (var i = 0; i < list.length; i++) {
     var panel = list[i], btn = panel.querySelector('.pmin');
     if (!btn) continue;
-    if (small) { panel.classList.add('min'); btn.title = 'Restore'; }
     (function (p, b) {
       b.addEventListener('click', function (e) {
         e.stopPropagation();
-        var min = p.classList.toggle('min');
-        b.title = min ? 'Restore' : 'Minimise';
-        if (!min && smallScreen()) foldPanels(p);
-        placePills();
+        var min = !p.classList.contains('min');
+        setPanelMin(p, min);
+        FOLDS[foldMode()][p.id] = min;
+        if (!min && smallScreen()) { foldPanels(p); return; }
+        saveFolds();
+        placePills(); layout(true);
       });
     })(panel, btn);
   }
@@ -2727,8 +3049,14 @@ function foldPanels(except) {
 
 /* ------------------------------------------------------------------ boot */
 buildLegend();
+var savedView = 'globe';
+try {
+  var sv = JSON.parse(localStorage.getItem('ha-view') || 'null');
+  if (sv && sv.v === 2) { if (PROJS[sv.p]) lastFlat = sv.p; if (PROJS[sv.m]) savedView = sv.m; }
+} catch (x) {}
 window.addEventListener('resize', function () { resize(); });
 document.fonts && document.fonts.ready && document.fonts.ready.then(function () { draw(); drawRibbon(); placePills(); });
+if (PROJS[savedView]) { resize(); setViewMode(savedView, true); }
 resize();
 if (GL) setTimeout(buildLandMask, 400);
 askChunk(chunkFor(year), 'w');
@@ -2762,6 +3090,13 @@ setTimeout(function () {
 setYear(year);
 updateStats();
 (function () {
+  if (FLAT) {
+    rotation = [-15, -20, 0];
+    zoom = (W < 700 && H > W) ? fillHeightZoom() : 1;
+    draw();
+    if (opt.spin) startSpin();
+    return;
+  }
   rotation = [-40, -40, 0];
   zoom = 0.86;
   draw();
@@ -2775,6 +3110,11 @@ window.HA = {
   setYear: function (y) { stopPlay(); setYear(y); return year; },
   setView: function (lon, lat, z) { rotation = [-lon, -lat, 0]; if (z) zoom = z; draw(); },
   rotation: function () { return rotation.slice(); },
+  setViewMode: function (m) { setViewMode(m); return view; },
+  viewMode: function () { return view; },
+  win: function () { applyProjection(); return winRect(); },
+  fold: function () { return foldMode() + ':' + Array.prototype.map.call(document.querySelectorAll('.panel'), function (p) { return p.id + (p.classList.contains('min') ? '=min' : '=open'); }).join(','); },
+  layout: function () { return { CX: CX, CY: CY, AVW: AVW, AVH: AVH, R0: R0 }; },
   zoom: function () { return zoom; },
   unitAt: function (lon, lat) {
     var e = unitAt([lon, lat]);
